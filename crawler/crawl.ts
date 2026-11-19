@@ -2,6 +2,13 @@ import { parseArcteryx, type CatalogProduct } from "./adapters/arcteryx";
 import { fetchProduct } from "./fetch";
 import { CrawlStop, discover, fixtureUrl, PoliteClient } from "./http";
 
+// Apparel and footwear only: packs, accessories, climbing gear and care products are skipped.
+export const excludedCategory = /\b(packs?|bags?|accessor(y|ies)|gloves?|mitts?|hats?|caps?|toques?|beanies?|socks?|climbing gear|harness(es)?|chalk|product care|care|belts?|gaiters?|neck|headbands?|luggage|duffels?)\b/i;
+
+export function isExcluded(category: string | null) {
+  return !!category && excludedCategory.test(category);
+}
+
 export type CrawlResult = {
   discovered: Set<string>;
   records: Map<string, CatalogProduct>;
@@ -46,6 +53,10 @@ export async function collect(known: Set<string>, counts: Counts, limit?: number
       }
       if (page.status !== 200) throw new Error(`HTTP ${page.status}`);
       const record = parseArcteryx(page.body, page.finalUrl, page.fetchedAt);
+      if (isExcluded(record.category)) {
+        console.log(JSON.stringify({ event: "category_skip", url, category: record.category }));
+        continue;
+      }
       const existing = records.get(record.externalId);
       if (!existing || (page.url === page.finalUrl && known.has(page.finalUrl))) records.set(record.externalId, record);
       counts.ok++;

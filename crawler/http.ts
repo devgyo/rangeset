@@ -5,7 +5,7 @@ import robotsParser from "robots-parser";
 import { XMLParser, XMLValidator } from "fast-xml-parser";
 
 export const origin = "https://arcteryx.com";
-export const userAgent = "rangeset-bot/0.1 (+https://rangeset.com)";
+export const userAgent = "Mozilla/5.0 (compatible; specbot/0.1)";
 export const fixtureUrl = `${origin}/us/en/shop/mens/beta-ar-jacket-1062`;
 const robotsUrl = `${origin}/robots.txt`;
 const sitemapIndex = `${origin}/sitemap.xml`;
