@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import { JacketTable } from "@/components/jacket-table";
-import { jackets } from "@/lib/jackets";
+import { catalogEnabled } from "@/lib/catalog";
+import { listJackets } from "@/lib/jackets";
 
 export const metadata: Metadata = {
   title: "Jacket index",
+  robots: catalogEnabled ? undefined : { index: false, follow: true },
   description: "Browse and compare hardshell jackets by membrane, construction, weight, price, and features.",
   alternates: { canonical: "/jackets" },
 };
 
-export default function JacketsPage() {
+export default async function JacketsPage() {
+  const jackets = await listJackets();
   return (
     <div className="site-width page-space">
       <div className="mb-9">

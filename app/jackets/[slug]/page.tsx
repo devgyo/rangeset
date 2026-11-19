@@ -5,17 +5,13 @@ import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { JacketSpec } from "@/components/spec-value";
-import { getJacket, jackets } from "@/lib/jackets";
+import { getJacket } from "@/lib/jackets";
 import { fields, formatSpec, groups, notPublished } from "@/lib/specs";
 import type { Spec } from "@/lib/types";
 
-export function generateStaticParams() {
-  return jackets.map(({ slug }) => ({ slug }));
-}
-
 export async function generateMetadata({ params }: PageProps<"/jackets/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const jacket = getJacket(slug);
+  const jacket = await getJacket(slug);
   if (!jacket) notFound();
 
   return {
@@ -29,7 +25,7 @@ export async function generateMetadata({ params }: PageProps<"/jackets/[slug]">)
 function Provenance({ spec }: { spec?: Spec<string | number | boolean> }) {
   if (!spec || (spec.source === "not_published" && !spec.sourceUrl && !spec.verifiedAt)) return null;
 
-  const source = { brand: "Brand", third_party: "Third party", not_published: notPublished }[spec.source];
+  const source = { brand: "Brand", third_party: "Third party", manual: "Manual override", not_published: notPublished }[spec.source];
 
   return (
     <div className="mt-1 flex flex-wrap items-baseline gap-x-2 text-xs text-muted-foreground">
@@ -41,7 +37,7 @@ function Provenance({ spec }: { spec?: Spec<string | number | boolean> }) {
 
 export default async function JacketPage({ params }: PageProps<"/jackets/[slug]">) {
   const { slug } = await params;
-  const jacket = getJacket(slug);
+  const jacket = await getJacket(slug);
   if (!jacket) notFound();
 
   return (
@@ -50,6 +46,7 @@ export default async function JacketPage({ params }: PageProps<"/jackets/[slug]"
       <header className="mt-7 mb-8">
         <p className="control-label mb-2">{jacket.brand}</p>
         <h1 className="page-title">{jacket.model}</h1>
+        {jacket.status === "discontinued" && <Badge variant="outline" className="mt-4">Discontinued</Badge>}
         {jacket.example && (
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <Badge variant="outline" className="example-badge">Example data</Badge>

@@ -21,7 +21,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <span className="brand-mark" aria-hidden="true" />
               RANGESET
             </Link>
-            <nav aria-label="Main navigation">
+            <nav aria-label="Main navigation" className="flex items-center gap-4 sm:gap-6">
+              <Link href="/products" className="font-mono text-xs tracking-wider uppercase hover:text-primary">Products</Link>
               <Link href="/jackets" className="font-mono text-xs tracking-wider uppercase hover:text-primary">
                 Jackets
               </Link>

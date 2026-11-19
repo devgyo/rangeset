@@ -7,7 +7,7 @@ type Provenance = {
 
 export type Spec<T extends string | number | boolean> = Provenance &
   (
-    | { value: T; source: "brand" | "third_party" }
+    | { value: T; source: "brand" | "third_party" | "manual" }
     | { value: null; source: "not_published" }
   );
 
@@ -16,6 +16,7 @@ export type Jacket = {
   brand: string;
   model: string;
   example?: boolean;
+  status?: "active" | "discontinued" | "pending_review";
   sourceUrl: string | null;
   verifiedAt: string | null;
   specs: {

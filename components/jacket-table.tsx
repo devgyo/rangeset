@@ -170,6 +170,7 @@ export function JacketTable({ jackets }: { jackets: Jacket[] }) {
                     <Link href={`/jackets/${jacket.slug}`} className="spec-link">
                       {jacket.model}
                     </Link>
+                    {jacket.status === "discontinued" && <Badge variant="outline" className="mt-1.5 flex w-fit">Discontinued</Badge>}
                     {jacket.example && <Badge variant="outline" className="example-badge mt-1.5 flex w-fit">Example data</Badge>}
                   </TableHead>
                   {visibleFields.map((field) => (

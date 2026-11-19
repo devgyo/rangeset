@@ -1,13 +1,17 @@
 import type { MetadataRoute } from "next";
-import { jackets } from "@/lib/jackets";
+import { catalogEnabled, listProducts } from "@/lib/catalog";
 import { siteUrl } from "@/lib/site";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const entries = [{ url: siteUrl.href }];
+  if (!catalogEnabled) return entries;
+  const products = await listProducts();
   return [
-    { url: siteUrl.href },
+    ...entries,
     { url: new URL("/jackets", siteUrl).href },
-    ...jackets.filter((jacket) => !jacket.example).map((jacket) => ({
-      url: new URL(`/jackets/${jacket.slug}`, siteUrl).href,
+    { url: new URL("/products", siteUrl).href },
+    ...products.filter((product) => product.isHardshell).map(({ slug }) => ({
+      url: new URL(`/jackets/${slug}`, siteUrl).href,
     })),
   ];
 }

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getJacket } from "@/lib/jackets";
+import { getJackets } from "@/lib/jackets";
 import { fields } from "@/lib/specs";
 import type { Jacket } from "@/lib/types";
 
@@ -16,18 +16,18 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-function readComparison(ids: string | string[] | undefined): Jacket[] | null {
+async function readComparison(ids: string | string[] | undefined): Promise<Jacket[] | null> {
   if (typeof ids !== "string") return null;
   const slugs = [...new Set(ids.split(",").map((id) => id.trim()))];
   if (slugs.length < 2 || slugs.length > 4) return null;
 
-  const jackets = slugs.map(getJacket);
+  const jackets = await getJackets(slugs);
   return jackets.every((jacket) => jacket !== undefined) ? jackets : null;
 }
 
 export default async function ComparePage({ searchParams }: PageProps<"/compare">) {
   const { ids } = await searchParams;
-  const jackets = readComparison(ids);
+  const jackets = await readComparison(ids);
 
   return (
     <div className="site-width page-space">
@@ -43,6 +43,7 @@ export default async function ComparePage({ searchParams }: PageProps<"/compare"
                   <TableHead key={jacket.slug} scope="col" className="h-auto py-4">
                     <span className="block text-xs text-muted-foreground">{jacket.brand}</span>
                     <Link href={`/jackets/${jacket.slug}`} className="spec-link text-base">{jacket.model}</Link>
+                    {jacket.status === "discontinued" && <Badge variant="outline" className="mt-1.5 flex w-fit">Discontinued</Badge>}
                     {jacket.example && <Badge variant="outline" className="example-badge mt-1.5 flex w-fit">Example data</Badge>}
                   </TableHead>
                 ))}
