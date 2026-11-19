@@ -2,52 +2,60 @@ import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import * as schema from "../lib/db/schema";
-import { collect } from "./crawl";
+import { collect, type CrawlResult } from "./crawl";
 import { ingest } from "./ingest";
+
+// Two phases. The crawl itself never touches the database, so a slow or long
+// crawl can't hold an idle connection open. Only once every page is fetched and
+// parsed do we connect, take the lock, and write the whole run in one short session.
 
 async function run() {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error("DATABASE_URL is required");
   if (new URL(url).hostname.includes("-pooler.")) throw new Error("Use a direct DATABASE_URL for the crawler");
+
+  // Phase 1: crawl (network only).
+  const started = new Date().toISOString();
+  const counts = { ok: 0, failed: 0 };
+  let result: CrawlResult | undefined;
+  let stoppedReason: string | undefined;
+  try {
+    result = await collect(new Set(), counts);
+  } catch (error) {
+    stoppedReason = error instanceof Error ? error.message : String(error);
+  }
+
+  // Phase 2: one short database session for the lock, run record, and ingest.
   const client = new pg.Client({ connectionString: url, connectionTimeoutMillis: 15_000 });
-  // Surface connection drops as a normal error instead of an unhandled 'error' event.
-  client.on("error", (error) => console.error(JSON.stringify({ event: "db_error", reason: error.message })));
   await client.connect();
   const db = drizzle(client, { schema });
   let runId: number | undefined;
-  let stoppedReason: string | undefined;
-  const counts = { ok: 0, failed: 0 };
-
   try {
-    // A direct Neon connection keeps this session lock for the whole crawl.
     const { rows: [lock] } = await db.execute<{ acquired: boolean }>(sql`select pg_try_advisory_lock(617354209, 1) as acquired`);
-    if (!lock.acquired) throw new Error("Another Arc'teryx crawl already holds the database lock");
+    if (!lock.acquired) throw new Error("Another Arc'teryx ingest already holds the database lock");
 
     const [brand] = await db.insert(schema.brands).values({
       slug: "arcteryx", name: "Arc'teryx", website: "https://arcteryx.com",
     }).onConflictDoUpdate({ target: schema.brands.slug, set: { name: "Arc'teryx" } })
       .returning({ id: schema.brands.id });
-    const [run] = await db.insert(schema.crawlRuns).values({
-      brandId: brand.id, started: new Date().toISOString(),
-    }).returning({ id: schema.crawlRuns.id });
-    runId = run.id;
+    const [crawlRun] = await db.insert(schema.crawlRuns).values({ brandId: brand.id, started })
+      .returning({ id: schema.crawlRuns.id });
+    runId = crawlRun.id;
 
-    const rows = await db.select({ url: schema.products.url }).from(schema.products).where(eq(schema.products.brandId, brand.id));
-    // Neon suspends an idle compute (and drops its sessions) after a few minutes; ping it while crawling.
-    const keepAlive = setInterval(() => {
-      client.query("select 1").catch((error: Error) => console.error(JSON.stringify({ event: "db_keepalive_error", reason: error.message })));
-    }, 60_000);
-    let result;
-    try {
-      result = await collect(new Set(rows.map(({ url }) => url)), counts);
-    } finally {
-      clearInterval(keepAlive);
+    if (result) {
+      // Products we already have that the sitemaps no longer list count as absent this run.
+      const rows = await db.select({ url: schema.products.url }).from(schema.products).where(eq(schema.products.brandId, brand.id));
+      const known = new Set(rows.map((row) => row.url));
+      for (const productUrl of known) if (!result.discovered.has(productUrl)) result.absent.add(productUrl);
+      console.log(JSON.stringify({
+        event: "catalog_diff", known: known.size, discovered: result.discovered.size,
+        new: [...result.discovered].filter((u) => !known.has(u)).length, absent: result.absent.size,
+      }));
+      const outcome = await ingest(db, brand.id, result, new Date().toISOString());
+      console.log(JSON.stringify({ event: "ingest", runId, ...outcome }));
     }
-    const outcome = await ingest(db, brand.id, result, new Date().toISOString());
-    console.log(JSON.stringify({ event: "ingest", runId, ...outcome }));
   } catch (error) {
-    stoppedReason = error instanceof Error ? error.message : String(error);
-    throw error;
+    stoppedReason ??= error instanceof Error ? error.message : String(error);
   } finally {
     try {
       if (runId !== undefined) await db.update(schema.crawlRuns).set({
@@ -59,6 +67,7 @@ async function run() {
       console.log(JSON.stringify({ event: "summary", runId, ...counts, stoppedReason }));
     }
   }
+  if (stoppedReason) throw new Error(stoppedReason);
 }
 
 run().catch((error: unknown) => {

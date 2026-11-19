@@ -23,8 +23,7 @@ export async function collect(known: Set<string>, counts: Counts, limit?: number
   const discovered = await discover(client);
   const missing = [...known].filter((url) => !discovered.has(url));
   console.log(JSON.stringify({
-    event: "discovery", discovered: discovered.size, new: [...discovered].filter((url) => !known.has(url)).length,
-    missing: missing.length, dbCompared: limit === undefined,
+    event: "discovery", discovered: discovered.size,
   }));
 
   const ordered = [...discovered].sort();
