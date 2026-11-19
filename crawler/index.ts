@@ -10,6 +10,8 @@ async function run() {
   if (!url) throw new Error("DATABASE_URL is required");
   if (new URL(url).hostname.includes("-pooler.")) throw new Error("Use a direct DATABASE_URL for the crawler");
   const client = new pg.Client({ connectionString: url, connectionTimeoutMillis: 15_000 });
+  // Surface connection drops as a normal error instead of an unhandled 'error' event.
+  client.on("error", (error) => console.error(JSON.stringify({ event: "db_error", reason: error.message })));
   await client.connect();
   const db = drizzle(client, { schema });
   let runId: number | undefined;
@@ -31,7 +33,16 @@ async function run() {
     runId = run.id;
 
     const rows = await db.select({ url: schema.products.url }).from(schema.products).where(eq(schema.products.brandId, brand.id));
-    const result = await collect(new Set(rows.map(({ url }) => url)), counts);
+    // Neon suspends an idle compute (and drops its sessions) after a few minutes; ping it while crawling.
+    const keepAlive = setInterval(() => {
+      client.query("select 1").catch((error: Error) => console.error(JSON.stringify({ event: "db_keepalive_error", reason: error.message })));
+    }, 60_000);
+    let result;
+    try {
+      result = await collect(new Set(rows.map(({ url }) => url)), counts);
+    } finally {
+      clearInterval(keepAlive);
+    }
     const outcome = await ingest(db, brand.id, result, new Date().toISOString());
     console.log(JSON.stringify({ event: "ingest", runId, ...outcome }));
   } catch (error) {
