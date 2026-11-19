@@ -1,0 +1,68 @@
+[
+  {
+    "slug": "formline-transit-shell",
+    "brand": "Formline",
+    "model": "Transit Shell",
+    "example": true,
+    "sourceUrl": "https://formline.example/transit-shell",
+    "verifiedAt": "2026-11-20",
+    "specs": {
+      "membrane": { "value": "Example PU", "source": "brand" },
+      "layers": { "value": 3, "source": "brand" },
+      "faceDenier": { "value": 40, "unit": "D", "source": "brand" },
+      "weight": { "value": 410, "unit": "g", "source": "brand" },
+      "weightSize": { "value": "M", "source": "brand" },
+      "backLength": { "value": 74, "unit": "cm", "source": "brand" },
+      "waterproof": { "value": 20000, "unit": "mm", "source": "brand" },
+      "breathability": { "value": 15000, "unit": "g/m²/24h", "method": "JIS L 1099 B1", "source": "brand" },
+      "fit": { "value": "Regular", "source": "brand" },
+      "price": { "value": 420, "unit": "USD", "source": "brand" },
+      "pitZips": { "value": true, "source": "brand" },
+      "helmetHood": { "value": false, "source": "brand" }
+    }
+  },
+  {
+    "slug": "northspan-grade-shell",
+    "brand": "Northspan",
+    "model": "Grade Shell",
+    "example": true,
+    "sourceUrl": "https://northspan.example/grade-shell",
+    "verifiedAt": null,
+    "specs": {
+      "membrane": { "value": "Example ePE", "source": "brand" },
+      "layers": { "value": 3, "source": "brand" },
+      "faceDenier": { "value": 70, "unit": "D", "source": "brand" },
+      "weight": { "value": 515, "unit": "g", "source": "third_party" },
+      "weightSize": { "value": "L", "source": "third_party" },
+      "backLength": { "value": 78, "unit": "cm", "source": "brand" },
+      "waterproof": { "value": null, "source": "not_published" },
+      "breathability": { "value": 6, "unit": "m²·Pa/W", "method": "ISO 11092 (RET)", "source": "third_party" },
+      "fit": { "value": "Relaxed", "source": "brand" },
+      "price": { "value": 580, "unit": "USD", "source": "brand" },
+      "pitZips": { "value": true, "source": "brand" },
+      "helmetHood": { "value": true, "source": "brand" }
+    }
+  },
+  {
+    "slug": "formline-drift-shell",
+    "brand": "Formline",
+    "model": "Drift Shell",
+    "example": true,
+    "sourceUrl": "https://formline.example/drift-shell",
+    "verifiedAt": null,
+    "specs": {
+      "membrane": { "value": "Example PU", "source": "brand" },
+      "layers": { "value": 2.5, "source": "brand" },
+      "faceDenier": { "value": null, "source": "not_published" },
+      "weight": { "value": 285, "unit": "g", "source": "brand" },
+      "weightSize": { "value": "M", "source": "brand" },
+      "backLength": { "value": null, "source": "not_published" },
+      "waterproof": { "value": 10000, "unit": "mm", "source": "brand" },
+      "breathability": { "value": null, "source": "not_published" },
+      "fit": { "value": "Trim", "source": "brand" },
+      "price": { "value": 280, "unit": "USD", "source": "brand" },
+      "pitZips": { "value": false, "source": "brand" },
+      "helmetHood": { "value": null, "source": "not_published" }
+    }
+  }
+]

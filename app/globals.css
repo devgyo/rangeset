@@ -1,0 +1,208 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Helvetica Neue", Arial, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--raised);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--raised);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--raised);
+  --color-accent-foreground: var(--foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--primary);
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 5px;
+  --radius-2xl: 6px;
+}
+
+:root {
+  color-scheme: dark;
+  --background: #101110;
+  --foreground: #f5f5ee;
+  --card: #151614;
+  --popover: #20211e;
+  --primary: #e0ff75;
+  --primary-foreground: #172000;
+  --raised: #232621;
+  --muted-foreground: #a8aaa2;
+  --border: #30322e;
+  --input: #595c53;
+  --destructive: #ff8d85;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    color: var(--primary-foreground);
+    background: var(--primary);
+  }
+}
+
+@layer components {
+  .site-width {
+    width: min(100% - 2 * clamp(1rem, 5vw, 5rem), 86rem);
+    margin-inline: auto;
+  }
+
+  .wordmark {
+    @apply font-mono text-xs font-bold tracking-[0.2em];
+  }
+
+  .brand-mark {
+    display: block;
+    width: 1rem;
+    height: 0.875rem;
+    background: var(--primary);
+    clip-path: polygon(30% 0, 53% 0, 23% 100%, 0 100%, 30% 0, 77% 0, 100% 0, 70% 100%, 47% 100%, 77% 0);
+  }
+
+  .skip-link {
+    @apply fixed top-4 left-4 z-50 -translate-y-24 bg-primary px-4 py-2 text-primary-foreground focus:translate-y-0;
+  }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .hero::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-image: linear-gradient(to right, #6c785025 1px, transparent 1px),
+      linear-gradient(to bottom, #6c785025 1px, transparent 1px),
+      radial-gradient(ellipse at 86% 45%, #242c17, transparent 66%);
+    background-size: 44px 44px, 44px 44px, auto;
+    mask-image: linear-gradient(to right, transparent 15%, black 100%);
+    content: "";
+    pointer-events: none;
+  }
+
+  .hero-title {
+    font-size: clamp(3.9rem, 10.5vw, 9rem);
+    letter-spacing: -0.056em;
+    line-height: 0.86;
+  }
+
+  .page-space {
+    @apply py-9 sm:py-13 lg:py-16;
+  }
+
+  .page-title {
+    font-size: clamp(2.3rem, 6vw, 4.5rem);
+    font-weight: 600;
+    letter-spacing: -0.065em;
+    line-height: 1.02;
+  }
+
+  .control-label {
+    @apply font-mono text-xs tracking-wider text-muted-foreground uppercase;
+  }
+
+  .data-panel {
+    @apply min-w-0 overflow-hidden rounded-lg border border-border bg-card;
+  }
+
+  .data-card {
+    @apply rounded-lg border border-border bg-card ring-0;
+  }
+
+  .spec-table th,
+  .spec-table td {
+    @apply px-3 sm:px-4;
+  }
+
+  .spec-table thead {
+    background-color: var(--raised);
+  }
+
+  .spec-table thead th {
+    @apply font-mono text-xs tracking-wide text-muted-foreground;
+  }
+
+  .spec-table tbody td {
+    @apply py-3;
+  }
+
+  .spec-table .sticky-cell {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: var(--card);
+    box-shadow: 1px 0 var(--border);
+    white-space: normal;
+    overflow-wrap: anywhere;
+    max-width: clamp(7.75rem, 35vw, 14rem);
+  }
+
+  .spec-table thead .sticky-cell,
+  .spec-table tr[data-state="selected"] .sticky-cell {
+    background-color: var(--raised);
+  }
+
+  .compare-table th:first-child {
+    min-width: min(8.25rem, 33vw);
+  }
+
+  .compare-table th:not(:first-child) {
+    min-width: 10rem;
+  }
+
+  .example-badge {
+    @apply border-input font-mono text-[0.625rem] font-normal text-muted-foreground;
+  }
+
+  .spec-link {
+    @apply underline decoration-muted-foreground/70 underline-offset-4 hover:text-primary hover:decoration-primary;
+  }
+
+  .back-link {
+    @apply inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary;
+  }
+
+  .detail-row {
+    @apply grid grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-3 border-t border-border py-3 text-sm wrap-break-word;
+  }
+
+  .detail-row:last-child {
+    @apply pb-1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot] {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
