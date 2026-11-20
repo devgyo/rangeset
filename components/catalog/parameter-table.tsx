@@ -63,16 +63,6 @@ function Parts({ parts, field, withEvidence, comparison }: { parts: Part[]; fiel
     {parts.map((part, index) => <div key={index} className="parameter-part">
       <p className="mb-1 font-medium">{part.label}</p>
       <PartFields fields={part.fields} withEvidence={withEvidence} comparison={comparison} />
-      {part.backers && part.backers.length > 0 && <dl className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-2 border-t pt-2">
-        <dt className="font-medium">Backer</dt>
-        <dd className="min-w-0 space-y-2">
-          {part.backers.map((backer, index) => <div key={index}>
-            {backer.label !== "Backer" && <p className="text-xs text-muted-foreground">{backer.label}</p>}
-            <PartFields fields={backer.fields} withEvidence={withEvidence} comparison={comparison} />
-            {withEvidence && !Object.keys(backer.fields).length && <SourceNotes evidence={backer.evidence} />}
-          </div>)}
-        </dd>
-      </dl>}
       {withEvidence && !Object.keys(part.fields).length && <SourceNotes evidence={part.evidence} />}
     </div>)}
     {!parts.length && <span>{formatValue(field, { state: "unpublished", evidence: [] })}</span>}
@@ -80,6 +70,9 @@ function Parts({ parts, field, withEvidence, comparison }: { parts: Part[]; fiel
 }
 
 export function ParameterValue({ field, value, withEvidence = true, comparison = false }: { field: Field; value: Parameter; withEvidence?: boolean; comparison?: boolean }) {
+  if (value.entries) return <div className="grid gap-2">{value.entries.map((entry, index) =>
+    <ParameterValue key={index} field={field} value={entry} withEvidence={withEvidence} comparison={comparison} />
+  )}</div>;
   if (field.type === "parts" && value.state === "known") return <Parts parts={value.value as Part[]} field={field} withEvidence={withEvidence} comparison={comparison} />;
   const text = formatValue(field, value);
   const reference = formatReference(field, value);
@@ -91,7 +84,9 @@ export function ParameterValue({ field, value, withEvidence = true, comparison =
     {status && value.state !== "inapplicable"
       ? <span data-parameter-inline><ParameterHelp label={status.label} text={status.description} symbol={status.text} /></span>
       : field.type === "list" && value.state === "known"
-      ? <ul className="grid gap-1" data-parameter-value>{(value.value as string[]).map((item, index) => <li key={index}>{item}</li>)}</ul>
+      ? <ul className="grid gap-1" data-parameter-value>{(value.value as string[]).map((item, index) => <li key={index}>
+        {field.key === "weave" && item === "Ripstop" ? <span data-parameter-inline><span data-parameter-value>{item}</span> <Help term="ripstop" /></span> : item}
+      </li>)}</ul>
       : <span data-parameter-inline={tech || weightHelp ? "" : undefined} className={value.state === "known" ? numeric ? "font-mono tabular-nums" : undefined : value.state === "review" || value.state === "conflict" ? "text-[#f3cf92]" : "text-muted-foreground"}>
         <span data-parameter-value>{text}</span>{tech && <Help term={tech} />}
         {weightHelp && <ParameterHelp label="Weight reference" text={weightHelp} />}
@@ -128,8 +123,17 @@ export function ParameterSections({ groups }: { groups: ParameterGroup[] }) {
 }
 
 function SectionRows({ rows }: { rows: ParameterGroup["rows"] }) {
-  return <dl>{rows.map(({ key, field, label, cells }) => <div key={key} data-parameter-row className={field.type === "parts" ? "border-t py-3 text-sm" : "detail-row"}>
-    <dt className="text-muted-foreground"><ParameterLabel field={field} label={label} /></dt>
-    <dd className={field.type === "parts" ? "mt-2" : "min-w-0"}><ParameterValue field={field} value={cells[0]} /></dd>
-  </div>)}</dl>;
+  const sections: { title?: string; rows: ParameterGroup["rows"] }[] = [];
+  for (const row of rows) {
+    const last = sections.at(-1);
+    if (last && last.title === row.subgroup) last.rows.push(row);
+    else sections.push({ title: row.subgroup, rows: [row] });
+  }
+  return <div className="space-y-4">{sections.map(({ title, rows: sectionRows }) => <div key={sectionRows[0].key}>
+    {title && <h4 className="mb-2 text-sm font-medium">{title}</h4>}
+    <dl>{sectionRows.map(({ key, field, label, cells }) => <div key={key} data-parameter-row className={field.type === "parts" ? "border-t py-3 text-sm" : "detail-row"}>
+      <dt className="text-muted-foreground"><ParameterLabel field={field} label={label} /></dt>
+      <dd className={field.type === "parts" ? "mt-2" : "min-w-0"}><ParameterValue field={field} value={cells[0]} /></dd>
+    </div>)}</dl>
+  </div>)}</div>;
 }

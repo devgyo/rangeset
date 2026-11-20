@@ -1,16 +1,17 @@
 import { mergeListValues } from "./merge";
-import { appliesTo, fieldsByKey, groups, registry, type Context, type Field } from "./registry";
+import { appliesTo, fabricParts, fieldsByKey, groups, registry, type Context, type Field } from "./registry";
 
 export type Evidence = {
   url: string | null; path: string; raw: string; method: "published" | "parsed" | "indexed" | "manual" | "example";
   updatedAt: string | null;
 };
 export type Reference = { size?: string; gender?: string; basis?: "single" | "pair" | "item" | "unspecified"; method?: string; unit?: string | null; kind?: string };
-export type Fiber = { name: string; percent: number };
-export type Part = { part: string; label: string; fields: Record<string, Parameter>; evidence: Evidence[]; backers?: Part[] };
-export type Value = string | number | boolean | string[] | number[] | Fiber[] | Part[];
+export type Fiber = { fiber: string; pct: number; recycled: boolean | null };
+export type RecycledContent = { pct: number | null; scope: "fabric" | "face" | "garment" | "claim_only" };
+export type Part = { part: string; label: string; fields: Record<string, Parameter>; evidence: Evidence[]; backers?: Part[]; faces?: Part[] };
+export type Value = string | number | boolean | string[] | number[] | Fiber[] | RecycledContent[] | Part[];
 export type State = "known" | "unpublished" | "inapplicable" | "conflict" | "review";
-export type Parameter = { state: State; value?: Value; evidence: Evidence[]; reference?: Reference; note?: string };
+export type Parameter = { state: State; value?: Value; evidence: Evidence[]; reference?: Reference; note?: string; reviewCode?: "needs_review" | "unverified"; original?: { value: number; unit: string }; entries?: Parameter[] };
 export type Profile = { context: Context; values: Record<string, Parameter> };
 export const statusLabels: Record<State, string> = {
   known: "Published", unpublished: "Not published", inapplicable: "Not applicable",
@@ -70,15 +71,19 @@ export function formatValue(field: Field, parameter: Parameter): string {
   const { value, reference } = parameter;
   const status = parameterStatus(field, parameter);
   if (status) return status.text;
+  if (parameter.reviewCode) return parameter.reviewCode === "unverified" ? "Unverified" : "Needs review";
   if (parameter.state !== "known" || value === undefined) return parameter.state === "review" && field.reviewLabel ? field.reviewLabel : statusLabels[parameter.state];
-  if (field.format === "denier") return (value as number[]).join(" × ") + " D";
-  if (field.format === "composition") return (value as Fiber[]).map(({ percent, name }) => `${number.format(percent)}% ${name}`).join(" · ");
+  if (field.format === "denier") return (value as number[]).map((item) => item + "D").join(" × ");
+  if (field.format === "composition") return (value as Fiber[]).map(({ pct, fiber, recycled }) => `${number.format(pct)}% ${recycled === true ? "recycled " : recycled === false ? "virgin " : ""}${fiber}`).join(" · ");
+  if (field.format === "recycled") return (value as RecycledContent[]).map(({ pct, scope }) =>
+    pct === null ? "Recycled material claimed · % not published" : `${number.format(pct)}% (${scope === "claim_only" ? "scope not published" : scope})`).join(" · ");
   if (field.format === "money") return formatMoney(Number(value), reference?.unit);
   if (field.options) return field.options[String(value)] ?? String(value);
   if (typeof value === "boolean") return value ? "Yes" : "No";
   if (typeof value === "number") {
     const amount = [number.format(value), (reference?.unit === null ? null : reference?.unit ?? field.unit)].filter(Boolean).join(" ");
     const suffix = field.key === "weight" ? weightPresentation(parameter).suffix : "";
+    if (parameter.original) return `${amount} (${number.format(parameter.original.value)} ${parameter.original.unit})`;
     return suffix ? `${amount} (${suffix})` : amount;
   }
   return Array.isArray(value) ? value.join(" · ") : value;
@@ -97,24 +102,25 @@ function canonical(parameter: Parameter, field: Field): unknown {
   const value = parameter.value;
   if (field.type === "parts" && Array.isArray(value)) return canonicalParts(value as Part[]);
   if (field.type === "composition" && Array.isArray(value)) {
-    return (value as Fiber[]).map(({ name, percent }) => JSON.stringify([normalize(name), percent])).sort();
+    return (value as Fiber[]).map(({ fiber, pct, recycled }) => JSON.stringify([normalize(fiber), pct, recycled])).sort();
   }
+  if (field.type === "recycled" && Array.isArray(value)) return (value as RecycledContent[]).map(({ scope, pct }) => JSON.stringify([scope, pct])).sort();
   if (field.type === "list" && Array.isArray(value)) return [...new Set(mergeListValues(field.key, value as string[]).map(normalize))].sort();
   return typeof value === "string" ? normalize(value) : value;
 }
 
 function canonicalParts(parts: Part[]): string[] {
   return parts.map((part) => JSON.stringify([part.part, Object.entries(part.fields).sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, detail]) => [key, canonical(detail, fieldsByKey.get(key)!)]), canonicalParts(part.backers ?? [])])).sort();
+    .map(([key, detail]) => [key, canonical(detail, fieldsByKey.get(key)!)]), canonicalParts(part.backers ?? []), canonicalParts(part.faces ?? [])])).sort();
 }
 
 function unresolvedPart(part: Part): boolean {
   return Object.entries(part.fields).some(([key, value]) => unresolved(value, fieldsByKey.get(key)!)) ||
-    Boolean(part.backers?.some(unresolvedPart));
+    Boolean(part.backers?.some(unresolvedPart) || part.faces?.some(unresolvedPart));
 }
 
 function unresolved(parameter: Parameter, field: Field): boolean {
-  if (parameter.state === "conflict" || parameter.state === "review") return true;
+  if (parameter.state === "conflict" || parameter.state === "review" || parameter.entries?.some((entry) => unresolved(entry, field))) return true;
   return field.type === "parts" && parameter.state === "known" &&
     (parameter.value as Part[]).some(unresolvedPart);
 }
@@ -124,7 +130,8 @@ type Comparison = { differs: boolean; weakDifference?: boolean; note?: string };
 export function compareValues(field: Field, values: Parameter[]): Comparison {
   const applicable = values.filter(({ state }) => state !== "inapplicable");
   const present = applicable.filter(({ state }) => state === "known");
-  const weakDifference = present.length > 0 && applicable.some(({ state }) => state === "unpublished");
+  const weakDifference = present.length > 0 && applicable.some(({ state, entries }) =>
+    state === "unpublished" || entries?.some((entry) => entry.state === "unpublished"));
   const result = applicable.some((item) => unresolved(item, field))
     ? { differs: false, note: "Verify the source values before comparing" }
     : compareKnownValues(field, present);
@@ -168,10 +175,14 @@ function compareKnownValues(field: Field, present: Parameter[]): Comparison {
     return { differs: false, note: "Different down-content reporting bases" };
   if (field.compare === "reference" && new Set(present.map(({ reference }) => reference?.gender ?? "")).size > 1)
     return { differs: false, note: "Sizes refer to different fit ranges" };
-  return { differs: new Set(present.map((item) => JSON.stringify(canonical(item, field)))).size > 1 };
+  const comparable = present.map((item) => {
+    if (field.component !== "fabric") return canonical(item, field);
+    return (item.entries ?? [item]).filter(({ state }) => state === "known").map((entry) => JSON.stringify(canonical(entry, field))).sort();
+  });
+  return { differs: new Set(comparable.map((item) => JSON.stringify(item))).size > 1 };
 }
 
-export type ParameterRow = Comparison & { key: string; field: Field; label: string; cells: Parameter[]; referenceNote?: string };
+export type ParameterRow = Comparison & { key: string; field: Field; label: string; cells: Parameter[]; referenceNote?: string; subgroup?: string };
 export type ParameterGroup = { title: string; rows: ParameterRow[] };
 const partLabels: Record<string, string> = {
   main: "Main fabric", contrast: "Contrast fabric", lining: "Lining", reinforcement: "Reinforcement",
@@ -181,11 +192,47 @@ const partLabels: Record<string, string> = {
 
 export function visibleOnDetail(field: Field, value: Parameter) {
   return !field.dataOnly && (value.state === "known" || (field.core && value.state === "unpublished") ||
-    (field.key === "product_type" && value.state === "review"));
+    ((field.key === "product_type" || field.key === "fabric_issues" || field.component === "fabric") && value.state === "review"));
 }
 
 export function visibleInComparison(row: ParameterRow, differencesOnly: boolean) {
   return !differencesOnly || row.differs || Boolean(row.weakDifference);
+}
+
+const fabricFields = registry.filter(({ component }) => component === "fabric").sort((a, b) => a.order - b.order);
+
+function materialRows(cells: Parameter[], mode: "detail" | "compare"): ParameterRow[] {
+  const fabrics = cells.map((cell) => cell.state === "known" ? (cell.value as Part[]) : []);
+  const present = Object.keys(fabricParts).filter((part) => fabrics.some((parts) => parts.some((record) => record.part === part))) as (keyof typeof fabricParts)[];
+  if (mode === "detail" && !present.length) present.push("body");
+  return present.flatMap((part) => {
+    const records = fabrics.map((parts) => parts.filter((record) => record.part === part));
+    const label = present.length === 1 && part === "body" ? undefined : fabricParts[part];
+    function rows(group: string | undefined, key: string, layers: Part[][]) {
+      return fabricFields.flatMap((field) => {
+        const values = layers.map((items, index) => {
+          const entries = items.map((item) => item.fields[field.key] ?? missing());
+          if (!entries.length) return key.endsWith(".face") || key.endsWith(".backer")
+            ? missing(records[index].length ? "inapplicable" : "unpublished") : missing();
+          if (entries.length === 1) return entries[0];
+          const best = entries.find((entry) => entry.state === "known") ?? entries.find((entry) => entry.state === "review") ?? entries[0];
+          return { ...best, entries };
+        });
+        const visible = mode === "detail" ? visibleOnDetail(field, values[0]) : values.some(({ state }) => state === "known");
+        return visible ? [{ key: key + "." + field.key, field, label: field.label, cells: values, subgroup: group,
+          ...(mode === "detail" ? { differs: false } : compareValues(field, values)) }] : [];
+      });
+    }
+    return [
+      ...rows(label, "materials." + part, records),
+      ...(["faces", "backers"] as const).flatMap((layer) => {
+        const nested = records.map((parts) => parts.flatMap((item) => item[layer] ?? []));
+        if (!nested.some((items) => items.length)) return [];
+        const name = layer === "faces" ? "Face" : "Backer";
+        return rows(label ? `${label} / ${name}` : name, `materials.${part}.${name.toLowerCase()}`, nested);
+      }),
+    ];
+  });
 }
 
 export function parameterGroups(profiles: Profile[], mode: "detail" | "compare" = profiles.length === 1 ? "detail" : "compare"): ParameterGroup[] {
@@ -194,16 +241,17 @@ export function parameterGroups(profiles: Profile[], mode: "detail" | "compare" 
     const rows = registry.filter((field) => field.group === key && !field.component && !field.dataOnly).sort((a, b) => a.order - b.order)
       .flatMap((field): ParameterRow[] => {
         const cells = profiles.map((profile) => getParameter(profile, field));
+        if (field.key === "materials") return materialRows(cells, mode);
         if (mode === "detail" ? !visibleOnDetail(field, cells[0]) : !cells.some(({ state }) => state === "known")) return [];
         const parts = field.type === "parts" ? cells.flatMap((item) => item.state === "known" ? item.value as Part[] : []) : [];
-        if (mode === "detail") return [{ key: field.key, field, label: field.label, cells, differs: false }];
+        if (mode === "detail") return [{ key: field.key, field, label: field.label, cells, differs: false, subgroup: field.key === "garment_recycled_content" ? "Whole garment" : undefined }];
         if (!parts.length) {
           const weights = field.key === "weight" ? cells.map(weightPresentation) : [];
           const referenceNote = [
             weights.some(({ referenceMissing }) => referenceMissing) && weightReferenceNote,
             weights.some(({ basisMissing }) => basisMissing) && "Shoe weight basis not published (per shoe or pair)",
           ].filter(Boolean).join(" · ");
-          return [{ key: field.key, field, label: field.label, cells, referenceNote, ...compareValues(field, cells) }];
+          return [{ key: field.key, field, label: field.label, cells, referenceNote, subgroup: field.key === "garment_recycled_content" ? "Whole garment" : undefined, ...compareValues(field, cells) }];
         }
         return [...new Set(parts.map(({ part }) => part))].sort().map((part) => {
           const aligned = cells.map((item) => {

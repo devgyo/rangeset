@@ -1,10 +1,15 @@
-export const parameterVersion = "1.2.0";
+export const fabricParts = { body: "Body", reinforcement: "Reinforcement", panel: "Panel", lining: "Lining" } as const;
+export type FabricPart = keyof typeof fabricParts;
+
+export const parameterVersion = "1.3.0";
 export const groups = {
-  identity: "General", sizing: "Dimensions & fit", fabric: "Fabrics", protection: "Protection",
+  identity: "General", sizing: "Dimensions & fit", fabric: "Main fabric", protection: "Protection",
   warmth: "Insulation", features: "Features", footwear: "Footwear", origin: "Origin",
   environment: "Environment & certifications", supplemental: "Supplementary source text",
 } as const;
 export const terms = {
+  ripstop: { label: "Ripstop", text: "A woven fabric with a grid of stronger threads that helps stop small tears from spreading." },
+  stretch: { label: "Stretch", text: "2-way stretch runs along one axis. 4-way stretch runs along both axes. Mechanical stretch comes from the fabric structure." },
   denier: { label: "Denier", text: "How much a length of yarn weighs. It does not tell you how thick the fabric is or how well it resists wear." },
   "3L": { label: "3L", text: "The outer fabric, waterproof layer, and inner backing are bonded together." },
   "2L": { label: "2L", text: "The outer fabric and waterproof layer are bonded together. The garment may have a separate lining." },
@@ -41,9 +46,9 @@ export type ProductType = keyof typeof productTypes;
 export type ProtectionType = keyof typeof protectionTypes;
 type Scope = "all" | "apparel" | "upper" | "bottom" | "shoe" | "shell" | "technical" | "warm" | "snow" | "hooded_style" | "outerwear" | "outerwear_or_pants";
 export type Context = { kind: ProductKind; productType?: ProductType; protectionType?: ProtectionType; insulated: boolean; snow: boolean; membrane: boolean };
-type ValueType = "text" | "number" | "boolean" | "enum" | "list" | "parts" | "denier" | "composition";
+type ValueType = "text" | "number" | "boolean" | "enum" | "list" | "parts" | "denier" | "composition" | "recycled";
 type CompareRule = "exact" | "set" | "parts" | "measurement" | "method" | "reference";
-type Format = "text" | "number" | "boolean" | "enum" | "list" | "parts" | "denier" | "composition" | "money" | "layers";
+type Format = "text" | "number" | "boolean" | "enum" | "list" | "parts" | "denier" | "composition" | "recycled" | "money" | "layers";
 type Group = keyof typeof groups;
 
 type FieldOptions = {
@@ -53,7 +58,7 @@ type FieldOptions = {
 
 function field(key: string, label: string, group: Group, order: number, type: ValueType, applies: Scope, description: string, extra: FieldOptions = {}) {
   return { key, label, group, order, type, applies, description, unit: extra.unit ?? null,
-    compare: extra.compare ?? (type === "list" || type === "composition" ? "set" : type === "parts" ? "parts" : "exact"),
+    compare: extra.compare ?? (type === "list" || type === "composition" || type === "recycled" ? "set" : type === "parts" ? "parts" : "exact"),
     format: extra.format ?? type, ...extra };
 }
 export type Field = ReturnType<typeof field>;
@@ -79,12 +84,18 @@ export const registry: Field[] = [
   field("inseam", "Inseam", "sizing", 60, "number", "bottom", "Length along the inside leg in the published reference size.", { unit: "cm", compare: "measurement", core: true, highlight: ["bottom"] }),
   field("sizes", "Available sizes", "sizing", 70, "list", "all", "Sizes offered by the brand. Availability can vary."),
   field("colors", "Colorways", "sizing", 80, "number", "all", "Number of colorways listed by the brand."),
-  field("materials", "Fabric by part", "fabric", 10, "parts", "all", "Fabric construction listed separately for each published component."),
-  field("fabric_name", "Fabric name", "fabric", 20, "text", "all", "Published fabric name or named material.", { component: "fabric" }),
-  field("fiber_content", "Fiber composition", "fabric", 30, "composition", "all", "Published proportions of the fibers within this fabric.", { unit: "%", component: "fabric" }),
-  field("denier", "Yarn denier", "fabric", 40, "denier", "all", terms.denier.text, { unit: "D", help: "denier", component: "fabric" }),
-  field("fabric_weight", "Fabric weight", "fabric", 50, "number", "all", "Mass per unit area of this fabric.", { unit: "g/m²", help: "gsm", component: "fabric" }),
-  field("weave", "Fabric construction", "fabric", 60, "text", "all", "Published weave, knit or other textile structure.", { component: "fabric" }),
+  field("materials", "Main fabric", "fabric", 10, "parts", "all", "Published fabrics grouped by their location on the product."),
+  field("fabric_name", "Fabric name", "fabric", 20, "text", "all", "The fabric or technology name as published.", { component: "fabric", core: true }),
+  field("fiber_content", "Composition", "fabric", 30, "composition", "all", "The percentage and published recycled status of each fiber.", { unit: "%", component: "fabric", core: true }),
+  field("fabric_weight", "Fabric weight", "fabric", 40, "number", "all", "Weight per square metre of the fabric.", { unit: "g/m²", help: "gsm", component: "fabric", core: true }),
+  field("denier", "Yarn denier", "fabric", 50, "denier", "all", terms.denier.text, { unit: "D", help: "denier", component: "fabric" }),
+  field("fabric_recycled_content", "Recycled content", "fabric", 60, "recycled", "all", "The published recycled percentage and what it measures.", { component: "fabric" }),
+  field("weave", "Construction", "fabric", 70, "list", "all", "The weave or knit named by the brand.", { component: "fabric" }),
+  field("fabric_stretch", "Stretch", "fabric", 80, "list", "all", "Published stretch directions, mechanical stretch, or elastane content.", { help: "stretch", component: "fabric" }),
+  field("fabric_certifications", "Certifications", "fabric", 90, "list", "all", "Certifications named for this fabric.", { component: "fabric" }),
+  field("fabric_treatment", "Fabric treatment", "fabric", 100, "list", "all", "Published finishes and UV ratings. Water-repellent finishes are recorded under Protection.", { component: "fabric" }),
+  field("garment_recycled_content", "Garment recycled content", "fabric", 110, "recycled", "all", "A recycled-content claim for the whole product."),
+  field("fabric_issues", "Unassigned material", "supplemental", 15, "list", "all", "A published material whose location could not be mapped.", { reviewLabel: "Needs review" }),
   field("protection_type", "Protection type", "protection", 5, "enum", "all", "The published shell construction for protective gear.", { options: protectionTypes }),
   field("protection", "Protection claims", "protection", 10, "list", "all", "Explicit protection claims stated by the brand."),
   field("membrane", "Waterproof membrane", "protection", 20, "text", "technical", terms.membrane.text, { help: "membrane", highlight: ["shell"] }),

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useTransition, type CSSProperties } from "react";
+import { Fragment, useEffect, useRef, useState, useTransition, type CSSProperties } from "react";
 import { Check, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { rememberSelection, useCompareSelection, type PickedProduct } from "@/components/catalog/compare-selection";
@@ -86,15 +86,20 @@ function CompareTable({ products, groups, highlight, differencesOnly, remove }: 
         </tr></thead>
         {visible.map(({ title, rows }) => <ParameterGroupSources key={title}><tbody>
           <tr className="matrix-group"><th scope="rowgroup" colSpan={products.length + 1}><div className="parameter-group-heading"><span>{title}</span><SourcesSwitch /></div></th></tr>
-          {rows.map(({ key, label, field, cells, differs, note, referenceNote }) => <tr key={key} data-parameter-row data-different={highlight && differs ? "true" : undefined}>
-            <th scope="row" className="matrix-label">
-              <ParameterLabel field={field} label={label} />
-              {referenceNote && <span className="mt-1 block text-[0.625rem] font-normal text-muted-foreground">{referenceNote}</span>}
-              {note && <span className="mt-1 block text-[0.625rem] font-normal text-[#f3cf92]">{note}</span>}
-            </th>
-            {cells.map((value, index) =>
-              <td key={products[index].slug}><ParameterValue field={field} value={value} comparison /></td>)}
-          </tr>)}
+          {rows.map(({ key, label, field, cells, differs, note, referenceNote, subgroup }, index) => <Fragment key={key}>
+            {subgroup && subgroup !== rows[index - 1]?.subgroup && <tr className="matrix-group">
+              <th colSpan={products.length + 1}><span className="parameter-group-heading">{subgroup}</span></th>
+            </tr>}
+            <tr data-parameter-row data-different={highlight && differs ? "true" : undefined}>
+              <th scope="row" className="matrix-label">
+                <ParameterLabel field={field} label={label} />
+                {referenceNote && <span className="mt-1 block text-[0.625rem] font-normal text-muted-foreground">{referenceNote}</span>}
+                {note && <span className="mt-1 block text-[0.625rem] font-normal text-[#f3cf92]">{note}</span>}
+              </th>
+              {cells.map((value, index) =>
+                <td key={products[index].slug}><ParameterValue field={field} value={value} comparison /></td>)}
+            </tr>
+          </Fragment>)}
         </tbody></ParameterGroupSources>)}
       </table>
     </div>

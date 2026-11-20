@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { ProductDetail } from "../arcteryx-view";
+import { fabricLocation } from "../parameters/fabric";
 import { convert, normalizeArcProduct, parseDenier } from "../parameters/arcteryx";
 import { type Fiber, compareValues, formatValue, getParameter, known, missing, parameterGroups, parameterStatus, visibleInComparison, weightPresentation, type Part } from "../parameters/model";
 import { fieldsByKey, parameterVersion, registry } from "../parameters/registry";
@@ -40,19 +41,19 @@ test("groups fabrics by explicit labels, preserves repeated parts and separates 
   const profile = normalizeArcProduct(product(), { raw, ...rawSample });
   const parts = partsOf(profile);
   assert.deepEqual(parts.map(({ part, label }) => [part, label]), [
-    ["main", "Body"], ["main", "Body"], ["contrast", "Contrast"],
+    ["body", "Body"], ["body", "Body"], ["panel", "Contrast"],
   ]);
   assert.deepEqual(parts[0].fields.denier.value, [40, 70]);
   assert.equal(parts[0].fields.fabric_weight.value, 125);
-  assert.equal(parts[0].fields.weave.value, "ripstop");
-  assert.deepEqual(parts[0].fields.fiber_content.value, [{ name: "Nylon", percent: 100 }]);
-  assert.deepEqual(parts[0].backers?.[0].fields.fiber_content.value, [{ name: "Polyester", percent: 100 }]);
+  assert.deepEqual(parts[0].fields.weave.value, ["Ripstop"]);
+  assert.deepEqual(parts[0].fields.fiber_content.value, [{ fiber: "Nylon", pct: 100, recycled: null }]);
+  assert.deepEqual(parts[0].backers?.[0].fields.fiber_content.value, [{ fiber: "Polyester", pct: 100, recycled: null }]);
   assert.deepEqual(profile.values.fabric_origin.value, ["TAIWAN, CHINA"]);
   assert.deepEqual(profile.values.source_notes.value, ["Unlabeled technical material statement."]);
   assert.equal(profile.values.microfibers.state, "known");
   assert.equal(parts[0].fields.denier.evidence[0].path, "product.materials[0]");
   assert.equal(parts[0].fields.denier.evidence[0].updatedAt, rawSample.fetchedAt);
-  assert.equal(formatValue(field("denier"), parts[0].fields.denier), "40 × 70 D");
+  assert.equal(formatValue(field("denier"), parts[0].fields.denier), "40D × 70D");
   assert.deepEqual(parseDenier("20dx20d nylon"), [20, 20]);
 });
 
@@ -175,9 +176,9 @@ test("comparison aligns materials by part and multiset order, normalizes claims 
     "Body: Ripstop", "Shell: 40x70D nylon - 10% Elastane, 90% Nylon", "Liner: Polyamide",
   ] } });
   const rows = parameterGroups([a, b]).flatMap(({ rows }) => rows);
-  assert.equal(rows.find(({ key }) => key === "materials.main")?.differs, false);
-  assert.equal(rows.find(({ key }) => key === "materials.lining")?.differs, false);
-  assert.equal((rows.find(({ key }) => key === "materials.main")?.cells[0].value as Part[]).length, 2);
+  assert.equal(rows.find(({ key }) => key === "materials.body.denier")?.differs, false);
+  assert.equal(rows.find(({ key }) => key === "materials.lining.fabric_name")?.differs, false);
+  assert.equal(rows.find(({ key }) => key === "materials.body.denier")?.cells[0].entries?.length, 2);
   assert.match(compareValues(field("breathability"), [
     known(10000, [], { unit: "g/m²/24h", method: "JIS L 1099" }), known(8, [], { unit: "m²·Pa/W", method: "ISO 11092" }),
   ]).note!, /test methods/i);
@@ -209,16 +210,16 @@ test("places inline and labelled backers under the unique owning fabric and keep
   ] } });
   const [body, contrast] = partsOf(a);
   assert.equal(partsOf(a).length, 2);
-  assert.equal((body.backers?.[0].fields.fiber_content.value as Fiber[])[0].name, "Nylon");
-  assert.equal((contrast.backers?.[0].fields.fiber_content.value as Fiber[])[0].name, "Polyester");
+  assert.equal((body.backers?.[0].fields.fiber_content.value as Fiber[])[0].fiber, "Nylon");
+  assert.equal((contrast.backers?.[0].fields.fiber_content.value as Fiber[])[0].fiber, "Polyester");
   assert.deepEqual(a.values.source_notes.value, ["Backer: Polyester mesh"]);
   const b = normalizeArcProduct(product(), { raw: { materials: [
     "Body: 100D Nylon - 100% Nylon with membrane 100% Polyester Backing",
     "Contrast: 80D Nylon", "Backer (Contrast): 100% Polyester",
   ] } });
   const rows = parameterGroups([a, b]).flatMap(({ rows }) => rows);
-  assert.equal(rows.find(({ key }) => key === "materials.main")?.differs, true);
-  assert.equal(rows.find(({ key }) => key === "materials.contrast")?.differs, false);
+  assert.equal(rows.find(({ key }) => key === "materials.body.backer.fiber_content")?.differs, true);
+  assert.equal(rows.find(({ key }) => key === "materials.panel.backer.fiber_content")?.differs, false);
   assert.ok(!rows.some(({ key }) => key === "materials.backer"));
 });
 
@@ -376,4 +377,107 @@ test("weight uses inline sizes and shoe basis with one comparison reference note
   const shoes = parameterGroups([shoeUnknown, single]).flatMap(({ rows }) => rows);
   assert.match(shoes.find(({ key }) => key === "weight")?.referenceNote ?? "", /Shoe weight basis not published/);
   assert.ok(!shoes.some(({ key }) => key === "weight_basis"));
+});
+
+test("normalizes fabric GSM, gm2 and ounces per square yard and keeps the imperial reading", () => {
+  const read = (text: string) => partsOf(normalizeArcProduct(product(), { raw: { materials: ["Body: " + text] } }))[0].fields.fabric_weight;
+  const weight = field("fabric_weight");
+  const ounces = read("Plain weave, 3.5 oz/yd²");
+  assert.equal(ounces.value, 119);
+  assert.deepEqual(ounces.original, { value: 3.5, unit: "oz/yd²" });
+  assert.equal(formatValue(weight, ounces), "119 g/m² (3.5 oz/yd²)");
+  assert.equal(read("119 gsm").value, 119);
+  assert.equal(read("118.8 gm2").value, 119);
+  for (const text of ["119 g/m", "Fabric weight: 119", "119 oz/yd"]) {
+    const value = read(text);
+    assert.equal(value.reviewCode, "unverified");
+    assert.equal(value.value, undefined);
+    assert.equal(formatValue(weight, value), "Unverified");
+  }
+  assert.equal(read("100 gsm, 3.5 oz/yd²").reviewCode, "needs_review");
+});
+
+test("preserves yarn order and recognizes prefix and explicit paired deniers", () => {
+  assert.deepEqual(parseDenier("denier 90 nylon"), [90]);
+  assert.deepEqual(parseDenier("70 Denier × 40D Nylon"), [70, 40]);
+  assert.deepEqual(parseDenier("Nylon 40 x 70d"), [40, 70]);
+  assert.equal(parseDenier("3D knit, 110 gsm and 20 days"), null);
+  assert.deepEqual(parseDenier("90-denier nylon"), [90]);
+  assert.equal(parseDenier("110 gsm and 20 days"), null);
+});
+
+test("marks overfull composition and keeps recycled scope separate from fiber status", () => {
+  const result = normalizeArcProduct(product(), { raw: {
+    materials: [
+      "Body: Nylon - 95% recycled Nylon, 5% virgin Elastane",
+      "Panel: 100% recycled Polyester, 5% Nylon",
+      "Lining: recycled polyester",
+      "Face (Body): 80% recycled Nylon, 20% Polyester",
+    ],
+    features: [feature("Sustainability", "This garment contains 72% recycled material")],
+  } });
+  const [body, panel, lining] = partsOf(result);
+  assert.deepEqual(body.fields.fiber_content.value, [{ fiber: "Nylon", pct: 95, recycled: true }, { fiber: "Elastane", pct: 5, recycled: false }]);
+  assert.deepEqual(body.fields.fabric_recycled_content.value, [{ pct: 95, scope: "fabric" }]);
+  assert.deepEqual(body.faces?.[0].fields.fabric_recycled_content.value, [{ pct: 80, scope: "face" }]);
+  assert.deepEqual(lining.fields.fabric_recycled_content.value, [{ pct: null, scope: "claim_only" }]);
+  assert.deepEqual(result.values.garment_recycled_content.value, [{ pct: 72, scope: "garment" }]);
+  assert.equal(panel.fields.fiber_content.reviewCode, "needs_review");
+  assert.match(panel.fields.fiber_content.evidence[0].raw, /100% recycled Polyester, 5% Nylon/);
+  assert.equal(panel.fields.fabric_recycled_content, undefined);
+});
+
+test("requires explicit construction and never uses insulation density as fabric weight", () => {
+  const item = normalizeArcProduct(product(), { raw: { materials: [
+    "Body: Fortius DW 1.0, brushed fleece, Coreloft 60 (60 g/m²)",
+    "Lining: recycled nylon jersey, 100 gsm",
+    "Synthetic Insulation: Octa Loft, 98gsm - 100% Polyester",
+  ] } });
+  const [body, lining] = partsOf(item);
+  assert.equal(body.fields.fabric_name.value, "Fortius DW 1.0");
+  assert.equal(body.fields.weave, undefined);
+  assert.equal(body.fields.fabric_weight, undefined);
+  assert.deepEqual(lining.fields.weave.value, ["Jersey"]);
+  assert.equal(lining.fields.fabric_weight.value, 100);
+  assert.equal(partsOf(item, "insulation")[0].fields.synthetic_density.value, 98);
+});
+
+test("shows only four fabric locations and flags ambiguous secondary materials", () => {
+  assert.equal(fabricLocation("Secondary (Body)"), "body");
+  const item = normalizeArcProduct(product(), { raw: { materials: [
+    "Contrast: Nylon", "Insert: Stretch woven cloth", "Secondary: Polyester", "Lining: Leather",
+    "Self: Fortius DW 1.0", "Reinforcement: 70D Nylon", "Body Backer: 100% Polyester",
+    "Secondary (lining): Cotton", "Backer (unknown owner): Wool",
+  ] } });
+  assert.deepEqual(partsOf(item).map(({ part }) => part), ["panel", "panel", "lining", "body", "reinforcement", "lining"]);
+  assert.equal(item.values.fabric_issues.reviewCode, "needs_review");
+  assert.deepEqual(item.values.fabric_issues.value, ["Secondary: Polyester", "Backer (unknown owner): Wool"]);
+  const rows = parameterGroups([item]).find(({ title }) => title === "Main fabric")!.rows;
+  const headers = [...new Set(rows.map(({ subgroup }) => subgroup))];
+  assert.deepEqual(headers, ["Body", "Body / Backer", "Reinforcement", "Panel", "Lining"]);
+});
+
+test("renders core gaps on details and aligns only known fabric rows in comparison", () => {
+  const body = normalizeArcProduct(product(), { raw: { materials: ["Body: GORE-TEX PRO ePE"] } });
+  const shirt = normalizeArcProduct(product(), { raw: { materials: ["Body: 70D Ripstop, 3.5 oz/yd²"] } });
+  const detail = parameterGroups([body]).find(({ title }) => title === "Main fabric")!.rows;
+  assert.deepEqual(detail.map(({ field }) => field.key), ["fabric_name", "fiber_content", "fabric_weight"]);
+  assert.equal(detail[0].subgroup, undefined);
+  assert.deepEqual(detail.map(({ cells }) => cells[0].state), ["known", "unpublished", "unpublished"]);
+  const compare = parameterGroups([body, shirt]).find(({ title }) => title === "Main fabric")!.rows;
+  assert.ok(!compare.some(({ field }) => field.key === "fiber_content"));
+  assert.equal(compare.find(({ field }) => field.key === "fabric_weight")?.cells[0].state, "unpublished");
+  assert.equal(compare.find(({ field }) => field.key === "fabric_weight")?.cells[1].value, 119);
+});
+
+
+test("uses explicitly published feature denier only when one fabric matches the name", () => {
+  const raw = { materials: ["Body: Tyono™ 30 - Nylon, 51gsm - 100% Nylon"],
+    features: [feature("Construction", "Tyono™ 30D fabric offers wind resistance", "Loose 40D fabric")] };
+  const item = normalizeArcProduct(product(), { raw });
+  assert.equal(partsOf(item)[0].fields.fabric_name.value, "Tyono™ 30");
+  assert.deepEqual(partsOf(item)[0].fields.denier.value, [30]);
+  assert.equal(partsOf(item)[0].fields.denier.evidence[0].path, "product.features[0].value[0]");
+  const ambiguous = normalizeArcProduct(product(), { raw: { ...raw, materials: [...raw.materials, "Panel: Tyono™ 30"] } });
+  assert.ok(partsOf(ambiguous).every(({ fields }) => !fields.denier));
 });

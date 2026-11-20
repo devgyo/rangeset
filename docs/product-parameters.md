@@ -1,6 +1,6 @@
-# Rangeset product parameter standard v1.2.0
+# Rangeset product parameter standard v1.3.0
 
-The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.1 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
+The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.3.0 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
 
 ## Evidence and review
 
@@ -22,10 +22,10 @@ Example value for `parameters.weight`:
 {"value":0.455,"unit":"kg","reference":{"size":"M","gender":"men","basis":"item"},"updatedAt":"2026-11-20"}
 ```
 
-Use a JSON null to explicitly keep a field unpublished. A structured override such as `parameters.materials` accepts an array of records with `part`, `label`, and `fields`. Use an optional `backers` array on the owning fabric record for backing details. Older standalone backing records are assigned only when their parent is unambiguous. For example:
+Use a JSON null to explicitly keep a field unpublished. A structured override such as `parameters.materials` accepts an array of records with `part`, `label`, and `fields`. Use optional `faces` and `backers` arrays on the owning fabric record. Older location keys and standalone layers are mapped when their parent is unambiguous. For example:
 
 ```json
-[{"part":"main","label":"Body","fields":{"fabric_name":"Nylon ripstop","denier":[40,70],"fabric_weight":{"value":125,"unit":"g/m²"},"fiber_content":[{"name":"Nylon","percent":100}]}}]
+[{"part":"body","label":"Body","fields":{"fabric_name":"Nylon","denier":[40,70],"fabric_weight":{"value":125,"unit":"g/m²"},"fiber_content":[{"fiber":"Nylon","pct":100,"recycled":null}],"weave":["Ripstop"]}}]
 ```
 
 ## Style, shell construction and price
@@ -44,7 +44,7 @@ The Weight row includes the reference size and single-shoe or pair basis when pu
 
 ## Coverage limits
 
-Weight reference sizes, shoe weight basis, down fill mass, waterproof and breathability measurements, and test conditions are often absent. Fill-power values keep their published number with units and methods withheld when the source does not identify them. Broad construction claims and treatment labels do not establish a waterproof rating, a temperature rating, or absence of PFAS. Brand-labelled fabric, dyeing, and assembly locations remain distinct. Unclear material text and otherwise unmapped feature statements are available under Supplementary source text.
+Weight reference sizes, shoe weight basis, down fill mass, and test conditions are often absent. Fill-power values keep their published number with units and methods withheld when the source does not identify them. Broad construction claims and treatment labels do not establish a temperature rating or absence of PFAS. Brand-labelled fabric, dyeing, and assembly locations remain distinct. Unclear material text and otherwise unmapped feature statements are available under Supplementary source text.
 
 Terminology references include the [denier definition in the US Code of Federal Regulations](https://www.govinfo.gov/content/pkg/CFR-2025-title21-vol8/xhtml/CFR-2025-title21-vol8-chapI-subchapK.html), [GORE-TEX laminate construction](https://www.gore-tex.com/en_uk/blog/the-gore-tex-membrane-what-it-is-how-it-works-and-why-you-need-it), and [IDFB fill-power terminology](https://idfb.net/consumer-resources/down-better-insulation-better-for-your-health).
 
@@ -80,16 +80,25 @@ The component fields appear within each fabric or fill record.
 | `sizes` | Available sizes | list | — | all | set |
 | `colors` | Colorways | number | — | all | exact |
 
-### Fabrics
+### Main fabric
 
-| Key | Field | Type | Standard unit | Applies to | Compare |
-| --- | --- | --- | --- | --- | --- |
-| `materials` | Fabric by part | parts | — | all | parts |
-| `fabric_name` | Fabric name | text | — | fabric | exact |
-| `fiber_content` | Fiber composition | composition | % | fabric | set |
-| `denier` | Yarn denier | denier | D | fabric | exact |
-| `fabric_weight` | Fabric weight | number | g/m² | fabric | exact |
-| `weave` | Fabric construction | text | — | fabric | exact |
+Published material records are organized as **Body**, **Reinforcement**, **Panel**, then **Lining**. The source label and original text remain in the evidence. Face and Backer are layers of an identified part. Contrast panels and explicit inserts map to Panel, reinforced inserts to Reinforcement, and a secondary layer explicitly described as a lining maps to Lining. A bare “Secondary” or a material name with no supported location is preserved as `needs_review` under Supplementary source text. A product with only Body omits the Body heading on the detail page.
+
+| Key | Field | Definition |
+| --- | --- | --- |
+| `materials` | Main fabric | Published part and layer records, with repeated material records preserved. |
+| `fabric_name` | Fabric name | Published fabric or technology name. |
+| `fiber_content` | Composition | An array of `{ fiber, pct, recycled }`. Recycled is true for a stated recycled fiber, false for a stated virgin fiber, or null when unspecified. A total above 100% keeps the source text and receives `needs_review`. |
+| `fabric_weight` | Fabric weight | Integer g/m². Read gsm and gm2 as g/m². Convert oz/yd² by multiplying by 33.906 and rounding. Keep and display the imperial reading, as in `119 g/m² (3.5 oz/yd²)`. Ambiguous units such as g/m produce `unverified` without a numeric value. Insulation weight stays under Insulation. |
+| `denier` | Yarn denier | Ordered numbers formatted as `40D` or `40D × 70D`. A written “denier 90” becomes `90D`. The adapter requires an explicit denier observation. |
+| `fabric_recycled_content` | Recycled content | An array of `{ pct, scope }`, with scope `fabric`, `face`, or `claim_only`. A percentage-free claim is stored with `pct: null`. |
+| `garment_recycled_content` | Garment recycled content | A separate product-level observation with scope `garment` or `claim_only`. It stays separate from the fabric percentages. |
+| `weave` | Construction | Explicit Ripstop, Plain weave, Double weave, Jersey, Grid fleece, Twill, or Knit. Published knit variants can map to Knit. A technology name or generic fleece is insufficient. |
+| `fabric_stretch` | Stretch | Mechanical, 2-way, 4-way, or Contains elastane, based on published text. |
+| `fabric_certifications` | Certifications | Fabric-level certifications or standards named by the source, such as bluesign. |
+| `fabric_treatment` | Fabric treatment | Published finishes and treatments such as UPF or an antimicrobial finish. |
+
+On details, unpublished Fabric name, Composition and Fabric weight use a dash. Other optional fields appear when published. In comparison, rows align by part, layer, and field. A row appears when at least one product has a known value.
 
 ### Protection
 
@@ -102,8 +111,8 @@ The component fields appear within each fabric or fill record.
 | `dwr` | Water-repellent treatment | list | — | technical | set |
 | `wind` | Wind protection | enum | — | apparel | exact |
 | `upf` | Sun protection | text | — | apparel | exact |
-| `hydrostatic_head` | Hydrostatic head | number | mm | technical | method |
-| `breathability` | Breathability | number | — | technical | method |
+
+Waterproof ratings and breathability will be added in a future version.
 
 ### Insulation
 
@@ -168,5 +177,6 @@ The component fields appear within each fabric or fill record.
 | Key | Field | Type | Standard unit | Applies to | Compare |
 | --- | --- | --- | --- | --- | --- |
 | `source_notes` | Supplemental material text | list | — | all | set |
+| `fabric_issues` | Unassigned material | list | — | all | set |
 | `feature_notes` | Other published features | list | — | all | set |
 
