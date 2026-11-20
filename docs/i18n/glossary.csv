@@ -261,7 +261,7 @@ ui.footer,Arc’teryx gear catalog,商品目录,商品カタログ,本地化补�
 ui.home_label,Rangeset home,Rangeset,Rangeset,本地化补充,,,本地化复用已有术语 brand.name，保留既有英文。
 ui.hero_first,"Specs,",看参数，,宣伝文句より、,本地化补充,,,needs_review: v1 补充草译。
 ui.hero_second,not hype.,不看噱头。,スペック。,本地化补充,,,needs_review: v1 补充草译。
-ui.hero_description,Browse the Arc’teryx US catalog and compare published specs side by side.,浏览 Arc’teryx 美国目录，并排对比品牌公布的参数。,Arc’teryxの米国向けカタログを見ながら、ブランドが公表したスペックを比較できます。,本地化补充,,,needs_review: v1 补充草译。
+ui.hero_description,Browse US outdoor catalogs and compare published specs side by side.,浏览美国户外品牌目录，并排对比已公布的参数。,米国向けアウトドアカタログで、公表スペックを比較できます。,本地化补充,,,needs_review: v1 补充草译。
 ui.families,Arc’teryx families,Arc’teryx 系列,Arc’teryxのシリーズ,本地化补充,,,needs_review: v1 补充草译。
 ui.catalog_live,US catalog · Published specs and MSRP,美国目录 · 已公布参数及官方定价,米国向けカタログ · 公表スペックと希望小売価格,本地化补充,,,needs_review: v1 补充草译。
 ui.arc_catalog,Arc’teryx catalog,商品目录,商品カタログ,本地化补充,,,本地化复用已有术语 ui.product_catalog，保留既有英文。
@@ -329,7 +329,7 @@ ui.not_found,This page could not be found.,未找到该商品,商品が見つか
 seo.title,"Rangeset — specs, not hype",Rangeset — 看参数，不看噱头,Rangeset — 宣伝文句よりスペック,本地化补充,,,needs_review: v1 补充草译。
 seo.template,{title} | Rangeset,{title} | Rangeset,{title} | Rangeset,本地化补充,,,复用现有标签或格式。
 seo.description,Browse and compare published Arc’teryx product specifications.,浏览和对比 Arc’teryx 公布的商品参数。,Arc’teryxが公表した製品スペックを閲覧・比較できます。,本地化补充,,,needs_review: v1 补充草译。
-seo.catalog_description,Browse Arc’teryx US gear and compare published specifications across models.,浏览 Arc’teryx 美国目录，对比不同款式的已公布参数。,Arc’teryxの米国向けカタログで、モデルごとの公表スペックを比較できます。,本地化补充,,,needs_review: v1 补充草译。
+seo.catalog_description,Browse US outdoor gear and compare published specifications across models.,浏览美国户外商品目录，对比不同款式的已公布参数。,米国向けアウトドア用品のカタログで、モデルごとの公表スペックを比較できます。,本地化补充,,,needs_review: v1 补充草译。
 seo.compare_description,Compare published specifications for up to four Arc’teryx products.,并排对比最多 4 款 Arc’teryx 商品的已公布参数。,Arc’teryx製品の公表スペックを最大4点まで並べて比較できます。,本地化补充,,,needs_review: v1 补充草译。
 seo.jackets_description,"Browse and compare hardshell jackets by membrane, construction, weight, price, and features.",按防水膜、结构、重量、价格和功能浏览和对比硬壳夹克。,防水メンブレン、構造、重量、価格、機能からハードシェルジャケットを比較できます。,本地化补充,,,needs_review: v1 补充草译。
 seo.product_description,Published configuration and specs for the {brand} {name}.,{brand} {name} 的已公布配置与参数。,{brand} {name}の公表仕様とスペック。,本地化补充,,,needs_review: v1 补充草译。
@@ -456,8 +456,44 @@ ui.fiber_share,{pct}% {fiber},{pct}% {fiber},{pct}%{fiber},参数取值,,,needs_
 value.goose,goose,鹅,ガチョウ,参数取值,,,needs_review: v1 补充草译。
 value.duck,duck,鸭,アヒル,参数取值,,,needs_review: v1 补充草译。
 value.minimum,Minimum,最低值,最低値,参数取值,,,needs_review: v1 补充草译。
-card.weight_help,Brands use different reference sizes for weighing. Arc’teryx does not publish the reference size.,各品牌称重时使用的参考尺码不同。Arc’teryx 未公布参考尺码。,計量時の基準サイズはブランドによって異なります。Arc’teryxは基準サイズを公表していません。,界面,,,needs_review: 卡片说明草译。
+card.weight_help,Brands may weigh different reference sizes. Some brands do not publish the reference size.,各品牌称重时使用的参考尺码可能不同。部分品牌未公布参考尺码。,計量時の基準サイズはブランドによって異なります。基準サイズを公表していないブランドもあります。,界面,,,needs_review: 卡片说明草译。
 card.fiber_share,{fiber} {pct}%,{fiber} {pct}%,{fiber}{pct}%,参数取值,,,needs_review: 卡片成分显示。
 card.recycled_share,{pct}% recycled,再生 {pct}%,リサイクル素材{pct}%,参数取值,,,needs_review: 卡片再生成分显示。
-card.search_placeholder,"Search products, specs, or model numbers",搜索商品、参数或款号,商品名・スペック・品番で検索,界面,,,needs_review: 款号搜索占位。
+card.search_placeholder,Search by name or model number,搜索产品名或款号,製品名・品番で検索,界面,,,needs_review: 款号搜索占位。
 card.main_fabric,Main fabric,主面料,主素材,字段,,,needs_review: 卡片仅展示 Body。
+taxonomy.outerwear,Outerwear,外套,アウター,统一品类,,,needs_review: 日文草译。
+taxonomy.hardshell_jackets,Hardshell Jackets,硬壳冲锋衣,ハードシェル,统一品类,,,needs_review: 日文草译。
+taxonomy.insulated_shells,Insulated Shells,保暖冲锋衣,インサレーテッドシェル,统一品类,,,needs_review: 日文草译。
+taxonomy.down_jackets,Down Jackets,羽绒服,ダウンジャケット,统一品类,,,needs_review: 日文草译。
+taxonomy.synthetic_insulated_jackets,Synthetic Insulated Jackets,棉服,化繊インサレーション,统一品类,,,needs_review: 日文草译。
+taxonomy.softshell_jackets,Softshell Jackets,软壳,ソフトシェル,统一品类,,,needs_review: 日文草译。
+taxonomy.windshells,Windshells,防风外套,ウインドシェル,统一品类,,,needs_review: 日文草译。
+taxonomy.coats_and_tailoring,Coats & Tailoring,大衣与西装,コート・テーラード,统一品类,,,needs_review: 日文草译。
+taxonomy.vests,Vests,背心马甲,ベスト,统一品类,,,needs_review: 日文草译。
+taxonomy.fleece_and_midlayers,Fleece & Midlayers,抓绒与中间层,フリース・ミッドレイヤー,统一品类,,,needs_review: 日文草译。
+taxonomy.tops,Shirts & Tops,上衣,トップス,统一品类,,,needs_review: 日文草译。
+taxonomy.base_layers,Base Layers,贴身层,ベースレイヤー,统一品类,,,needs_review: 日文草译。
+taxonomy.base_layer_tops,Base Layer Tops,贴身上衣,ベースレイヤー（トップ）,统一品类,,,needs_review: 日文草译。
+taxonomy.base_layer_bottoms,Base Layer Bottoms,贴身下装,ベースレイヤー（ボトム）,统一品类,,,needs_review: 日文草译。
+taxonomy.bottoms,Bottoms,下装,ボトムス,统一品类,,,needs_review: 日文草译。
+taxonomy.hardshell_pants,Hardshell Pants,冲锋裤,ハードシェルパンツ,统一品类,,,needs_review: 日文草译。
+taxonomy.insulated_pants,Insulated Pants,保暖裤,インサレーションパンツ,统一品类,,,needs_review: 日文草译。
+taxonomy.softshell_pants,Softshell Pants,软壳裤,ソフトシェルパンツ,统一品类,,,needs_review: 日文草译。
+taxonomy.pants,Pants,长裤,パンツ,统一品类,,,needs_review: 日文草译。
+taxonomy.tights_and_leggings,Tights & Leggings,紧身裤,タイツ・レギンス,统一品类,,,needs_review: 日文草译。
+taxonomy.shorts,Shorts,短裤,ショーツ,统一品类,,,needs_review: 日文草译。
+taxonomy.skirts,Skirts,半身裙,スカート,统一品类,,,needs_review: 日文草译。
+taxonomy.dresses_and_one_pieces,Dresses & One-Pieces,连衣裙与连体服,ワンピース・オールインワン,统一品类,,,needs_review: 日文草译。
+taxonomy.dresses,Dresses,连衣裙,ワンピース,统一品类,,,needs_review: 日文草译。
+taxonomy.one_piece_suits,One-Piece Suits,连体服,オールインワン,统一品类,,,needs_review: 日文草译。
+taxonomy.backpacks,Backpacks,背包,バックパック,统一品类,,,needs_review: 日文草译。
+ui.subcategories,Subcategories,二级品类,サブカテゴリー,界面,,,needs_review: 日文草译。
+ui.local_catalog,Local catalog · Saved product data,本地目录 · 已保存的商品数据,ローカルカタログ · 保存済みの商品データ,界面,,,needs_review: 日文草译。
+activity.approach,Approach,接近路线,アプローチ,活动,,,needs_review: 日文草译。
+activity.climbing,Climbing,攀登,クライミング,活动,,,needs_review: 日文草译。
+activity.everyday,Everyday,日常,日常,活动,,,needs_review: 日文草译。
+activity.mountain_training,Mountain Training,山地训练,山岳トレーニング,活动,,,needs_review: 日文草译。
+activity.mountaineering,Mountaineering,登山,登山,活动,,,needs_review: 日文草译。
+activity.skiing,Skiing,滑雪,スキー,活动,,,needs_review: 日文草译。
+activity.travel,Travel,旅行,旅行,活动,,,needs_review: 日文草译。
+activity.via_ferrata,Via Ferrata,铁道式攀登,ヴィア・フェラータ,活动,,,needs_review: 日文草译。

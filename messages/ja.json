@@ -300,7 +300,7 @@
     "home_label": "Rangeset",
     "hero_first": "宣伝文句より、",
     "hero_second": "スペック。",
-    "hero_description": "Arc’teryxの米国向けカタログを見ながら、ブランドが公表したスペックを比較できます。",
+    "hero_description": "米国向けアウトドアカタログで、公表スペックを比較できます。",
     "families": "Arc’teryxのシリーズ",
     "catalog_live": "米国向けカタログ · 公表スペックと希望小売価格",
     "arc_catalog": "商品カタログ",
@@ -365,7 +365,9 @@
     "recycled_fiber": "リサイクル{fiber}",
     "virgin_fiber": "バージン{fiber}",
     "not_found": "商品が見つかりません",
-    "fiber_share": "{pct}%{fiber}"
+    "fiber_share": "{pct}%{fiber}",
+    "subcategories": "サブカテゴリー",
+    "local_catalog": "ローカルカタログ · 保存済みの商品データ"
   },
   "keep": {
     "arcteryx": "Arc'teryx",
@@ -403,7 +405,7 @@
     "title": "Rangeset — 宣伝文句よりスペック",
     "template": "{title} | Rangeset",
     "description": "Arc’teryxが公表した製品スペックを閲覧・比較できます。",
-    "catalog_description": "Arc’teryxの米国向けカタログで、モデルごとの公表スペックを比較できます。",
+    "catalog_description": "米国向けアウトドア用品のカタログで、モデルごとの公表スペックを比較できます。",
     "compare_description": "Arc’teryx製品の公表スペックを最大4点まで並べて比較できます。",
     "jackets_description": "防水メンブレン、構造、重量、価格、機能からハードシェルジャケットを比較できます。",
     "product_description": "{brand} {name}の公表仕様とスペック。"
@@ -470,7 +472,15 @@
     "backcountry_skiing": "バックカントリースキー",
     "mountain_bike": "マウンテンバイク",
     "travel_commute": "旅行・通勤",
-    "ski_patrol": "スキーパトロール"
+    "ski_patrol": "スキーパトロール",
+    "approach": "アプローチ",
+    "climbing": "クライミング",
+    "everyday": "日常",
+    "mountain_training": "山岳トレーニング",
+    "mountaineering": "登山",
+    "skiing": "スキー",
+    "travel": "旅行",
+    "via_ferrata": "ヴィア・フェラータ"
   },
   "brand": {
     "name": "Rangeset",
@@ -502,10 +512,38 @@
     "ptfe": "PTFE"
   },
   "card": {
-    "weight_help": "計量時の基準サイズはブランドによって異なります。Arc’teryxは基準サイズを公表していません。",
+    "weight_help": "計量時の基準サイズはブランドによって異なります。基準サイズを公表していないブランドもあります。",
     "fiber_share": "{fiber}{pct}%",
     "recycled_share": "リサイクル素材{pct}%",
-    "search_placeholder": "商品名・スペック・品番で検索",
+    "search_placeholder": "製品名・品番で検索",
     "main_fabric": "主素材"
+  },
+  "taxonomy": {
+    "outerwear": "アウター",
+    "hardshell_jackets": "ハードシェル",
+    "insulated_shells": "インサレーテッドシェル",
+    "down_jackets": "ダウンジャケット",
+    "synthetic_insulated_jackets": "化繊インサレーション",
+    "softshell_jackets": "ソフトシェル",
+    "windshells": "ウインドシェル",
+    "coats_and_tailoring": "コート・テーラード",
+    "vests": "ベスト",
+    "fleece_and_midlayers": "フリース・ミッドレイヤー",
+    "tops": "トップス",
+    "base_layers": "ベースレイヤー",
+    "base_layer_tops": "ベースレイヤー（トップ）",
+    "base_layer_bottoms": "ベースレイヤー（ボトム）",
+    "bottoms": "ボトムス",
+    "hardshell_pants": "ハードシェルパンツ",
+    "insulated_pants": "インサレーションパンツ",
+    "softshell_pants": "ソフトシェルパンツ",
+    "pants": "パンツ",
+    "tights_and_leggings": "タイツ・レギンス",
+    "shorts": "ショーツ",
+    "skirts": "スカート",
+    "dresses_and_one_pieces": "ワンピース・オールインワン",
+    "dresses": "ワンピース",
+    "one_piece_suits": "オールインワン",
+    "backpacks": "バックパック"
   }
 }

@@ -2,7 +2,7 @@ import Image from "next/image";
 import { ImageOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {genderDisplay, useCopy} from "@/i18n/copy";
-import type { CatalogCard, ColorSwatch } from "@/lib/arcteryx-view";
+import type { CatalogCard, ColorSwatch } from "@/lib/product-view";
 import { cn } from "@/lib/utils";
 
 export function ProductImage({ src, alt = "", sizes, eager, studio = true, fit = "cover", className }: {

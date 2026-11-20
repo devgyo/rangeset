@@ -286,7 +286,8 @@
     @apply font-mono text-[0.68rem] tabular-nums;
   }
 
-  .catalog-tab[aria-pressed="true"] {
+  .catalog-tab[aria-pressed="true"],
+  .catalog-tab[aria-current="page"] {
     @apply border-primary text-primary;
   }
 

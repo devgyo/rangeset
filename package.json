@@ -10,6 +10,7 @@
     "test": "tsx --test crawler/tests/*.test.ts lib/tests/*.test.ts",
     "crawl:arcteryx": "tsx crawler/index.ts",
     "crawl:dry-run": "tsx crawler/dry-run.ts",
+    "crawl:mammut:dry-run": "tsx crawler/mammut-dry-run.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "i18n-check": "node scripts/i18n-check"

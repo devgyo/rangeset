@@ -1,7 +1,8 @@
 "use client";
+import {leafSlug, taxonomyLabelKey} from "@/lib/taxonomy";
 
 import {Link, useRouter} from "@/i18n/navigation";
-import {categoryLabel, displayPrice, genderDisplay, localNote, partDisplay, useCopy} from "@/i18n/copy";
+import {displayPrice, genderDisplay, localNote, partDisplay, useCopy} from "@/i18n/copy";
 import { Fragment, useEffect, useRef, useState, useTransition, type CSSProperties } from "react";
 import { Check, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,7 +46,7 @@ function ProductPicker({ products, selected, onPick, onClose }: {
           <ProductImage src={product.image} sizes="32px" className="h-10 w-8 shrink-0" />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-medium">{product.name}</span>
-            <span className="block truncate text-xs text-muted-foreground">{genderDisplay(t, product.gender)}{product.category && ` · ${categoryLabel(t, product.category)}`}</span>
+            <span className="block truncate text-xs text-muted-foreground">{genderDisplay(t, product.gender)}{leafSlug(product.taxonomy) && ` · ${t(taxonomyLabelKey(leafSlug(product.taxonomy)!))}`}</span>
           </span>
           <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">{displayPrice(t, product.msrp, product.currency)}</span>
           <Plus size={14} className="shrink-0 text-primary" aria-hidden="true" />

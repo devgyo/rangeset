@@ -7,7 +7,6 @@ import { XMLParser, XMLValidator } from "fast-xml-parser";
 export const origin = "https://arcteryx.com";
 export const userAgent = "Mozilla/5.0 (compatible; specbot/0.1)";
 export const fixtureUrl = `${origin}/us/en/shop/mens/beta-ar-jacket-1062`;
-const robotsUrl = `${origin}/robots.txt`;
 const sitemapIndex = `${origin}/sitemap.xml`;
 const expectedSitemaps = ["sitemap_1.xml", "sitemap_2.xml"];
 const maxBytes = 32 * 1024 * 1024;
@@ -55,6 +54,18 @@ async function readBody(response: Response) {
   return (bytes[0] === 0x1f && bytes[1] === 0x8b ? gunzipSync(bytes, { maxOutputLength: maxBytes }) : bytes).toString("utf8");
 }
 
+export type CrawlPolicy = {
+  origin: string;
+  productUrl: (value: string) => string | undefined;
+  productPath?: string;
+  sitemapAllowed: (value: string) => boolean;
+};
+
+const arcPolicy: CrawlPolicy = {
+  origin, productUrl, productPath: "/us/en/shop/",
+  sitemapAllowed: (url) => url === sitemapIndex || /^https:\/\/arcteryx\.com\/sitemap_[12]\.xml(?:\.gz)?$/.test(url),
+};
+
 export class PoliteClient {
   private robots?: ReturnType<typeof robotsParser>;
   private lastRequest = -Infinity;
@@ -62,9 +73,10 @@ export class PoliteClient {
   private busy = false;
   private productRequests = 0;
 
-  constructor(private readonly productLimit?: number) {}
+  constructor(private readonly productLimit?: number, private readonly policy = arcPolicy) {}
 
   async loadRobots() {
+    const robotsUrl = this.policy.origin + "/robots.txt";
     const page = await this.request(robotsUrl, "robots");
     if (page.status !== 200 || /^\s*</.test(page.body) || !/^\s*user-agent\s*:/im.test(page.body)) {
       throw new CrawlStop(`Unable to read robots.txt (HTTP ${page.status})`);
@@ -90,9 +102,9 @@ export class PoliteClient {
   private async perform(url: string, kind: Kind): Promise<Page> {
     let finalUrl = url;
     for (let hop = 0; hop <= 5; hop++) {
-      const allowedUrl = kind === "robots" ? finalUrl === robotsUrl
-        : kind === "product" ? productUrl(finalUrl) === finalUrl
-        : finalUrl === sitemapIndex || /^https:\/\/arcteryx\.com\/sitemap_[12]\.xml(?:\.gz)?$/.test(finalUrl);
+      const allowedUrl = kind === "robots" ? finalUrl === this.policy.origin + "/robots.txt"
+        : kind === "product" ? this.policy.productUrl(finalUrl) === finalUrl
+        : this.policy.sitemapAllowed(finalUrl);
       if (!allowedUrl || (kind !== "robots" && !this.allows(finalUrl))) {
         throw new CrawlStop(`URL outside crawl policy or disallowed by robots.txt: ${finalUrl}`);
       }
@@ -103,13 +115,18 @@ export class PoliteClient {
         }
         this.productRequests++;
       }
-      await delay(Math.max(0, Math.ceil(this.interval - (performance.now() - this.lastRequest))));
-      this.lastRequest = performance.now();
-      const response = await fetch(finalUrl, {
-        redirect: "manual",
-        signal: AbortSignal.timeout(45_000),
+      const options = {
+        redirect: "manual" as const,
         headers: { "User-Agent": userAgent, Accept: kind === "product" ? "text/html" : "*/*", "Accept-Encoding": "gzip" },
-      });
+      };
+      let remaining = this.interval - (performance.now() - this.lastRequest);
+      while (remaining > 0) {
+        await delay(Math.ceil(remaining));
+        remaining = this.interval - (performance.now() - this.lastRequest);
+      }
+      const signal = AbortSignal.timeout(45_000);
+      this.lastRequest = performance.now();
+      const response = await fetch(finalUrl, {...options, signal});
       const fetchedAt = new Date().toISOString();
       if (response.status === 403 || response.status === 429 || response.headers.get("cf-mitigated") === "challenge") {
         await response.body?.cancel();
@@ -124,12 +141,12 @@ export class PoliteClient {
 
       const next = new URL(location, finalUrl).href;
       if (kind === "product") {
-        const normalized = productUrl(next);
-        const target = new URL(next);
-        if (target.origin !== origin || !target.pathname.startsWith("/us/en/shop/")) {
+        const normalized = this.policy.productUrl(next);
+        if (!normalized) {
+          const target = new URL(next);
+          if (this.policy.productPath && target.origin === this.policy.origin && target.pathname.startsWith(this.policy.productPath)) return page;
           return { ...page, finalUrl: next, offShop: true };
         }
-        if (!normalized) return page;
         finalUrl = normalized;
       } else {
         finalUrl = next;
@@ -143,7 +160,7 @@ const parser = new XMLParser({ removeNSPrefix: true, processEntities: false, par
   isArray: (name, path) => (path === "sitemapindex.sitemap" && name === "sitemap") || (path === "urlset.url" && name === "url"),
 });
 
-function parseXml(page: Page) {
+export function parseXml(page: Page) {
   if (page.status !== 200 || /<!DOCTYPE/i.test(page.body) || XMLValidator.validate(page.body) !== true) {
     throw new CrawlStop(`Invalid sitemap (HTTP ${page.status}): ${page.finalUrl}`);
   }

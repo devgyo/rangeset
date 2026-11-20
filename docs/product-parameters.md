@@ -1,12 +1,45 @@
-# Rangeset product parameter standard v1.6.0
+# Rangeset product parameter standard v1.7.0
 
-The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.6.0 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
+The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.7.0 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
 
 ## Catalog scope
 
-Rangeset catalogs apparel. Catalog eligibility requires an allowed clothing category and excludes footwear product types even when they are assigned to an allowed category. Existing non-apparel entries already in the Professional Use category are retained for this release.
+Rangeset catalogs apparel and backpacks. The original brand category stays in `products.category`. The catalog resolves at most one Rangeset leaf at read time. Footwear, backpack accessories and other equipment stay outside the public catalog. Records with unresolved or contradictory construction are searchable and have detail pages. They are excluded from category lists and comparison recommendations.
 
-The scope change and read-only catalog inventory are recorded in the [v1.4.0 verification report](catalog-scope-v1.4.0.md).
+## Rangeset taxonomy
+
+| Group | Leaves |
+| --- | --- |
+| Outerwear | Hardshell Jackets · Insulated Shells · Down Jackets · Synthetic Insulated Jackets · Softshell Jackets · Windshells · Coats & Tailoring · Vests |
+| Fleece & Midlayers | Fleece & Midlayers |
+| Shirts & Tops | Shirts & Tops |
+| Base Layers | Base Layer Tops · Base Layer Bottoms |
+| Bottoms | Hardshell Pants · Insulated Pants · Softshell Pants · Pants · Tights & Leggings · Shorts · Skirts |
+| Dresses & One-Pieces | Dresses · One-Piece Suits |
+| Backpacks | Backpacks |
+
+Brand, gender, activity and series are independent facets. Category routes use stable English slugs under `/products/category/`. Legacy catalog category URLs and the hard-shell index redirect with HTTP 301 in each language. The canonical URL, language alternates and sitemap use the new path. The tree in `lib/taxonomy.ts` defines each leaf. The [glossary](i18n/glossary.csv) provides the English, Simplified Chinese and Japanese names, with Japanese marked for review.
+
+The first applicable rule wins. Scope and backpack checks precede base layers, one-piece garments, dresses, skirts and shorts. Pants resolve in the order tights, fixed fill, body waterproofing, softshell and other pants. Next check contradictory body claims, sleeveless outerwear, unfilled fleece or knit midlayers, and ordinary tops. For the remaining outerwear, waterproof membrane and fixed fill give Insulated Shells. Otherwise use the primary torso fill, followed by body waterproofing, tailoring, softshell and windshell. A 3-in-1 uses the outer layer. Ski use remains an activity. A waterproof panel, DWR, WINDSTOPPER or GORE-TEX INFINIUM alone is insufficient for a hardshell. The legacy `is_hardshell` value is excluded from classification.
+
+Use `parameters.taxonomy` in `manual_overrides` with a stable leaf key, optionally wrapped in `{"value":"outer.hardshell","reason":"…","updatedAt":"YYYY-MM-DD"}`. Conflicting automatic classifications of same-brand model variants enter review. A valid manual choice takes priority. See the [rule research](taxonomy-research.md) and [Arc’teryx coverage audit](arcteryx-taxonomy-v1.7.0.md).
+
+## Brand adapters
+
+`lib/brands/index.ts` registers Arc’teryx and Mammut. Each adapter supplies catalog eligibility, merchandising fields, model numbers, taxonomy facts and the common `Profile`. Brands preserve product names, technology names and cited original text. Card selection, search, featured sorting, and comparison use the same data model. Material records follow Body, Reinforcement, Panel and Lining, with Face and Backer attached to their owning part.
+
+| Mammut published field | Normalization |
+| --- | --- |
+| Cut | Athletic and Tight → Fitted. Regular, Snow Sports Regular, Ski Regular and Climbing Regular → Regular. Relaxed and Ski Relaxed → Relaxed. Source wording is kept as evidence. |
+| Weight | Published grams. Reference size remains unpublished when absent. |
+| Main material, Reinforcement, Insert, Lining | Body, Reinforcement, Panel and Lining. Location-specific backing stays on its owner. Fiber percentages and explicitly recycled fibers are kept. |
+| Main material (Denier), Water column, Breathability | Ordered denier, hydrostatic head in mm, and RET or MVTR with published units and bounds. |
+| Main fabric name | A structured name or a description identifying the body/outer fabric. An unscoped technology mention leaves the named field unpublished. |
+| Filling, Fill power, Fill weight | Published fill type, down ratio and power, and fill mass or location-specific synthetic density when published. |
+| Variant originalPrice, price, color, size, inStock | List and sale price stored separately in USD. Cards and price sorting use list price. Variant stock is derived only from published combinations and flags. |
+| Release year / season | Used only when explicitly published. An in-season stock flag does not give a release date. Merchandising labels such as New Style and New Colors Added stay in the source data. |
+
+Use the saved US HTML crawl to reproduce the [Mammut dry-run report](mammut-import-v1.7.0.md). The local catalog loads `data/arcteryx-local.json` and `data/mammut-dry-run.json` in read-only mode. Run `RANGESET_LOCAL_CATALOG=1 pnpm dev`, or set that variable on both `pnpm build` and `pnpm start` for a production-mode local server. `pnpm crawl:mammut:dry-run` refreshes the dry run. Pass `--from-cache` to reprocess saved HTML. `crawler/mammut-import.ts --apply` is the separate transactional importer for new Mammut rows, after approval.
 
 ## Catalog cards and search
 
@@ -14,7 +47,7 @@ Every card uses the same 2×2 grid defined by `cardFields` in `lib/parameters/re
 
 | Cell | Selection and display |
 | --- | --- |
-| Weight | The published normalized item weight in grams, such as `505 g`. The heading explains that weighing sizes can differ by brand and Arc’teryx does not publish a reference size. The card displays the weight value without a size suffix. |
+| Weight | The published normalized item weight in grams, such as `505 g`. The heading explains that weighing sizes can differ by brand and Arc’teryx and Mammut typically omit the reference size. The card displays the weight value without a size suffix. |
 | Fit | The published fit mapped through the table below. Unrecognized labels use an em dash. The original label and source evidence stay in the detail profile. |
 | Main fabric | The first published Body fabric name in source order. If Body has no name, display its largest published fiber share, such as `Nylon 100%`. If neither exists, display an em dash. |
 | Composition | The largest published share from one Body composition, with a published fabric-scope recycled percentage for that same Body record when available. Use source order to break a tie. The title gives the complete Body composition and any displayed recycled percentage. Lining, panels, unquantified claims, and garment-wide or face-only percentages do not supply a Body value. |
@@ -31,7 +64,7 @@ When multiple Body records exist, the composition from the named Body record tak
 | `relaxed` | Relaxed, Relaxed Fit | Relaxed | 宽松版型 | リラックスフィット |
 | `oversized` | Oversized, Oversized Fit | Oversized | 超宽松版型 | オーバーサイズ |
 
-The mapping ignores case and normalizes hyphens and spacing. Search accepts the short or full model number from the Arc’teryx catalog slug, case-insensitively. It first applies the normal token search. When no result matches, it may omit the whole qualifiers `hooded`, `hoodie`, and `hoody`, or normalize the possessive `jacket's` to `jacket`. On retry, an exact product name takes precedence over other token matches. Search does not apply fuzzy matching. See the [card coverage and verification report](catalog-cards-v1.5.0.md).
+The mapping ignores case and normalizes hyphens and spacing. Search accepts published model numbers case-insensitively, including Arc’teryx short and full numbers and Mammut article numbers such as `1010-33030`. It first applies the normal token search. When no result matches, it may omit the whole qualifiers `hooded`, `hoodie`, and `hoody`, or normalize the possessive `jacket's` to `jacket`. On retry, an exact product name takes precedence over other token matches. Search does not apply fuzzy matching. See the [card coverage and verification report](catalog-cards-v1.5.0.md).
 
 ## Featured catalog sort
 
@@ -155,7 +188,7 @@ On details, unpublished Fabric name, Composition and Fabric weight use a dash. O
 | `wind` | Wind protection | enum | — | apparel | exact |
 | `upf` | Sun protection | text | — | apparel | exact |
 
-Waterproof ratings and breathability will be added in a future version.
+Waterproof ratings and breathability keep their published units and qualifiers. Confirm a matching test method and reporting convention before comparing readings.
 
 ### Insulation
 
@@ -214,5 +247,7 @@ These fields support internal data review. They are excluded from detail and com
 
 
 ## Changelog
+
+- **v1.7.0** adds the Rangeset taxonomy, shared brand adapters and a Mammut US dry run.
 
 - **v1.6.0** introduces Featured as the default catalog sort and removes the source controls, source links, and original source text from product detail and comparison views. Evidence remains available internally for conflict handling and data verification.

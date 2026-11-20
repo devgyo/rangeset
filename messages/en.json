@@ -300,7 +300,7 @@
     "home_label": "Rangeset home",
     "hero_first": "Specs,",
     "hero_second": "not hype.",
-    "hero_description": "Browse the Arc’teryx US catalog and compare published specs side by side.",
+    "hero_description": "Browse US outdoor catalogs and compare published specs side by side.",
     "families": "Arc’teryx families",
     "catalog_live": "US catalog · Published specs and MSRP",
     "arc_catalog": "Arc’teryx catalog",
@@ -365,7 +365,9 @@
     "recycled_fiber": "recycled {fiber}",
     "virgin_fiber": "virgin {fiber}",
     "not_found": "This page could not be found.",
-    "fiber_share": "{pct}% {fiber}"
+    "fiber_share": "{pct}% {fiber}",
+    "subcategories": "Subcategories",
+    "local_catalog": "Local catalog · Saved product data"
   },
   "keep": {
     "arcteryx": "Arc'teryx",
@@ -403,7 +405,7 @@
     "title": "Rangeset — specs, not hype",
     "template": "{title} | Rangeset",
     "description": "Browse and compare published Arc’teryx product specifications.",
-    "catalog_description": "Browse Arc’teryx US gear and compare published specifications across models.",
+    "catalog_description": "Browse US outdoor gear and compare published specifications across models.",
     "compare_description": "Compare published specifications for up to four Arc’teryx products.",
     "jackets_description": "Browse and compare hardshell jackets by membrane, construction, weight, price, and features.",
     "product_description": "Published configuration and specs for the {brand} {name}."
@@ -481,7 +483,15 @@
     "backcountry_skiing": "Backcountry Skiing",
     "mountain_bike": "Mountain Bike",
     "travel_commute": "Travel/Commute",
-    "ski_patrol": "Ski Patrol"
+    "ski_patrol": "Ski Patrol",
+    "approach": "Approach",
+    "climbing": "Climbing",
+    "everyday": "Everyday",
+    "mountain_training": "Mountain Training",
+    "mountaineering": "Mountaineering",
+    "skiing": "Skiing",
+    "travel": "Travel",
+    "via_ferrata": "Via Ferrata"
   },
   "brand": {
     "name": "Rangeset",
@@ -513,10 +523,38 @@
     "ptfe": "PTFE"
   },
   "card": {
-    "weight_help": "Brands use different reference sizes for weighing. Arc’teryx does not publish the reference size.",
+    "weight_help": "Brands may weigh different reference sizes. Some brands do not publish the reference size.",
     "fiber_share": "{fiber} {pct}%",
     "recycled_share": "{pct}% recycled",
-    "search_placeholder": "Search products, specs, or model numbers",
+    "search_placeholder": "Search by name or model number",
     "main_fabric": "Main fabric"
+  },
+  "taxonomy": {
+    "outerwear": "Outerwear",
+    "hardshell_jackets": "Hardshell Jackets",
+    "insulated_shells": "Insulated Shells",
+    "down_jackets": "Down Jackets",
+    "synthetic_insulated_jackets": "Synthetic Insulated Jackets",
+    "softshell_jackets": "Softshell Jackets",
+    "windshells": "Windshells",
+    "coats_and_tailoring": "Coats & Tailoring",
+    "vests": "Vests",
+    "fleece_and_midlayers": "Fleece & Midlayers",
+    "tops": "Shirts & Tops",
+    "base_layers": "Base Layers",
+    "base_layer_tops": "Base Layer Tops",
+    "base_layer_bottoms": "Base Layer Bottoms",
+    "bottoms": "Bottoms",
+    "hardshell_pants": "Hardshell Pants",
+    "insulated_pants": "Insulated Pants",
+    "softshell_pants": "Softshell Pants",
+    "pants": "Pants",
+    "tights_and_leggings": "Tights & Leggings",
+    "shorts": "Shorts",
+    "skirts": "Skirts",
+    "dresses_and_one_pieces": "Dresses & One-Pieces",
+    "dresses": "Dresses",
+    "one_piece_suits": "One-Piece Suits",
+    "backpacks": "Backpacks"
   }
 }

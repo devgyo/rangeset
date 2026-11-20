@@ -1,4 +1,4 @@
-import { plainText, record, type ProductDetail } from "../arcteryx-view";
+import { plainText, record, type ProductDetail } from "../product-view";
 import { known, missing, type Evidence, type Parameter } from "./model";
 import { productTypes, protectionTypes, type ProductKind } from "./registry";
 
@@ -7,7 +7,7 @@ const footwearTypes = {shoe: "Shoe", boot: "Boot", sandal: "Sandal", mule: "Mule
 const classificationTypes = {...productTypes, ...footwearTypes};
 type Style = keyof typeof classificationTypes;
 type Shell = keyof typeof protectionTypes;
-type Subject = Pick<ProductDetail, "name" | "category" | "subTags" | "isHardshell" | "url" | "verifiedAt" | "example">;
+type Subject = Pick<ProductDetail, "name" | "category" | "subTags" | "url" | "verifiedAt" | "example">;
 type StyleSubject = Pick<Subject, "name" | "category"> & {subTags?: string[]};
 type Input = { raw?: Record<string, unknown>; fetchedAt?: string | null; overrides?: Map<string, unknown> };
 export type Classification = { productType: Parameter; protectionType: Parameter; kind: ProductKind };
@@ -35,7 +35,7 @@ function explicitStyle(text: string): Style | undefined {
     !text.includes(" and ") && !text.includes(" or ") && !text.includes("/"))?.[0];
 }
 
-function garmentStyle(product: StyleSubject, raw: Record<string, unknown>, tags: string[]): Style | undefined {
+export function garmentStyle(product: StyleSubject, raw: Record<string, unknown>, tags: string[]): Style | undefined {
   const category = (product.category ?? "").toLowerCase();
   const name = product.name;
   const marketing = plainText(raw.marketingName);
@@ -81,7 +81,7 @@ function shellType(product: Subject, style: Style | undefined, raw: Record<strin
   if (!style && !["Shell Jackets", "Insulated Jackets", "Pants", "Professional Use"].includes(product.category ?? "")) return "inapplicable";
   const description = [product.name, plainText(raw.marketingName), ...tags].join(" · ");
   const insulated = /\binsulated shell\b/i.test(description);
-  const hard = product.isHardshell || /\bhard[ -]?shell\b/i.test(description);
+  const hard = /\bhard[ -]?shell\b/i.test(description);
   if (insulated || (hard && product.category === "Insulated Jackets")) return "insulated_shell";
   if (hard) return "hard_shell";
   if (/\bsoft[ -]?shell\b/i.test(description)) return "soft_shell";
@@ -111,7 +111,7 @@ export function classifyArcProduct(product: Subject, { raw = {}, fetchedAt, over
   const evidence: Evidence[] = [{
     url: product.url, path: "product.name / marketingName / productType / category / subCategory",
     raw: JSON.stringify({ name: product.name, marketingName: raw.marketingName, productType: raw.productType,
-      category: product.category, rawCategory: raw.category, subTags: product.subTags, subCategory: raw.subCategory, isHardshell: product.isHardshell }),
+      category: product.category, rawCategory: raw.category, subTags: product.subTags, subCategory: raw.subCategory }),
     method: product.example ? "example" : "parsed", updatedAt: fetchedAt ?? product.verifiedAt,
   }];
 

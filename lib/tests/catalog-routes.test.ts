@@ -96,3 +96,37 @@ test("detail and comparison pages keep source controls, links and raw evidence o
     }
   }
 });
+
+test("the unified category and its 301 redirects use English slugs and three language alternates", options, async () => {
+  for (const prefix of locales) {
+    const path = prefix + "/products/category/hardshell-jackets";
+    const response = await get(path + "?sort=name");
+    assert.equal(response.status, 200, path);
+    const html = await rendered(response);
+    assert.ok(html.includes(translations[prefix].taxonomy.hardshell_jackets));
+    assert.match(html, /hreflang="zh-Hans"[^>]*\/zh\/products\/category\/hardshell-jackets/i);
+    assert.match(html, /hreflang="ja"[^>]*\/ja\/products\/category\/hardshell-jackets/i);
+    const legacy = await get(prefix + "/products?category=Shell+Jackets&q=beta");
+    assert.equal(legacy.status, 301);
+    assert.equal(legacy.headers.get("location"), prefix + "/products/category/outerwear?q=beta");
+    const jackets = await get(prefix + "/jackets");
+    assert.equal(jackets.status, 301);
+    assert.equal(jackets.headers.get("location"), path);
+  }
+});
+
+test("the local two-brand catalog renders both brands and accepts a Mammut article number in search and compare", {
+  skip: !site || process.env.RANGESET_LOCAL_CATALOG !== "1",
+}, async () => {
+  const html = await rendered(await get("/products/category/softshell-jackets"));
+  const cards = [...html.matchAll(/<article class="gear-card [^"]*">([\s\S]*?)<\/article>/g)].map(([, card]) => card);
+  assert.ok(cards.some((card) => card.includes("Arc’teryx")));
+  assert.ok(cards.some((card) => card.includes("Mammut")));
+  const search = await rendered(await get("/products?q=1010-33030"));
+  assert.match(search, /Eiger Free Pro HS Hooded Jacket Men/);
+  assert.equal((search.match(/<article class="gear-card/g) ?? []).length, 1);
+  const compare = await rendered(await get(`/compare?ids=mammut-1010-33030,${beta}`));
+  assert.match(compare, /class="comparison-matrix"/);
+  assert.match(compare, /Eiger Free Pro HS Hooded Jacket Men/);
+  assert.match(compare, /Beta AR Jacket/);
+});

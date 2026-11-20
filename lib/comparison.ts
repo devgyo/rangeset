@@ -1,5 +1,5 @@
-import type { ProductDetail } from "./arcteryx-view";
-import { parametersOf } from "./parameters/arcteryx";
+import type { ProductDetail } from "./product-view";
+import { parametersOf } from "./brands";
 import { parameterGroups, type ParameterGroup } from "./parameters/model";
 import {publicParameterGroups} from "./public-parameters";
 

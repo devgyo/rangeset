@@ -1,9 +1,10 @@
+import {taxonomyLabelKey, taxonomySlugs} from "@/lib/taxonomy";
 import {useLocale, useTranslations} from "next-intl";
 import en from "@/messages/en.json";
 import {formatParameterNumber, formatReference, formatValue, known, parameterStatus, type Fiber, type Parameter} from "@/lib/parameters/model";
 import {cardFields, fieldsByKey, type Field} from "@/lib/parameters/registry";
 import type {CardParameters} from "@/lib/parameters/card";
-import {formatPrice, type Gender} from "@/lib/arcteryx-view";
+import {formatPrice, type Gender} from "@/lib/product-view";
 
 export type Translator = ReturnType<typeof useTranslations>;
 export const englishMessage = (key: string) => {
@@ -35,8 +36,14 @@ export const categoryLabel = (t: Translator, data: string | null) => data && cat
 export const genderDisplay = (t: Translator, data: Gender | null) => data ? t("gender." + data) : t("status.missing");
 export const displayPrice = (t: Translator, amount: number | null, currency?: string | null) =>
   amount === null ? t("status.missing") : formatPrice(amount, currency);
+const activityAliases: Record<string, string> = {hiking: "hike", freeriding: "freeride", ski_touring: "touring", trail_running: "trail_run"};
+export function activityCode(value: string) {
+  const code = value.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+  return activityAliases[code] ?? code;
+}
+
 export const activityLabel = (t: Translator, value: string) => {
-  const key = "activity." + value.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+  const key = "activity." + activityCode(value);
   return t.has(key) ? t(key) : value;
 };
 
@@ -132,7 +139,10 @@ export function displayParameter(t: Translator, locale: string, field: Field, pa
   if (parameter.reviewCode === "needs_review" || (parameter.state === "review" && field.reviewLabel)) return t("type.needs_review");
   if (parameter.state === "review" || parameter.state === "conflict") return t("status." + parameter.state);
   if (field.key === "release" && typeof parameter.value === "string") return formatSeason(t, parameter.value);
-  if (field.key === "category" && typeof parameter.value === "string" && locale !== "en") return categoryLabel(t, parameter.value) ?? parameter.value;
+  if (field.key === "category" && typeof parameter.value === "string") {
+    if (taxonomySlugs.includes(parameter.value)) return t(taxonomyLabelKey(parameter.value));
+    if (locale !== "en") return categoryLabel(t, parameter.value) ?? parameter.value;
+  }
   if (field.key === "fit" && typeof parameter.value === "string") return localizedFit(t, parameter.value);
   if (field.key === "product_line" && parameter.value === "Mainline") return t("ui.mainline");
   if (field.options) return optionLabel(t, field, String(parameter.value), formatValue(field, parameter));

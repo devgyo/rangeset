@@ -1,7 +1,7 @@
 export const fabricParts = { body: "Body", reinforcement: "Reinforcement", panel: "Panel", lining: "Lining" } as const;
 export type FabricPart = keyof typeof fabricParts;
 
-export const parameterVersion = "1.6.0";
+export const parameterVersion = "1.7.0";
 export const cardFields = [
   {key: "weight", label: "field.weight", help: "card.weight_help"},
   {key: "fit", label: "field.fit"},
@@ -11,9 +11,9 @@ export const cardFields = [
 
 export const cardFitAliases = {
   next_to_skin: ["Next to Skin", "Next-to-skin"],
-  fitted: ["Fitted", "Fitted Fit"],
-  regular: ["Regular", "Regular Fit"],
-  relaxed: ["Relaxed", "Relaxed Fit"],
+  fitted: ["Fitted", "Fitted Fit", "Athletic Fit", "Slim Fit", "Slim", "Athletic", "Tight Fit", "Ski Slim"],
+  regular: ["Regular", "Regular Fit", "Snow Sports Regular", "Ski Regular", "Climbing Regular"],
+  relaxed: ["Relaxed", "Relaxed Fit", "Snow Sports Relaxed", "Ski Relaxed", "Loose Fit", "Loose"],
   oversized: ["Oversized", "Oversized Fit"],
 } as const;
 export type CardFit = keyof typeof cardFitAliases;

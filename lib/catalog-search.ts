@@ -1,6 +1,6 @@
-import type {CatalogCard} from "./arcteryx-view";
+import type {CatalogCard} from "./product-view";
 
-type SearchableProduct = Pick<CatalogCard, "slug" | "name" | "family" | "subTags" | "specs" | "gender">;
+type SearchableProduct = Pick<CatalogCard, "slug" | "name" | "family" | "subTags" | "specs" | "gender" | "modelNumbers"> & {brand?: string};
 const optionalQualifiers = new Set(["hooded", "hoodie", "hoody"]);
 
 function tokenize(query: string) {
@@ -8,10 +8,10 @@ function tokenize(query: string) {
 }
 
 function matches(product: SearchableProduct, tokens: string[]) {
-  const numbers = product.slug.toLowerCase().match(/-(\d{4})-(x\d+)$/)?.slice(1);
-  const text = [product.name, product.family, product.gender, ...product.subTags, product.specs.membrane?.value]
+  const numbers = product.modelNumbers ?? product.slug.toLowerCase().match(/-(\d{4})-(x\d+)$/)?.slice(1) ?? [];
+  const text = [product.name, product.brand, product.family, product.gender, ...product.subTags, product.specs.membrane?.value]
     .join(" ").normalize("NFKC").toLowerCase().replaceAll("’", "'");
-  return tokens.every((token) => /^(?:\d{4}|x\d+)$/.test(token) ? numbers?.includes(token) === true : text.includes(token));
+  return tokens.every((token) => /^(?:\d{4}(?:-\d{5})?|x\d+)$/.test(token) ? numbers.some((number) => number.toLowerCase() === token) : text.includes(token));
 }
 
 export function searchCatalog<T extends SearchableProduct>(products: T[], query: string): T[] {

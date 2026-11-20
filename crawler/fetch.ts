@@ -7,7 +7,7 @@ import { CrawlStop, type Page, type PoliteClient } from "./http";
 
 const compress = promisify(gzip);
 
-export async function fetchProduct(client: PoliteClient, url: string) {
+export async function fetchProduct(client: PoliteClient, url: string, brand = "arcteryx") {
   let page: Page;
   try {
     page = await client.request(url, "product");
@@ -17,7 +17,7 @@ export async function fetchProduct(client: PoliteClient, url: string) {
   }
 
   const { body, ...metadata } = page;
-  const directory = join(".crawl", "raw", "arcteryx", page.fetchedAt.slice(0, 10));
+  const directory = join(".crawl", "raw", brand, page.fetchedAt.slice(0, 10));
   const slug = new URL(url).pathname.split("/").at(-1)!;
   const variant = createHash("sha256").update(url).digest("hex").slice(0, 10);
   let file = join(directory, `${slug}.html.gz`);

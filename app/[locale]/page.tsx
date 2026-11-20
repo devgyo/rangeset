@@ -3,11 +3,11 @@ import {Link} from "@/i18n/navigation";
 import {getTranslations} from "next-intl/server";
 import {currentLocale} from "@/i18n/seo";
 import {pageAlternates} from "@/i18n/routing";
-import {categoryLabel, genderDisplay} from "@/i18n/copy";
+import {genderDisplay} from "@/i18n/copy";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductImage } from "@/components/catalog/product-media";
-import { categoryCounts, featuredFamilies } from "@/lib/arcteryx-view";
+import {matchesTaxonomy, taxonomy, taxonomyLabelKey, taxonomyPath} from "@/lib/taxonomy";
 import { listProducts } from "@/lib/catalog";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -16,10 +16,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Home() {
   const [products, t] = await Promise.all([listProducts(), getTranslations()]);
-  const categories = categoryCounts(products);
-  const feature = products.find((item) => item.name === "Beta AR Jacket" && item.status === "active" && item.gender === "men" && item.hero)
-    ?? products.find((item) => item.hero && item.status === "active");
-  const families = featuredFamilies.filter((family) => products.some((item) => item.family === family));
+  const categories = taxonomy.map(({slug}) => ({slug, count: products.filter((product) => matchesTaxonomy(product, slug)).length}));
+  const feature = products.find((item) => item.hero && item.status === "active");
+  const familyCounts = new Map<string, number>();
+  for (const {family} of products) if (family) familyCounts.set(family, (familyCounts.get(family) ?? 0) + 1);
+  const families = [...familyCounts].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name]) => name);
   return (
     <>
       <section className="hero border-b">
@@ -47,10 +48,10 @@ export default async function Home() {
         <section aria-labelledby="categories-heading">
           <h2 id="categories-heading" className="section-title mb-4">{t("ui.browse_by_category")}</h2>
           <div className="grid grid-cols-2 gap-px border bg-border sm:grid-cols-3 lg:grid-cols-5">
-            {categories.map(({ label, count }) =>
-              <Link key={label} href={`/products?category=${encodeURIComponent(label)}`} className="category-card">
+            {categories.map(({ slug, count }) =>
+              <Link key={slug} href={taxonomyPath(slug)} className="category-card">
                 <div className="flex items-center justify-between gap-2"><span className="font-mono text-xl tabular-nums text-primary">{count}</span><ArrowUpRight size={15} aria-hidden="true" /></div>
-                <span className="text-sm font-medium">{categoryLabel(t, label)}</span>
+                <span className="text-sm font-medium">{t(taxonomyLabelKey(slug))}</span>
               </Link>)}
           </div>
         </section>
@@ -58,7 +59,7 @@ export default async function Home() {
           <h2 id="families-heading" className="section-title mb-4">{t("ui.families")}</h2>
           <div className="flex flex-wrap gap-2">
             {families.map((family) => <Button asChild key={family} variant="outline" className="h-9 px-4">
-              <Link href={`/products?family=${family}`}>{family} <ArrowUpRight aria-hidden="true" /></Link>
+              <Link href={`/products?family=${encodeURIComponent(family)}`}>{family} <ArrowUpRight aria-hidden="true" /></Link>
             </Button>)}
           </div>
         </section>}

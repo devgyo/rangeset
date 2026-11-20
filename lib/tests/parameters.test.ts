@@ -218,7 +218,7 @@ test("accepts manual nested and legacy separately labelled backer overrides", ()
 
 test("classifies garment style independently from protective construction", () => {
   const cases = [
-    [product({ name: "Beta AR Jacket", isHardshell: true }), "jacket", "hard_shell"],
+    [product({ name: "Beta AR Jacket", subTags: ["Hardshell"] }), "jacket", "hard_shell"],
     [product({ name: "Gamma Jacket", subTags: ["Softshell"] }), "jacket", "soft_shell"],
     [product({ name: "Squamish Hoody", subTags: ["Windshell"] }), "hoodie", "wind_shell"],
     [product({ name: "Fissile SV Down Jacket", category: "Insulated Jackets", subTags: ["Insulated Shell"] }), "jacket", "insulated_shell"],
@@ -246,7 +246,7 @@ test("classifies garment style independently from protective construction", () =
 });
 
 test("renders ISO currency with price and compares style and currency codes", () => {
-  const beta = normalizeArcProduct(product({ name: "Beta AR Jacket", isHardshell: true }), { raw: { price: 650, currencyCode: "USD" } });
+  const beta = normalizeArcProduct(product({ name: "Beta AR Jacket", subTags: ["Hardshell"] }), { raw: { price: 650, currencyCode: "USD" } });
   const shirt = normalizeArcProduct(product({ name: "Cormac T-shirt", category: "Shirts and Tops" }), { raw: { price: 50, currencyCode: "EUR" } });
   assert.equal(formatValue(field("msrp"), beta.values.msrp), "$650 USD");
   assert.equal(formatValue(field("msrp"), shirt.values.msrp), "€50 EUR");

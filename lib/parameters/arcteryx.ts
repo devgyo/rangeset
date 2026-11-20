@@ -1,18 +1,17 @@
-import { compositionValue, constructions, fabricLayer, fabricLocation, fabricPart, fabricWeight, garmentRecycledContent, parseDenier } from "./fabric";
+import { fabricLayer, fabricLocation, fabricPart, fabricWeight, garmentRecycledContent, parseDenier } from "./fabric";
 import { classifyArcProduct } from "./classification";
 import { mergeListValues } from "./merge";
-import { plainText, record, type ProductDetail } from "../arcteryx-view";
-import { fieldsByKey, type Context, type FabricPart, type Field, type ProductType, type ProtectionType, productTypes } from "./registry";
-import { known, missing, type Evidence, type Fiber, type Parameter, type Part, type Profile, type Reference, type Value } from "./model";
+import { plainText, record, type ProductDetail } from "../product-view";
+import { fieldsByKey, type Context, type FabricPart, type ProductType, type ProtectionType, productTypes } from "./registry";
+import { known, missing, type Evidence, type Parameter, type Part, type Profile, type Reference, type Value } from "./model";
 
-export type IndexedSpec = { key: string; value: unknown; unit: string | null; source: string; fetchedAt: string; sourceUrl?: string; rawText?: string | null };
-type Input = { raw?: Record<string, unknown>; fetchedAt?: string | null; indexed?: IndexedSpec[]; overrides?: Map<string, unknown> };
+import {comparisonText, compatible, convert, rounded, scalarKeys} from "./normalization";
+import {applyOverrides} from "./overrides";
+export {convert} from "./normalization";
+
+import type {BrandInput as Input, IndexedSpec} from "../brands/types";
+export type {IndexedSpec} from "../brands/types";
 type Line = { text: string; evidence: Evidence; group?: string };
-const scalarKeys: Record<string, string> = {
-  weight_g: "weight", weight_size: "weight_size", fit: "fit", centre_back_length_cm: "back_length", inseam: "inseam",
-  membrane: "membrane", layers: "laminate", recco: "recco", pit_zips: "pit_zips", helmet_hood: "helmet_hood",
-  waterproof_mm: "hydrostatic_head", breathability: "breathability",
-};
 const numberPattern = "(\\d+(?:[.,]\\d+)?)";
 const sizePattern = /\bsize\s+([a-z\d]+(?:[-/]\w+)*)(?=\s|[),:]|$)/i;
 const indexedFeatures: Record<string, [RegExp, RegExp]> = Object.fromEntries(Object.entries({
@@ -27,23 +26,7 @@ const indexedFeatures: Record<string, [RegExp, RegExp]> = Object.fromEntries(Obj
 const weightSize = (text: string) => text.match(/\bsize\s*[:=]?\s+((?:US|UK|EU)\s+\d+(?:\.\d+)?|[a-z\d]+(?:[-/.]\w+)*)(?=\s|[),;:]|$)/i)?.[1] ??
   text.match(/\((XX?S|S|M|L|XL|XXL|XXXL|[2-5]XL)\)/i)?.[1];
 const decimal = (value: string) => Number(value.replace(",", "."));
-const rounded = (value: number) => Math.round(value * 100) / 100;
 const clean = (value: string) => value.replace(/\s+/g, " ").trim();
-const comparisonText = (value: unknown) => String(value).replace(/[®™]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
-
-export function convert(value: number, from: string, to: string) {
-  const unit = from.toLowerCase().replace(/\s/g, "");
-  if (unit === to.toLowerCase()) return rounded(value);
-  const units: Record<string, Record<string, number>> = {
-    g: { kg: 1000, lb: 453.59237, lbs: 453.59237, oz: 28.349523125, gram: 1, grams: 1 },
-    cm: { mm: 0.1, m: 100, in: 2.54, inch: 2.54, '"': 2.54, "″": 2.54 },
-    mm: { cm: 10, m: 1000, in: 25.4, '"': 25.4, "″": 25.4 },
-    "g/m²": { gsm: 1, "g/m2": 1, "g/m^2": 1, "oz/yd²": 33.905747, "oz/yd2": 33.905747 },
-  };
-  const factor = units[to]?.[unit];
-  return factor === undefined ? null : rounded(value * factor);
-}
-
 export { parseDenier } from "./fabric";
 
 function reading(text: string, to: "g" | "cm" | "mm") {
@@ -109,27 +92,6 @@ function insulationPart(label: string, text: string, evidence: Evidence): { part
     put(fields, "synthetic_density", mass && convert(Number(mass[1]), mass[2], "g/m²"), [evidence]);
   }
   return { part: { part, label, fields, evidence: [evidence] }, type };
-}
-
-function compatible(key: string, value: unknown): value is Value {
-  const field = fieldsByKey.get(key);
-  switch (field?.type) {
-    case "text": return typeof value === "string" && Boolean(value.trim());
-    case "enum": return typeof value === "string" && Object.hasOwn(field.options ?? {}, value);
-    case "boolean": return typeof value === "boolean";
-    case "number": return typeof value === "number" && Number.isFinite(value) && value >= 0;
-    case "list": return Array.isArray(value) && value.length > 0 && value.every((item) => typeof item === "string" && Boolean(item.trim()));
-    case "denier": return Array.isArray(value) && value.length > 0 && value.every((item) => typeof item === "number" && Number.isFinite(item) && item > 0);
-    case "composition": return Array.isArray(value) && value.length > 0 && value.every((item) => typeof record(item).fiber === "string" &&
-      typeof record(item).pct === "number" && Number.isFinite(record(item).pct) && Number(record(item).pct) >= 0 &&
-      [true, false, null].includes(record(item).recycled as boolean | null));
-    case "recycled": return Array.isArray(value) && value.length > 0 && value.every((item) => {
-      const { pct, scope } = record(item);
-      return ["fabric", "face", "garment", "claim_only"].includes(String(scope)) &&
-        (pct === null ? scope === "claim_only" : typeof pct === "number" && Number.isFinite(pct) && pct >= 0 && pct <= 100);
-    });
-    default: return false;
-  }
 }
 
 export function normalizeArcProduct(product: ProductDetail, input: Input = {}): Profile {
@@ -466,125 +428,6 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
     }
   }
   return { context, values };
-}
-
-function parseManual(field: Field, original: unknown, previous: Parameter | undefined): { value: unknown; reference?: Reference } {
-  const entry = record(original);
-  let value = Object.hasOwn(entry, "value") ? entry.value : original;
-  let reference = previous?.reference;
-  const ref = record(entry.reference);
-  reference = { ...reference, ...Object.fromEntries(Object.entries(ref).filter(([key, value]) =>
-    ["size", "gender", "method", "unit", "kind"].includes(key) && typeof value === "string")) };
-  if (field.type === "enum" && typeof value === "number") value = String(value);
-  if (field.type === "denier" && typeof value === "number") value = [value];
-  if (field.type === "denier" && typeof value === "string") value = parseDenier(value);
-  if (field.type === "composition" && Array.isArray(value)) value = value.map((item) => {
-    const fiber = record(item);
-    return { fiber: fiber.fiber ?? fiber.name, pct: fiber.pct ?? fiber.percent, recycled: fiber.recycled ?? null };
-  });
-  if (field.key === "weave") value = (Array.isArray(value) ? value : [value]).flatMap((word) => {
-    const canonical = constructions.find((option) => comparisonText(option) === comparisonText(word));
-    return canonical ? [canonical] : [];
-  });
-  if (typeof value === "number" && typeof entry.unit === "string" && field.unit && field.key !== "fabric_weight") value = convert(value, entry.unit, field.unit);
-  if (typeof entry.unit === "string" && !field.unit) reference.unit = entry.unit;
-  return { value, reference };
-}
-
-function manualFabricValue(field: Field, raw: unknown, evidence: Evidence, previous?: Parameter): Parameter {
-  if (raw === null) return { state: "unpublished", evidence: [evidence] };
-  const parsed = parseManual(field, raw, previous);
-  if (field.key === "fabric_weight" && typeof parsed.value === "number") {
-    const unit = record(raw).unit;
-    return fabricWeight(parsed.value, typeof unit === "string" ? unit : "g/m²", [evidence]);
-  }
-  if (!compatible(field.key, parsed.value)) return {
-    state: "review", reviewCode: "needs_review", evidence: [evidence], note: "Manual value does not match the field definition.",
-  };
-  return field.type === "composition" ? compositionValue(parsed.value as Fiber[], [evidence]) : known(parsed.value, [evidence], parsed.reference);
-}
-
-function applyOverrides(values: Profile["values"], product: ProductDetail, overrides: Map<string, unknown>) {
-  const metadataKeys: Record<string, string> = { name: "model", category: "category", price: "msrp", gender: "gender" };
-  const keys = [...overrides].filter(([key]) => !key.startsWith("parameters."))
-    .concat([...overrides].filter(([key]) => key.startsWith("parameters.")));
-  for (const [path, original] of keys) {
-    if (path === "parameters.product_type" || path === "parameters.protection_type") continue;
-    const key = path.startsWith("parameters.") ? path.slice(11) : path.startsWith("spec.") ? scalarKeys[path.slice(5)] : metadataKeys[path];
-    const field = fieldsByKey.get(key);
-    const entry = record(original);
-    const evidence: Evidence = { url: product.url, path: `manual_overrides.${path}`, raw: JSON.stringify(original) ?? "",
-      method: "manual", updatedAt: typeof entry.updatedAt === "string" && /^\d{4}-\d{2}-\d{2}/.test(entry.updatedAt) ? entry.updatedAt : null };
-    const legacyFabric = path === "spec.face_denier" ? "denier" : path === "spec.fabric_gsm" ? "fabric_weight" : null;
-    if (legacyFabric) {
-      const parts = values.materials?.state === "known" ? values.materials.value as Part[] : [];
-      const primary = parts.filter(({ part }) => part === "body");
-      if (primary.length > 1) {
-        values.materials = { state: "review", evidence: [...(values.materials?.evidence ?? []), evidence],
-          note: "A product-level override cannot be assigned to one of multiple main fabrics." };
-        continue;
-      }
-      const definition = fieldsByKey.get(legacyFabric)!;
-      const detail = manualFabricValue(definition, original, evidence, primary[0]?.fields[legacyFabric]);
-      const part = primary[0] ?? { part: "body", label: "Body", fields: {}, evidence: [] };
-      part.fields[legacyFabric] = detail;
-      part.evidence.unshift(evidence);
-      values.materials = known(primary.length ? parts : [...parts, part], [evidence, ...(values.materials?.evidence ?? [])]);
-      continue;
-    }
-    if (!field) continue;
-    if (original === null) {
-      values[key] = { state: "unpublished", evidence: [evidence] };
-      continue;
-    }
-    if (field.type === "parts" && Array.isArray(original)) {
-      const fabric = field.group === "fabric";
-      function readPart(input: unknown, nested?: "face" | "backer"): Part | undefined {
-        const item = record(input);
-        if (typeof item.part !== "string" || !/^[a-z0-9_]+$/.test(item.part) || typeof item.label !== "string") return undefined;
-        const detachedLayer = /(?:^|_)(?:backer|face)$/.test(item.part);
-        const part = nested ?? (fabric && !detachedLayer ? fabricLocation(item.part) ?? fabricLocation(item.label) : item.part);
-        if (!part) return undefined;
-        const attributes: Part["fields"] = {};
-        for (const [componentKey, raw] of Object.entries(record(item.fields))) {
-          const component = fieldsByKey.get(componentKey);
-          if (component?.component !== (fabric ? "fabric" : "warmth")) continue;
-          attributes[componentKey] = manualFabricValue(component, raw, evidence);
-        }
-        const result: Part = { part, label: item.label, fields: attributes, evidence: [evidence] };
-        for (const layer of ["faces", "backers"] as const) {
-          if (item[layer] === undefined) continue;
-          if (nested || !fabric || !Array.isArray(item[layer])) return undefined;
-          const layers = item[layer].map((entry) => readPart(entry, layer === "faces" ? "face" : "backer"));
-          if (layers.some((entry) => entry === undefined)) return undefined;
-          result[layer] = layers as Part[];
-        }
-        return result;
-      }
-      const records = original.map((input) => readPart(input));
-      const parts = records.every((part) => part !== undefined) ? records : [];
-      const layers = fabric ? parts.filter(({ part }) => /(?:^|_)(?:backer|face)$/.test(part)) : [];
-      const parents = parts.filter((part) => !layers.includes(part));
-      const assigned = layers.every((part) => {
-        const legacy = part.part.match(/^(?:(.+)_)?(backer|face)$/)!;
-        const label = part.label.match(/^(.+?)\s*(?:·|[-–])\s*(?:backer|face)$/i)?.[1];
-        const namedOwner = legacy[1] ?? label;
-        const owner = namedOwner ? fabricLocation(namedOwner) : undefined;
-        const candidates = owner ? parents.filter(({ part }) => part === owner) : namedOwner ? [] : parents;
-        if (candidates.length !== 1) return false;
-        const parent = candidates[0];
-        const key = legacy[2] === "face" ? "faces" : "backers";
-        parent[key] = [...(parent[key] ?? []), { ...part, part: legacy[2] }];
-        return true;
-      });
-      values[key] = parents.length && assigned ? known(parents, [evidence])
-        : { state: "review", reviewCode: "needs_review", evidence: [evidence], note: "Manual parts are invalid or a backer has no unambiguous parent." };
-      continue;
-    }
-    const parsed = parseManual(field, original, values[key]);
-    values[key] = compatible(key, parsed.value) ? known(parsed.value, [evidence], parsed.reference)
-      : { state: "review", evidence: [evidence], note: "Manual value does not match the field definition." };
-  }
 }
 
 export function parametersOf(product: ProductDetail): Profile {

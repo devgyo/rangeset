@@ -1,10 +1,11 @@
+import {leafSlug, taxonomyLabelKey, taxonomyPath} from "@/lib/taxonomy";
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import {Link} from "@/i18n/navigation";
 import {getTranslations} from "next-intl/server";
 import {currentLocale} from "@/i18n/seo";
 import {pageAlternates} from "@/i18n/routing";
-import {activityLabel, categoryLabel, displayParameter, genderDisplay, type Translator} from "@/i18n/copy";
+import {activityLabel, displayParameter, genderDisplay, type Translator} from "@/i18n/copy";
 import { notFound } from "next/navigation";
 import { ProductGallery } from "@/components/catalog/product-gallery";
 import { CompareButton } from "@/components/catalog/compare-selection";
@@ -14,9 +15,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { readProduct, relatedProducts } from "@/lib/catalog";
-import { formatPrice, type ProductDetail } from "@/lib/arcteryx-view";
+import { formatPrice, type ProductDetail } from "@/lib/product-view";
 import { ParameterLabel, ParameterLegend, ParameterSections, ParameterValue } from "@/components/catalog/parameter-table";
-import { parametersOf } from "@/lib/parameters/arcteryx";
+import { parametersOf } from "@/lib/brands";
 import { compareValues, getParameter, keyParameters, parameterGroups } from "@/lib/parameters/model";
 import {publicParameterGroups, withoutParameterEvidence} from "@/lib/public-parameters";
 import { fieldsByKey, parameterVersion } from "@/lib/parameters/registry";
@@ -55,7 +56,7 @@ function Trims({ product, siblings, t, locale }: {product: ProductDetail; siblin
     return delta(number(after), number(before), format);
   };
   return <section className="mt-10" aria-labelledby="trim-heading">
-    <h2 id="trim-heading" className="section-title mb-4">{t("ui.family_variants", {family: product.family ?? "", category: categoryLabel(t, product.category) ?? ""})} <span className="text-muted-foreground">— {genderDisplay(t, product.gender)}</span></h2>
+    <h2 id="trim-heading" className="section-title mb-4">{t("ui.family_variants", {family: product.family ?? "", category: leafSlug(product.taxonomy) ? t(taxonomyLabelKey(leafSlug(product.taxonomy)!)) : ""})} <span className="text-muted-foreground">— {genderDisplay(t, product.gender)}</span></h2>
     <div className="data-panel">
       <Table scrollLabel={t("ui.family_comparison")} className="spec-table">
         <TableHeader><TableRow>
@@ -82,6 +83,7 @@ function Trims({ product, siblings, t, locale }: {product: ProductDetail; siblin
 export default async function ProductPage({ params }: PageProps<"/[locale]/products/[slug]">) {
   const product = await readProduct((await params).slug);
   if (!product) notFound();
+  const category = leafSlug(product.taxonomy);
   const [siblings, t, locale] = await Promise.all([relatedProducts(product), getTranslations(), currentLocale()]);
   const profile = parametersOf(product);
   const core = keyParameters(profile);
@@ -92,8 +94,8 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
     <div className="grid items-start gap-6 lg:grid-cols-[1fr_.9fr] lg:gap-12">
       <div className="min-w-0 lg:col-start-2 lg:row-start-1">
         <nav aria-label={t("ui.breadcrumb")} className="mb-5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <Link href="/products" className="hover:text-primary">{product.brand}</Link>
-          {product.category && <><span aria-hidden="true">/</span><Link href={`/products?category=${encodeURIComponent(product.category)}`} className="hover:text-primary">{categoryLabel(t, product.category)}</Link></>}
+          <Link href={`/products?brand=${product.brandSlug ?? ""}`} className="hover:text-primary">{product.brand}</Link>
+          {category && <><span aria-hidden="true">/</span><Link href={taxonomyPath(category)} className="hover:text-primary">{t(taxonomyLabelKey(category))}</Link></>}
           {product.gender && <><span aria-hidden="true">/</span><span>{genderDisplay(t, product.gender)}</span></>}
         </nav>
         <div className="mb-3 flex flex-wrap items-center gap-1.5"><GenderPill gender={product.gender} /><ProductBadges product={product} /></div>

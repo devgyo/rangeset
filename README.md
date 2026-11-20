@@ -1,6 +1,6 @@
 # Rangeset
 
-An English-language index for comparing urban techwear and hardshell jackets. Built with the Next.js App Router, TypeScript, Tailwind CSS, and shadcn/ui.
+A catalog for comparing outdoor apparel and backpacks in English, Simplified Chinese and Japanese. Built with the Next.js App Router, TypeScript, Tailwind CSS, and shadcn/ui.
 
 ## Local setup
 
@@ -20,6 +20,8 @@ pnpm start
 ```
 
 ## Catalog data
+
+For the read-only Arc’teryx and Mammut fixtures, set `RANGESET_LOCAL_CATALOG=1` on the local app server. See [the parameter standard](docs/product-parameters.md) for category rules and the dry-run workflow.
 
 Edit `data/jackets.json` using the `Jacket` type in `lib/types.ts`. The three example records are fictional and use reserved `.example` URLs. Replace them with real records and remove `example: true` to include their detail pages in the sitemap.
 
@@ -70,4 +72,4 @@ The dry run accepts 1–5 PDP requests, including redirect hops, and never write
 
 New products and changes to price, stock, and catalog text are applied automatically. Changes to weight, membrane, layers, face denier, or other numeric specs by more than 10% are recorded for review while the previous spec stays live. A product is marked discontinued after three consecutive completed runs count it as absent. A verified reappearance resets the streak. Candidate successor links remain pending until an operator reviews them.
 
-Inspect `changes` where `status = 'needs_review'`. To approve a spec, confirm the candidate is still current, then update the live `product_specs` row and mark the change approved in one transaction. For a successor, set the predecessor and successor references together before approving the change. A rejected candidate keeps the published value in place. Use `manual_overrides` for operator values that should take precedence over later crawl observations. The site recognizes product fields `name`, `category`, `gender`, `url`, `isHardshell`, `status`, dollar `price`, and `spec.<key>` values such as `spec.weight_g`. A JSON null spec override displays as unpublished.
+Inspect `changes` where `status = 'needs_review'`. To approve a spec, confirm the candidate is still current, then update the live `product_specs` row and mark the change approved in one transaction. For a successor, set the predecessor and successor references together before approving the change. A rejected candidate keeps the published value in place. Use `manual_overrides` for operator values that should take precedence over later crawl observations. The site recognizes product fields `name`, `category`, `gender`, `url`, `status`, dollar `price`, and `spec.<key>` values such as `spec.weight_g`. Use `parameters.taxonomy` to choose a unified category. A JSON null spec override displays as unpublished.

@@ -6,15 +6,16 @@ import { useMemo, useSyncExternalStore } from "react";
 import { ArrowRight, Check, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductImage } from "@/components/catalog/product-media";
+import {taxonomyPath} from "@/lib/taxonomy";
 import { comparisonHref } from "@/lib/comparison";
 import {isCatalogProduct} from "@/lib/catalog-scope";
-import type { CatalogCard } from "@/lib/arcteryx-view";
+import {safeImage, type CatalogCard} from "@/lib/product-view";
 
 const storageKey = "rangeset:comparison";
 const listeners = new Set<() => void>();
 let fallback = "";
 
-export type PickedProduct = Pick<CatalogCard, "slug" | "name" | "image" | "category" | "gender">;
+export type PickedProduct = Pick<CatalogCard, "slug" | "name" | "image" | "category" | "gender" | "taxonomy">;
 
 function snapshot() {
   try { return localStorage.getItem(storageKey) ?? ""; }
@@ -34,10 +35,11 @@ function decodeSelection(value: string): PickedProduct[] {
     return [...new Map(items.filter((item) => item && typeof item.slug === "string" && typeof item.name === "string" &&
       /^[a-z0-9-]+$/i.test(item.slug)).map((item) => [item.slug as string, {
       slug: item.slug, name: item.name,
-      image: typeof item.image === "string" && item.image.startsWith("https://images.arcteryx.com/") ? item.image : null,
+      image: safeImage(item.image),
       category: typeof item.category === "string" ? item.category : null,
       gender: ["men", "women", "unisex"].includes(item.gender) ? item.gender : null,
-    } as PickedProduct])).values()].filter((product) => isCatalogProduct(product)).slice(0, 4);
+    } as PickedProduct])).values()].filter((product) => /^mammut-\d{4}-\d{5}$/.test(product.slug) ||
+      isCatalogProduct(product) && !/\b(?:backpack|pack) lid\b/i.test(product.name)).slice(0, 4);
   } catch { return []; }
 }
 
@@ -118,7 +120,7 @@ export function CatalogNav() {
   const links = [
     { label: "ui.nav_catalog", href: "/products", active: route.startsWith("/products") },
     { label: "ui.compare", href: comparisonHref(selection.map(({ slug }) => slug)), active: route === "/compare" },
-    { label: "ui.nav_hardshells", href: "/jackets", active: route === "/jackets" },
+    { label: "ui.nav_hardshells", href: taxonomyPath("hardshell-jackets"), active: route === taxonomyPath("hardshell-jackets") },
   ];
   return <nav aria-label={t("ui.navigation")} className="flex items-center gap-2.5 sm:gap-6">
     {links.map(({ label, href, active }) => (

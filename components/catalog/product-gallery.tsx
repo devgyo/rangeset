@@ -3,7 +3,7 @@
 import {useCopy} from "@/i18n/copy";
 import { useState } from "react";
 import { ColorDot, ProductImage } from "@/components/catalog/product-media";
-import type { Colorway, Photo } from "@/lib/arcteryx-view";
+import type { Colorway, Photo } from "@/lib/product-view";
 
 export function ProductGallery({ name, colorways, hero, cutout }: {
   name: string; colorways: Colorway[]; hero: string | null; cutout: string | null;

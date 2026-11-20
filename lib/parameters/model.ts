@@ -5,7 +5,7 @@ export type Evidence = {
   url: string | null; path: string; raw: string; method: "published" | "parsed" | "indexed" | "manual" | "example";
   updatedAt: string | null;
 };
-export type Reference = { size?: string; gender?: string; method?: string; unit?: string | null; kind?: string };
+export type Reference = { size?: string; gender?: string; method?: string; unit?: string | null; kind?: string; qualifier?: "<" | "≤" | ">" | "≥" };
 export type Fiber = { fiber: string; pct: number; recycled: boolean | null };
 export type RecycledContent = { pct: number | null; scope: "fabric" | "face" | "garment" | "claim_only" };
 export type Part = { part: string; label: string; fields: Record<string, Parameter>; evidence: Evidence[]; backers?: Part[]; faces?: Part[] };
@@ -75,7 +75,7 @@ export function formatValue(field: Field, parameter: Parameter): string {
   if (field.options) return field.options[String(value)] ?? String(value);
   if (typeof value === "boolean") return value ? "Yes" : "No";
   if (typeof value === "number") {
-    const amount = [formatParameterNumber(value), (reference?.unit === null ? null : reference?.unit ?? field.unit)].filter(Boolean).join(" ");
+    const amount = [(reference?.qualifier ?? "") + formatParameterNumber(value), (reference?.unit === null ? null : reference?.unit ?? field.unit)].filter(Boolean).join(" ");
     const suffix = field.key === "weight" ? weightPresentation(parameter).suffix : "";
     if (parameter.original) return `${amount} (${formatParameterNumber(parameter.original.value)} ${parameter.original.unit})`;
     return suffix ? `${amount} (${suffix})` : amount;
@@ -159,7 +159,7 @@ function compareKnownValues(field: Field, present: Parameter[]): Comparison {
   if (field.compare === "method") {
     const first = present[0].reference;
     const defined = field.key === "msrp" ? first?.unit : first?.method && (field.key !== "fill_power" || first.unit);
-    if (!defined || present.some((item) => item.reference?.unit !== first?.unit || item.reference?.method !== first?.method))
+    if (!defined || present.some((item) => item.reference?.unit !== first?.unit || item.reference?.method !== first?.method || item.reference?.qualifier !== first?.qualifier))
       return { differs: false, note: field.key === "msrp" ? "Different or unpublished currencies" : "Different or unpublished test methods" };
   }
   if (field.key === "down_ratio" && new Set(present.map(({ reference }) => reference?.method ?? "")).size > 1)

@@ -4,11 +4,11 @@ import {pageAlternates} from "@/i18n/routing";
 import {displayParameter} from "@/i18n/copy";
 import type { Metadata } from "next";
 import { ComparisonGrid, type ComparisonProduct, type PickerProduct } from "@/components/catalog/comparison-grid";
-import { genderLabel, type CatalogCard, type ProductDetail } from "@/lib/arcteryx-view";
+import { genderLabel, type CatalogCard, type ProductDetail } from "@/lib/product-view";
 import { listProducts, readProducts } from "@/lib/catalog";
 import { buildComparison, comparisonIds } from "@/lib/comparison";
 
-import { parametersOf } from "@/lib/parameters/arcteryx";
+import { parametersOf } from "@/lib/brands";
 import { getParameter } from "@/lib/parameters/model";
 import { fieldsByKey } from "@/lib/parameters/registry";
 
@@ -24,11 +24,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 function summary(product: CatalogCard): ComparisonProduct {
   return { slug: product.slug, name: product.name, image: product.image, gender: product.gender,
-    category: product.category, msrp: product.msrp, currency: product.currency, example: product.example, discontinued: product.status === "discontinued" };
+    category: product.category, taxonomy: product.taxonomy, msrp: product.msrp, currency: product.currency, example: product.example, discontinued: product.status === "discontinued" };
 }
 
 function picker(product: CatalogCard): PickerProduct {
-  return { ...summary(product), keywords: [product.name, product.family, product.category,
+  return { ...summary(product), keywords: [product.name, product.brand, product.family, product.category, ...(product.modelNumbers ?? []),
     product.gender, genderLabel(product.gender), ...product.subTags, product.specs.membrane?.value].join(" ").toLocaleLowerCase("en-US") };
 }
 

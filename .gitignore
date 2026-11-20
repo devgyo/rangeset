@@ -42,3 +42,10 @@ next-env.d.ts
 
 # Crawler archives and run logs
 /.crawl/
+
+# Local Codex task prompts and logs
+.codex-tasks/
+
+# Large local catalog fixtures (regenerate with export and dry-run scripts)
+/data/arcteryx-local.json
+/data/mammut-dry-run.json

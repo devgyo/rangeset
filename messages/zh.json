@@ -300,7 +300,7 @@
     "home_label": "Rangeset",
     "hero_first": "看参数，",
     "hero_second": "不看噱头。",
-    "hero_description": "浏览 Arc’teryx 美国目录，并排对比品牌公布的参数。",
+    "hero_description": "浏览美国户外品牌目录，并排对比已公布的参数。",
     "families": "Arc’teryx 系列",
     "catalog_live": "美国目录 · 已公布参数及官方定价",
     "arc_catalog": "商品目录",
@@ -365,7 +365,9 @@
     "recycled_fiber": "再生{fiber}",
     "virgin_fiber": "原生{fiber}",
     "not_found": "未找到该商品",
-    "fiber_share": "{pct}% {fiber}"
+    "fiber_share": "{pct}% {fiber}",
+    "subcategories": "二级品类",
+    "local_catalog": "本地目录 · 已保存的商品数据"
   },
   "keep": {
     "arcteryx": "Arc'teryx",
@@ -403,7 +405,7 @@
     "title": "Rangeset — 看参数，不看噱头",
     "template": "{title} | Rangeset",
     "description": "浏览和对比 Arc’teryx 公布的商品参数。",
-    "catalog_description": "浏览 Arc’teryx 美国目录，对比不同款式的已公布参数。",
+    "catalog_description": "浏览美国户外商品目录，对比不同款式的已公布参数。",
     "compare_description": "并排对比最多 4 款 Arc’teryx 商品的已公布参数。",
     "jackets_description": "按防水膜、结构、重量、价格和功能浏览和对比硬壳夹克。",
     "product_description": "{brand} {name} 的已公布配置与参数。"
@@ -470,7 +472,15 @@
     "backcountry_skiing": "野雪滑雪",
     "mountain_bike": "山地骑行",
     "travel_commute": "旅行与通勤",
-    "ski_patrol": "雪场巡逻"
+    "ski_patrol": "雪场巡逻",
+    "approach": "接近路线",
+    "climbing": "攀登",
+    "everyday": "日常",
+    "mountain_training": "山地训练",
+    "mountaineering": "登山",
+    "skiing": "滑雪",
+    "travel": "旅行",
+    "via_ferrata": "铁道式攀登"
   },
   "brand": {
     "name": "Rangeset",
@@ -502,10 +512,38 @@
     "ptfe": "PTFE"
   },
   "card": {
-    "weight_help": "各品牌称重时使用的参考尺码不同。Arc’teryx 未公布参考尺码。",
+    "weight_help": "各品牌称重时使用的参考尺码可能不同。部分品牌未公布参考尺码。",
     "fiber_share": "{fiber} {pct}%",
     "recycled_share": "再生 {pct}%",
-    "search_placeholder": "搜索商品、参数或款号",
+    "search_placeholder": "搜索产品名或款号",
     "main_fabric": "主面料"
+  },
+  "taxonomy": {
+    "outerwear": "外套",
+    "hardshell_jackets": "硬壳冲锋衣",
+    "insulated_shells": "保暖冲锋衣",
+    "down_jackets": "羽绒服",
+    "synthetic_insulated_jackets": "棉服",
+    "softshell_jackets": "软壳",
+    "windshells": "防风外套",
+    "coats_and_tailoring": "大衣与西装",
+    "vests": "背心马甲",
+    "fleece_and_midlayers": "抓绒与中间层",
+    "tops": "上衣",
+    "base_layers": "贴身层",
+    "base_layer_tops": "贴身上衣",
+    "base_layer_bottoms": "贴身下装",
+    "bottoms": "下装",
+    "hardshell_pants": "冲锋裤",
+    "insulated_pants": "保暖裤",
+    "softshell_pants": "软壳裤",
+    "pants": "长裤",
+    "tights_and_leggings": "紧身裤",
+    "shorts": "短裤",
+    "skirts": "半身裙",
+    "dresses_and_one_pieces": "连衣裙与连体服",
+    "dresses": "连衣裙",
+    "one_piece_suits": "连体服",
+    "backpacks": "背包"
   }
 }

@@ -1,0 +1,454 @@
+brand_category,name,gender,tags,leaf,status
+Insulated Jackets,Altira Insulated Cropped Jacket,w,GTX IS SY,outer.insulated_shell,rule
+Insulated Jackets,Altus Down Jacket,m,DN IS,outer.down,rule
+Insulated Jackets,Andessa Down Jacket,w,DN GTX IS,outer.insulated_shell,rule
+Insulated Jackets,Atom Hoody,m,IN SY,outer.synthetic,rule
+Insulated Jackets,Atom Hoody,w,IN SY,outer.synthetic,rule
+Insulated Jackets,Atom Jacket,w,IN SY,outer.synthetic,rule
+Insulated Jackets,Atom Jacket,m,IN SY,outer.synthetic,rule
+Insulated Jackets,Atom SL Hoody,w,IN SY,outer.synthetic,rule
+Insulated Jackets,Atom SL Hoody,m,IN SY,outer.synthetic,rule
+Insulated Jackets,Atom SL Jacket,w,IN SY,outer.synthetic,rule
+Insulated Jackets,Atom SL Jacket,m,IN SY,outer.synthetic,rule
+Insulated Jackets,Atom SV Hoody,w,SY,outer.synthetic,rule
+Insulated Jackets,Atom SV Hoody,m,SY,outer.synthetic,rule
+Insulated Jackets,Atom SV Jacket,m,SY,outer.synthetic,rule
+Insulated Jackets,Atom SV Jacket,w,SY,outer.synthetic,rule
+Insulated Jackets,Atom Vest,w,IN SY,outer.vest,rule
+Insulated Jackets,Atom Vest,m,IN SY,outer.vest,rule
+Insulated Jackets,Beta Insulated Jacket,m,GTX IS SY,REVIEW:同款男女标签不一致（男款有 GTX，女款无）,review
+Insulated Jackets,Beta Insulated Jacket,w,IS SY,REVIEW:同款男女标签不一致（男款有 GTX，女款无）,review
+Insulated Jackets,Cementis Wool Insulated Jacket,w,IN SY,outer.synthetic,rule
+Insulated Jackets,Cerium Hoody,m,DN,outer.down,rule
+Insulated Jackets,Cerium Hoody,w,DN,outer.down,rule
+Insulated Jackets,Cerium Jacket,m,DN,outer.down,rule
+Insulated Jackets,Cerium Jacket,w,DN,outer.down,rule
+Insulated Jackets,Cerium SL Hoody,m,DN IN,outer.down,rule
+Insulated Jackets,Cerium SV Hoody,w,DN,outer.down,rule
+Insulated Jackets,Cerium SV Hoody,m,DN,outer.down,rule
+Insulated Jackets,Cerium SV Vest,m,DN V,outer.vest,rule
+Insulated Jackets,Cerium SV Vest,w,DN V,outer.vest,rule
+Insulated Jackets,Cerium Vest,m,DN V,outer.vest,rule
+Insulated Jackets,Cerium Vest,w,DN V,outer.vest,rule
+Insulated Jackets,Clarkia AR Insulated Hoody,w,IN SY,outer.synthetic,rule
+Insulated Jackets,Conduit Down Jacket,w,DN,outer.down,rule
+Insulated Jackets,Conduit Down Jacket,m,DN,outer.down,rule
+Insulated Jackets,Corva Insulated Jacket,w,IN SO SY,outer.synthetic,rule
+Insulated Jackets,Cronin Insulated Overshirt,m,SY WR,outer.synthetic,rule
+Insulated Jackets,Decca Down Bomber,w,DN IS,outer.down,rule
+Insulated Jackets,Decca Down Parka,w,DN IS,outer.down,rule
+Insulated Jackets,Demlo Insulated Jacket,m,IS WR,REVIEW:保暖但未公布填充类型,review
+Insulated Jackets,Diode Insulated Bomber,m,WR,REVIEW:保暖但未公布填充类型,review
+Insulated Jackets,Diode Insulated Jacket,m,IS WP,outer.insulated_shell,rule
+Insulated Jackets,Diode Insulated Jacket,m,IS SY WP,outer.insulated_shell,rule
+Insulated Jackets,Elec Insulated Jacket,w,IN SY,outer.synthetic,rule
+Insulated Jackets,Epsilon Down Hoody,m,DN SO,outer.down,rule
+Insulated Jackets,Euler Insulated Jacket,m,GTX IS SY,outer.insulated_shell,rule
+Insulated Jackets,Fissile SV Down Jacket,m,DN IS,outer.down,rule
+Insulated Jackets,Ifora Down Jacket,w,DN IS,outer.down,rule
+Insulated Jackets,Ifora Down Parka,w,DN IS,outer.down,rule
+Insulated Jackets,Konseal Insulated Jacket,m,IN SY,outer.synthetic,rule
+Insulated Jackets,Liatris Down Jacket,w,DN GTX IS,outer.insulated_shell,rule
+Insulated Jackets,Liatris Down Parka,w,DN GTX IS,outer.insulated_shell,rule
+Insulated Jackets,Macai Down Jacket,m,DN GTX IS,outer.insulated_shell,rule
+Insulated Jackets,Mionn Insulated Jacket,m,SO SY WR,outer.synthetic,rule
+Insulated Jackets,Mionn Insulated Overshirt,m,SY WR,outer.synthetic,rule
+Insulated Jackets,Monitor Down Coat,m,DN GTXP IS,outer.insulated_shell,rule
+Insulated Jackets,Mutton Insulated Jacket - Walk Gently,u,IN,REVIEW:保暖但未公布填充类型,review
+Insulated Jackets,Naroda Insulated Jacket,m,IN SY,outer.synthetic,rule
+Insulated Jackets,Naroda Insulated Vest,m,IN SY,outer.vest,rule
+Insulated Jackets,Nuclei SV Parka,m,SY,outer.synthetic,rule
+Insulated Jackets,Omineca Short Jacket,w,DN IN,outer.down,rule
+Insulated Jackets,Patera Parka,w,DN GTX IS,outer.insulated_shell,rule
+Insulated Jackets,Proton Heavyweight Hoody,w,SY,outer.synthetic,rule
+Insulated Jackets,Proton Hoody,m,SY,outer.synthetic,rule
+Insulated Jackets,Proton Hoody,w,SY,outer.synthetic,rule
+Insulated Jackets,Proton SL Hoody,m,IN SY,outer.synthetic,rule
+Insulated Jackets,Proton SL Hoody,w,IN SY,outer.synthetic,rule
+Insulated Jackets,Ralle Insulated Jacket,m,GTX IS SY,outer.insulated_shell,rule
+Insulated Jackets,Ralle Parka,m,GTX IS SY,outer.insulated_shell,rule
+Insulated Jackets,Sabre Insulated Jacket,m,IS SY,outer.synthetic,rule
+Insulated Jackets,Sarya Wool Insulated Jacket,m,IN SY,outer.synthetic,rule
+Insulated Jackets,Sentinel Insulated Jacket,w,GTX IS SY,outer.insulated_shell,rule
+Insulated Jackets,Sorin Down Jacket,m,DN GTXP IS,outer.insulated_shell,rule
+Insulated Jackets,Sorin Down Parka,m,DN GTXP IS,outer.insulated_shell,rule
+Insulated Jackets,Spere Insulated Jacket,m,IS,REVIEW:保暖但未公布填充类型,review
+Insulated Jackets,Therme Down Jacket,m,DN GTX IS,outer.insulated_shell,rule
+Insulated Jackets,Therme Down Parka,m,DN GTX IS,outer.insulated_shell,rule
+Insulated Jackets,Therme Insulated Jacket,m,GTX IS SY,outer.insulated_shell,rule
+Insulated Jackets,Thorium Hoody,m,DN,outer.down,rule
+Insulated Jackets,Thorium Jacket,m,DN,outer.down,rule
+Insulated Jackets,Thorium Jacket,w,DN,outer.down,rule
+Insulated Jackets,Thorium Vest,w,DN V,outer.vest,rule
+Professional Use,Alpha PRO 50 Backpack,u,,packs.backpack,rule
+Professional Use,Alpine Guide Insulated Jacket,w,GTXP IS SY,outer.insulated_shell,rule
+Professional Use,Alpine Guide Insulated Jacket,m,GTXP IS SY,outer.insulated_shell,rule
+Professional Use,Alpine Guide Jacket,m,GTXP,outer.hardshell,rule
+Professional Use,Alpine Guide Jacket,w,GTXP,outer.hardshell,rule
+Professional Use,PRO Backpack Lid Replacement,u,,packs.accessory,rule
+Professional Use,Patrol Vest,u,V,outer.vest,rule
+Professional Use,Practitioner AR Hoody,w,SY,outer.synthetic,rule
+Professional Use,Practitioner AR Hoody,m,SY,outer.synthetic,rule
+Professional Use,Ski Guide Bib Pant,w,GTXP,bottoms.hardshell,rule
+Professional Use,Ski Guide Bib Pant,m,GTXP,bottoms.hardshell,rule
+Professional Use,Ski Guide Jacket,m,GTXP,outer.hardshell,rule
+Professional Use,Ski Guide Jacket,w,GTXP,outer.hardshell,rule
+Professional Use,Ski Guide Pant,w,GTXP,bottoms.hardshell,rule
+Professional Use,Ski Guide Pant,m,GTXP,bottoms.hardshell,rule
+Shell Jackets,Alar Wool Coat,m,SO,outer.tailoring,rule
+Shell Jackets,Allene SL Jacket,w,WS,outer.windshell,rule
+Shell Jackets,Alpha Jacket,m,GTX GTXP,outer.hardshell,rule
+Shell Jackets,Alpha Jacket,w,GTX GTXP,outer.hardshell,rule
+Shell Jackets,Alpha Jacket,m,GTX GTXP HS,outer.hardshell,rule
+Shell Jackets,Alpha SL Anorak,w,GTX GTXP HS,outer.hardshell,rule
+Shell Jackets,Alpha SL Jacket,m,GTX GTXP HS,outer.hardshell,rule
+Shell Jackets,Alpha SV Jacket,w,GTX GTXP,outer.hardshell,rule
+Shell Jackets,Alpha SV Jacket,m,GTX GTXP HS,outer.hardshell,rule
+Shell Jackets,Altira Cropped Jacket,w,GTX,outer.hardshell,rule
+Shell Jackets,Arris Jacket,m,GTX,outer.hardshell,rule
+Shell Jackets,Asset Airshell Jacket,w,,REVIEW:未声明壳层类型,review
+Shell Jackets,Asset SL Jacket,w,GTX WP,outer.hardshell,rule
+Shell Jackets,Belfry Wool Jacket,w,SO,outer.softshell,rule
+Shell Jackets,Beta AR Jacket,m,GTX GTXP,outer.hardshell,rule
+Shell Jackets,Beta AR Jacket,m,GTX GTXP HS,outer.hardshell,rule
+Shell Jackets,Beta AR Jacket,w,GTX GTXP HS,outer.hardshell,rule
+Shell Jackets,Beta Jacket,m,GTX,outer.hardshell,rule
+Shell Jackets,Beta Jacket,w,GTX HS,outer.hardshell,rule
+Shell Jackets,Beta Jacket,w,GTX,outer.hardshell,rule
+Shell Jackets,Beta Jacket,m,GTX HS,outer.hardshell,rule
+Shell Jackets,Beta SL Jacket,m,GTX HS,outer.hardshell,rule
+Shell Jackets,Beta SL Jacket,w,GTX HS,outer.hardshell,rule
+Shell Jackets,Beta SL Jacket,m,GTX,outer.hardshell,rule
+Shell Jackets,Beta SL Jacket,w,GTX,outer.hardshell,rule
+Shell Jackets,Beta SV Jacket,w,GTX GTXP HS,outer.hardshell,rule
+Shell Jackets,Beta SV Jacket,m,GTX GTXP HS,outer.hardshell,rule
+Shell Jackets,Beta SV Jacket,m,GTX GTXP HS,outer.hardshell,rule
+Shell Jackets,Centra Jacket,w,GTX HS,outer.hardshell,rule
+Shell Jackets,Centroid Jacket,m,GTX HS,outer.hardshell,rule
+Shell Jackets,Coelle Jacket,w,GTX,outer.hardshell,rule
+Shell Jackets,Cronin AR Hoody,m,SO,outer.softshell,rule
+Shell Jackets,Dekoi Jacket - Walk Gently,u,GTX GTXP HS,outer.hardshell,rule
+Shell Jackets,Demlo Hoody,m,WS,outer.windshell,rule
+Shell Jackets,Diode Bomber Jacket,m,SO,outer.softshell,rule
+Shell Jackets,Diode Jacket,m,GTX,outer.hardshell,rule
+Shell Jackets,Diode Jacket,m,GTX HS,outer.hardshell,rule
+Shell Jackets,Emaris Relaxed Jacket,w,GTX,outer.hardshell,rule
+Shell Jackets,Field Jacket,m,GTXP,outer.hardshell,rule
+Shell Jackets,Field Softshell Jacket,m,SO,outer.softshell,rule
+Shell Jackets,Focal Hoody,w,SO WR,outer.softshell,rule
+Shell Jackets,Gamma Hoody,w,SO,outer.softshell,rule
+Shell Jackets,Gamma Hoody,m,SO WR,outer.softshell,rule
+Shell Jackets,Gamma Jacket,w,SO WR,outer.softshell,rule
+Shell Jackets,Gamma Jacket,m,SO WR,outer.softshell,rule
+Shell Jackets,Gamma Lightweight Hoody,m,SO WR,outer.softshell,rule
+Shell Jackets,Gamma Lightweight Hoody,w,SO WR,outer.softshell,rule
+Shell Jackets,Gamma Lightweight Hoody,m,SO WR,outer.softshell,rule
+Shell Jackets,Gamma Lightweight Hoody,w,SO WR,outer.softshell,rule
+Shell Jackets,Gamma Lightweight Jacket,m,SO WR,outer.softshell,rule
+Shell Jackets,Gamma MX Hoody,m,SO,outer.softshell,rule
+Shell Jackets,Gamma MX Hoody,w,SO WR,outer.softshell,rule
+Shell Jackets,Gamma MX Jacket,w,SO,outer.softshell,rule
+Shell Jackets,Gamma MX Jacket,m,SO,outer.softshell,rule
+Shell Jackets,Ifora Coat,w,GTX,outer.hardshell,rule
+Shell Jackets,Ifora Jacket,w,GTX WP,outer.hardshell,rule
+Shell Jackets,Incendia Jacket,w,GTX GTXP,outer.hardshell,rule
+Shell Jackets,Incendo Hybrid Hoody,m,SO,outer.softshell,rule
+Shell Jackets,Indisce Blazer,m,SO,outer.tailoring,rule
+Shell Jackets,Indisce MX Blazer,m,SO,outer.tailoring,rule
+Shell Jackets,Isogon MX Hoody,m,SO,outer.softshell,rule
+Shell Jackets,Isogon MX Jacket,m,SO WR,outer.softshell,rule
+Shell Jackets,Limina Softshell Jacket,w,SO,outer.softshell,rule
+Shell Jackets,Mionn Softshell Overshirt,m,SO,outer.softshell,rule
+Shell Jackets,Monitor Coat,m,GTX,outer.hardshell,rule
+Shell Jackets,Naya Cropped Jacket,w,GTX HS,outer.hardshell,rule
+Shell Jackets,Naya Cropped Stowhood Jacket,w,WS,outer.windshell,rule
+Shell Jackets,Nitra Trench Coat,w,GTX HS,outer.hardshell,rule
+Shell Jackets,Norvan Jacket,w,GTX,outer.hardshell,rule
+Shell Jackets,Norvan Jacket,m,GTX,outer.hardshell,rule
+Shell Jackets,Norvan Softshell Jacket,w,SO,outer.softshell,rule
+Shell Jackets,Norvan Softshell Jacket,m,SO WR,outer.softshell,rule
+Shell Jackets,Norvan Windshell Hoody,m,WS,outer.windshell,rule
+Shell Jackets,Ossa 1/2 Zip Hoody,m,WS,outer.windshell,rule
+Shell Jackets,Ossa Stowhood Jacket,m,WS,outer.windshell,rule
+Shell Jackets,Phera Wool Coat,w,SO,outer.tailoring,rule
+Shell Jackets,Quartic Jacket,m,SO,outer.softshell,rule
+Shell Jackets,Rhoam Hybrid Jacket,m,GTX,"REVIEW:品牌标签 GORE-TEX(Waterproof) 与正文 ""not fully waterproof"" 冲突",review
+Shell Jackets,Rhoam Hybrid Jacket,w,GTX,"REVIEW:品牌标签 GORE-TEX(Waterproof) 与正文 ""not fully waterproof"" 冲突",review
+Shell Jackets,Rush Jacket,w,GTX GTXP,outer.hardshell,rule
+Shell Jackets,Rush Jacket,m,GTX GTXP,outer.hardshell,rule
+Shell Jackets,Sabre Jacket,m,GTX,outer.hardshell,rule
+Shell Jackets,Sabre Jacket,m,GTX HS,outer.hardshell,rule
+Shell Jackets,Secant SL Jacket,m,GTX,outer.hardshell,rule
+Shell Jackets,Sentinel Jacket,w,GTX,outer.hardshell,rule
+Shell Jackets,Sentinel Jacket,w,GTX HS,outer.hardshell,rule
+Shell Jackets,Serratus Hoody,m,SO,outer.softshell,rule
+Shell Jackets,Sidewinder Jacket,w,GTX HS,outer.hardshell,rule
+Shell Jackets,Sidewinder Jacket,m,GTX HS,outer.hardshell,rule
+Shell Jackets,Sidewinder Jacket - Archive,w,GTX HS,outer.hardshell,rule
+Shell Jackets,Sidewinder Jacket - Archive,m,GTX HS,outer.hardshell,rule
+Shell Jackets,Sima Jacket,w,WS,outer.windshell,rule
+Shell Jackets,Sima Pullover,w,WS,outer.windshell,rule
+Shell Jackets,Sinsola Hoody,w,WS,outer.windshell,rule
+Shell Jackets,Sinsola Jacket,w,WS,outer.windshell,rule
+Shell Jackets,Solano Hoody,m,HS WR,REVIEW:标签 Hardshell 但 Water resistant，客服答 not fully waterproof,review
+Shell Jackets,Solano Hoody,m,WR,REVIEW:标签 Hardshell 但 Water resistant，客服答 not fully waterproof,review
+Shell Jackets,Solano Jacket,m,HS WR,REVIEW:标签 Hardshell 但仅 Water resistant,review
+Shell Jackets,Sonii MX Jacket,w,SO,outer.softshell,rule
+Shell Jackets,Sonii Utility Vest,w,SO,outer.vest,rule
+Shell Jackets,Spere SL Blazer,m,WS,outer.tailoring,rule
+Shell Jackets,Spere SL Jacket,m,WS,outer.windshell,rule
+Shell Jackets,Sperro SV Jacket - 0,w,GTX GTXP HS,outer.hardshell,rule
+Shell Jackets,Sperro SV Jacket - 0,m,GTX GTXP HS,outer.hardshell,rule
+Shell Jackets,Squamish Hoody,m,WS,outer.windshell,rule
+Shell Jackets,Squamish Hoody,w,WS,outer.windshell,rule
+Shell Jackets,Squamish Jacket,m,WS,outer.windshell,rule
+Shell Jackets,Squamish Jacket,w,WS,outer.windshell,rule
+Shell Jackets,Stellant Jacket,w,SO,outer.softshell,rule
+Shell Jackets,Strato Jacket,m,GTX GTXP HS,outer.hardshell,rule
+Shell Jackets,Therme Jacket,m,GTX HS,outer.hardshell,rule
+Shell Jackets,Voronoi Wool Jacket,m,SO,outer.softshell,rule
+Shell Jackets,Voronoi Wool Jacket,m,SO,outer.softshell,rule
+Dresses and Skirts,Beta SL Skirt,w,GTX,bottoms.skirt,rule
+Dresses and Skirts,Carbene SL Skirt,w,,bottoms.skirt,rule
+Dresses and Skirts,Cila SL Dress,w,,onepiece.dress,rule
+Dresses and Skirts,Lota Skirt,w,,bottoms.skirt,rule
+Dresses and Skirts,Serin Wool Skirt,w,,bottoms.skirt,rule
+Fleece,Conic Wool Half Zip Neck,m,,fleece,rule
+Fleece,Conic Wool Halter,w,,fleece,rule
+Fleece,Conic Wool Midlayer,w,ML,fleece,rule
+Fleece,Conic Wool Midlayer,m,ML,fleece,rule
+Fleece,Consola Fleece Midlayer,m,FL,fleece,rule
+Fleece,Covert 1/2 Zip Neck,w,FL,fleece,rule
+Fleece,Covert 1/2 Zip Neck,m,FL,fleece,rule
+Fleece,Covert Cardigan,m,FL,fleece,rule
+Fleece,Covert Cardigan,w,FL,fleece,rule
+Fleece,Covert Cardigan,m,FL,fleece,rule
+Fleece,Covert Pullover Hoody,m,FL,fleece,rule
+Fleece,Covert Vest,m,FL,outer.vest,rule
+Fleece,Delta 1/2 Zip Neck,m,FL,fleece,rule
+Fleece,Delta Hoody,m,HF,fleece,rule
+Fleece,Delta Hybrid Hoody,m,FL SO,fleece,rule
+Fleece,Delta Jacket,w,FL,fleece,rule
+Fleece,Delta Jacket,m,FL,fleece,rule
+Fleece,Emblem Fleece Crew,w,FL,fleece,rule
+Fleece,Emblem Fleece Crew Neck Pullover,m,FL,fleece,rule
+Fleece,Emblem Fleece Full Zip Hoody,m,FL,fleece,rule
+Fleece,Emblem Fleece Hoody,m,FL,fleece,rule
+Fleece,Emblem Fleece Hoody,w,FL,fleece,rule
+Fleece,Konseal Crew Neck Pullover,m,FL,fleece,rule
+Fleece,Konseal Pullover Hoody,m,FL,fleece,rule
+Fleece,Konseal SL Pullover Hoody,m,FL,fleece,rule
+Fleece,Kyanite Hoody,m,FL,fleece,rule
+Fleece,Kyanite Hoody,w,FL,fleece,rule
+Fleece,Kyanite Jacket,m,FL,fleece,rule
+Fleece,Kyanite Jacket,w,FL,fleece,rule
+Fleece,Kyanite LT Hoody,w,FL,fleece,rule
+Fleece,Kyanite Lightweight Hoody,m,FL,fleece,rule
+Fleece,Kyanite Lightweight Jacket,m,FL,fleece,rule
+Fleece,Kyanite Pullover Hoody,m,FL,fleece,rule
+Fleece,Olera Crew Neck Pullover,w,,fleece,rule
+Fleece,Olera Zip Neck,w,,fleece,rule
+Pants,Adze Pant - Walk Gently,u,IN,bottoms.insulated,rule
+Pants,Align MX Pant,m,WR,bottoms.pants,rule
+Pants,Align MX Pant,m,WR,bottoms.pants,rule
+Pants,Alpha SL Pant,w,GTX GTXP HS,bottoms.hardshell,rule
+Pants,Alpha SV Bib Pant,m,GTX GTXP HS,bottoms.hardshell,rule
+Pants,Alpha SV Bib Pant,w,GTX GTXP HS,bottoms.hardshell,rule
+Pants,Andessa Insulated Pant,w,GTX GTXP IN SY,bottoms.insulated,rule
+Pants,Belfry Pant,w,WR,bottoms.pants,rule
+Pants,Beta Pant,m,GTX HS,bottoms.hardshell,rule
+Pants,Beta Pant,w,GTX,bottoms.hardshell,rule
+Pants,Beta SV Pant,m,GTX GTXP HS,bottoms.hardshell,rule
+Pants,Beta SV Pant,w,GTX GTXP HS,bottoms.hardshell,rule
+Pants,Carbene SL Pant,w,,bottoms.pants,rule
+Pants,Clarkia AR Pant,w,,bottoms.pants,rule
+Pants,Clarkia Cotton Wide Leg Pant,w,,bottoms.pants,rule
+Pants,Clarkia Wide Leg Pant,w,,bottoms.pants,rule
+Pants,Corbel Pant,m,SO,bottoms.softshell,rule
+Pants,Covert Pant,w,FL,bottoms.pants,rule
+Pants,Cronin AR Pant,m,,bottoms.pants,rule
+Pants,Cronin Cotton Pant,m,,bottoms.pants,rule
+Pants,Diode MX Pant,m,SO,bottoms.softshell,rule
+Pants,Disomy Wool Pant,m,,bottoms.pants,rule
+Pants,Emblem Fleece Jogger,m,FL,bottoms.pants,rule
+Pants,Emblem Fleece Jogger,w,FL,bottoms.pants,rule
+Pants,"Essent High-Rise Utility Legging 26""",w,TI,bottoms.tights,rule
+Pants,Fissile Insulated Pant,m,GTX SY,bottoms.insulated,rule
+Pants,Gamma Jogger,m,SO,bottoms.softshell,rule
+Pants,Gamma MX Pant,w,SO,bottoms.softshell,rule
+Pants,Gamma MX Pant,w,SO,bottoms.softshell,rule
+Pants,Gamma MX Pant,m,SO,bottoms.softshell,rule
+Pants,Gamma Pant,m,SO WR,bottoms.softshell,rule
+Pants,Gamma Pant,w,SO,bottoms.softshell,rule
+Pants,Gamma SL Pant,w,SO WR,bottoms.softshell,rule
+Pants,Incendia One Piece,w,GTX GTXP,onepiece.suit,rule
+Pants,Incendia Pant,w,GTX GTXP,bottoms.hardshell,rule
+Pants,Indisce MX Pant,m,,bottoms.pants,rule
+Pants,Khara Pant,w,SO,bottoms.softshell,rule
+Pants,Konseal Pant,m,SO WR,bottoms.softshell,rule
+Pants,Kragg Cotton Pant,m,,bottoms.pants,rule
+Pants,Kragg Cotton Pant,w,,bottoms.pants,rule
+Pants,Kyanite Pant,m,FL,bottoms.pants,rule
+Pants,Leutia Pant,w,,bottoms.pants,rule
+Pants,Nia Pant,w,SO,bottoms.softshell,rule
+Pants,Norvan Legging,w,,bottoms.tights,rule
+Pants,Norvan Pant,w,,bottoms.pants,rule
+Pants,Norvan Softshell Pant,m,SO WR,bottoms.softshell,rule
+Pants,Norvan Softshell Pant,w,SO,bottoms.softshell,rule
+Pants,Norvan Tight,m,TI,bottoms.tights,rule
+Pants,Olia Pant,w,,bottoms.pants,rule
+Pants,Omineca Down Pant,w,DN,bottoms.insulated,rule
+Pants,Reane Wool Pant,w,,bottoms.pants,rule
+Pants,Rush Bib Pant,m,GTX GTXP HS,bottoms.hardshell,rule
+Pants,Rush Bib Pant,w,GTX GTXP,bottoms.hardshell,rule
+Pants,Sabre Bib Pant,m,GTX HS,bottoms.hardshell,rule
+Pants,Sabre Bib Pant,m,GTX,bottoms.hardshell,rule
+Pants,Sabre Pant,m,GTX HS,bottoms.hardshell,rule
+Pants,Sabre Pant,m,GTX,bottoms.hardshell,rule
+Pants,Saic Pant,m,,bottoms.pants,rule
+Pants,Secant Comp Track Pant,m,,bottoms.pants,rule
+Pants,Sentinel Bib Pant,w,GTX HS,bottoms.hardshell,rule
+Pants,Sentinel Bib Pant,w,GTX,bottoms.hardshell,rule
+Pants,Sentinel Insulated Pant,w,GTX SY,bottoms.insulated,rule
+Pants,Sentinel Pant,w,GTX HS,bottoms.hardshell,rule
+Pants,Sentinel Pant,w,GTX,bottoms.hardshell,rule
+Pants,Serratus Pant,m,SO,bottoms.softshell,rule
+Pants,Silene Pant,w,,bottoms.pants,rule
+Pants,Spere Cargo Pant,m,,bottoms.pants,rule
+Pants,Spere Pant,m,SO,bottoms.softshell,rule
+Pants,Spere SL Pant,m,,bottoms.pants,rule
+Pants,Strato Pant,m,GTX GTXP HS,bottoms.hardshell,rule
+Pants,Tecta Pant,w,,bottoms.pants,rule
+Pants,Voronoi Pant,m,,bottoms.pants,rule
+Pants,Voronoi Wool Pant,m,,bottoms.pants,rule
+Shirts and Tops,Clarkia SL Cotton Overshirt,w,,tops,rule
+Shirts and Tops,Cormac Crew Neck Shirt LS,m,LS,tops,rule
+Shirts and Tops,Cormac Crew Neck Shirt SS,m,TS,tops,rule
+Shirts and Tops,Cormac Hoody,m,,tops,rule
+Shirts and Tops,Cormac Logo Shirt SS,m,TS,tops,rule
+Shirts and Tops,Cormac Speed Bird Shirt SS,m,TS,tops,rule
+Shirts and Tops,Cronin Cotton Overshirt,m,,tops,rule
+Shirts and Tops,Cusec Shirt LS,m,LS,tops,rule
+Shirts and Tops,Demlo Shirt SS,m,COL,tops,rule
+Shirts and Tops,Diantric Shirt SS,w,,tops,rule
+Shirts and Tops,Dromos Tech Polo Shirt SS,m,COL,tops,rule
+Shirts and Tops,Dromos Tech T-Shirt,m,,tops,rule
+Shirts and Tops,ECM Kragg T-Shirt - Walk Gently,u,TS,tops,rule
+Shirts and Tops,Field Shirt LS,m,LS,tops,rule
+Shirts and Tops,Field Shirt SS,m,,tops,rule
+Shirts and Tops,Field Shirt SS,m,,tops,rule
+Shirts and Tops,Frame Crew Neck Shirt LS,w,LS,tops,rule
+Shirts and Tops,Frame Polo Shirt LS,m,COL,tops,rule
+Shirts and Tops,Frame Polo Shirt SS,m,COL,tops,rule
+Shirts and Tops,Frame Shirt LS,m,LS,tops,rule
+Shirts and Tops,Frame Shirt SS,m,,tops,rule
+Shirts and Tops,Frame Shirt SS,w,TS,tops,rule
+Shirts and Tops,Hallam Merino Wool Crew Neck,m,,tops,rule
+Shirts and Tops,Ionia Merino Wool Shirt SS,m,TS,tops,rule
+Shirts and Tops,Kragg Cotton Bird Crew Neck Shirt LS,w,LS,tops,rule
+Shirts and Tops,Kragg Cotton Dream State Crew Neck Shirt SS,w,TS,tops,rule
+Shirts and Tops,Kragg Cotton Emblem Crew Neck Shirt SS,m,TS,tops,rule
+Shirts and Tops,Kragg Cotton Flow State Crew Neck Shirt SS,w,TS,tops,rule
+Shirts and Tops,Kragg Cotton Lithographica Shirt SS,m,TS,tops,rule
+Shirts and Tops,Kragg Cotton Little Bird Crew Shirt SS,w,,tops,rule
+Shirts and Tops,Kragg Cotton Logo Shirt SS,m,,tops,rule
+Shirts and Tops,Kragg Cotton Shirt LS,m,,tops,rule
+Shirts and Tops,Kragg Cotton Since 1989 Crew Neck Shirt LS,w,,tops,rule
+Shirts and Tops,Kragg Cotton V6 Shirt SS,m,TS,tops,rule
+Shirts and Tops,Kragg SL Cotton Bird Tile Shirt LS,m,,tops,rule
+Shirts and Tops,Kragg SL Cotton Bird Word Shirt SS,m,TS,tops,rule
+Shirts and Tops,Kragg SL Cotton Bloom Crew Shirt LS,w,LS,tops,rule
+Shirts and Tops,Kragg SL Cotton Blurred Bird Shirt SS,m,TS,tops,rule
+Shirts and Tops,Kragg SL Cotton Emblem Crew Shirt SS,w,TS,tops,rule
+Shirts and Tops,Kragg SL Cotton Heatmap Crew Shirt SS,w,TS,tops,rule
+Shirts and Tops,Kragg SL Cotton Jug Shirt SS,m,TS,tops,rule
+Shirts and Tops,Kragg SL Cotton Shirt LS,m,,tops,rule
+Shirts and Tops,Kragg SL Cotton Shirt SS,m,TS,tops,rule
+Shirts and Tops,Kragg SL Cotton Superbloom Crew Shirt SS,w,TS,tops,rule
+Shirts and Tops,Lana Merino Wool Crew Shirt SS,w,TS,tops,rule
+Shirts and Tops,Metron SS Tee,m,TS,tops,rule
+Shirts and Tops,Metry Shirt LS,m,LS,tops,rule
+Shirts and Tops,Norvan Crew Shirt LS,w,,tops,rule
+Shirts and Tops,Norvan Crew Shirt SS,w,TS,tops,rule
+Shirts and Tops,Norvan Downword Logo Shirt LS,m,LS,tops,rule
+Shirts and Tops,Norvan Downword Logo Shirt SS,m,TS,tops,rule
+Shirts and Tops,Norvan Tank,w,TANK,tops,rule
+Shirts and Tops,Pixa Shirt LS,w,,tops,rule
+Shirts and Tops,Real Cedar Shirt LS - Walk Gently,u,LS,tops,rule
+Shirts and Tops,Rula T-Shirt LS,w,,tops,rule
+Shirts and Tops,Rula T-Shirt SS,w,,tops,rule
+Shirts and Tops,Rula T-Shirt SS,w,,tops,rule
+Shirts and Tops,Sima Shirt LS,w,,tops,rule
+Shirts and Tops,Sima Shirt SS,w,TS,tops,rule
+Shirts and Tops,Skyline Shirt LS,m,COL LS,tops,rule
+Shirts and Tops,Skyline Shirt SS,m,COL TS,tops,rule
+Shirts and Tops,Soria Racerback Tank,w,,tops,rule
+Shirts and Tops,Stema Shirt LS,m,,tops,rule
+Shirts and Tops,Sunna Crew Shirt LS,w,LS,tops,rule
+Shirts and Tops,Sunna Crew Shirt SS,w,TS,tops,rule
+Shirts and Tops,Sunna Speed Bird Crew Shirt SS,w,TS,tops,rule
+Shorts,"Emblem Fleece Short 6""",w,FL,bottoms.shorts,rule
+Shorts,Indisce Short,m,,bottoms.shorts,rule
+Shorts,"Konseal Short 9""",m,,bottoms.shorts,rule
+Shorts,"Norvan Liner Short 7""",m,,bottoms.shorts,rule
+Shorts,"Norvan Short 3""",w,,bottoms.shorts,rule
+Shorts,Secant Comp Short,m,,bottoms.shorts,rule
+Shorts,"Silene Short 6""",w,SO,bottoms.shorts,rule
+Shorts,"Sonii SL Skort 4""",w,SO,bottoms.shorts,rule
+Shorts,"Sonii SL Utility Short 10""",w,SO,bottoms.shorts,rule
+Shorts,Spere SL Short,m,,bottoms.shorts,rule
+Base Layer,Rho Bottom,w,,base.bottom,rule
+Base Layer,Rho Bottom,w,,base.bottom,rule
+Base Layer,Rho Crew Neck LS,w,,base.top,rule
+Base Layer,Rho Crew Neck LS,w,,base.top,rule
+Base Layer,Rho Hoody,w,,base.top,rule
+Base Layer,Rho LT Bottom,m,,base.bottom,rule
+Base Layer,Rho LT Crew Neck,m,,base.top,rule
+Base Layer,Rho LT Hoody,m,,base.top,rule
+Base Layer,Rho LT Zip Neck,m,,base.top,rule
+Base Layer,Rho SV Bottom,m,,base.bottom,rule
+Base Layer,Rho SV Bottom,w,,base.bottom,rule
+Base Layer,Rho SV Crew Neck LS,w,,base.top,rule
+Base Layer,Rho SV Zip Neck,m,,base.top,rule
+Base Layer,Rho SV Zip Neck,w,,base.top,rule
+Base Layer,Rho Zip Neck,w,,base.top,rule
+Base Layer,Satoro Merino Wool Bottom,w,,base.bottom,rule
+Base Layer,Satoro Merino Wool Bottom,m,,base.bottom,rule
+Base Layer,Satoro Merino Wool Crew Neck LS,w,,base.top,rule
+Base Layer,Satoro Merino Wool Crew Neck LS,m,,base.top,rule
+Base Layer,Satoro Merino Wool Hoody,w,,base.top,rule
+Base Layer,Satoro Merino Wool Zip Neck,m,,base.top,rule
+Footwear,Konseal GTX Shoe,w,,footwear,rule
+Footwear,Konseal GTX Shoe,m,,footwear,rule
+Footwear,Konseal Shoe,m,,footwear,rule
+Footwear,Konseal Shoe,w,,footwear,rule
+Footwear,Konseal Trek Boot,m,,footwear,rule
+Footwear,Konseal Trek Boot,w,,footwear,rule
+Footwear,Konseal Trek Boot - Walk Gently,m,,footwear,rule
+Footwear,Konseal Trek Boot - Walk Gently,w,,footwear,rule
+Footwear,Kopec 2 Low GTX Shoe,w,,footwear,rule
+Footwear,Kopec 2 Low GTX Shoe,m,,footwear,rule
+Footwear,Kopec 2 Mid GTX Boot,m,,footwear,rule
+Footwear,Kopec 2 Mid GTX Boot,w,,footwear,rule
+Footwear,Kragg Aura Shoe,w,,footwear,rule
+Footwear,Kragg Aura Shoe,m,,footwear,rule
+Footwear,Kragg Mid Shoe,w,,footwear,rule
+Footwear,Kragg Mid Shoe,m,,footwear,rule
+Footwear,Kragg Shoe,m,,footwear,rule
+Footwear,Kragg Shoe,w,,footwear,rule
+Footwear,Norvan 4 Nivalis GTX Shoe,m,,footwear,rule
+Footwear,Norvan 4 Nivalis GTX Shoe,w,,footwear,rule
+Footwear,Norvan LD 4 GTX Shoe,m,,footwear,rule
+Footwear,Norvan LD 4 GTX Shoe,w,,footwear,rule
+Footwear,Norvan LD 4 Shoe,w,,footwear,rule
+Footwear,Norvan LD 4 Shoe,m,,footwear,rule
+Footwear,Postour Boot,m,,footwear,rule
+Footwear,Postour Boot,w,,footwear,rule
+Footwear,Sylan 2 Shoe,w,,footwear,rule
+Footwear,Sylan 2 Shoe,m,,footwear,rule
+Footwear,Vertex Alp Boot,w,,footwear,rule
+Footwear,Vertex Alp Boot,m,,footwear,rule
+Footwear,Vertex Speed Low Shoe,m,,footwear,rule
+Footwear,Vertex Speed Low Shoe,w,,footwear,rule
+Footwear,Vertex Speed Shoe,w,,footwear,rule
+Footwear,Vertex Speed Shoe,m,,footwear,rule
