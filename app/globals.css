@@ -206,3 +206,271 @@
     transition-duration: 0s !important;
   }
 }
+
+@layer components {
+  .nav-link {
+    @apply flex items-center border-b border-transparent py-2 font-mono text-[0.65rem] tracking-wide text-muted-foreground uppercase hover:text-foreground sm:text-xs;
+  }
+
+  .nav-link[aria-current="page"] {
+    @apply border-primary text-primary;
+  }
+
+  .home-title {
+    font-size: clamp(3.65rem, 8.5vw, 8.25rem);
+    letter-spacing: -0.055em;
+    line-height: 0.88;
+  }
+
+  .catalog-title {
+    font-size: clamp(2.3rem, 5vw, 3.9rem);
+    letter-spacing: -0.055em;
+  }
+
+  .section-title {
+    @apply text-xl font-semibold tracking-tight sm:text-2xl;
+  }
+
+  .home-image {
+    aspect-ratio: 16 / 10;
+  }
+
+  .home-image img {
+    object-position: center 34%;
+  }
+
+  .category-card {
+    @apply grid min-h-22 gap-2 bg-card p-3.5 hover:bg-muted hover:text-primary sm:p-4;
+  }
+
+  .image-stage {
+    background-color: #f2f2ef;
+  }
+
+  .studio-stage {
+    isolation: isolate;
+  }
+
+  .studio-stage img {
+    mix-blend-mode: multiply;
+  }
+
+  .gender-pill {
+    @apply inline-flex w-fit items-center border border-border bg-background px-1.5 py-0.5 font-mono text-[0.625rem] leading-tight font-medium tracking-wide text-foreground uppercase;
+  }
+
+  .gear-card {
+    @apply flex flex-col;
+  }
+
+  .gear-card > div {
+    grid-template-rows: auto;
+    flex: 1;
+    align-content: start;
+  }
+
+  .gear-card:has(:hover) {
+    border-color: #606354;
+  }
+
+  .catalog-tabs {
+    @apply flex gap-1 overflow-x-auto border-t border-b px-0.5;
+    scrollbar-width: thin;
+  }
+
+  .catalog-tab {
+    @apply flex h-11 shrink-0 items-center gap-1.5 border-b-2 border-transparent px-2.5 text-sm whitespace-nowrap text-muted-foreground hover:text-foreground;
+  }
+
+  .catalog-tab span {
+    @apply font-mono text-[0.68rem] tabular-nums;
+  }
+
+  .catalog-tab[aria-pressed="true"] {
+    @apply border-primary text-primary;
+  }
+
+  .catalog-tab:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .catalog-filters {
+    @apply my-4 grid gap-3 border bg-card p-3 sm:p-4;
+  }
+
+  .catalog-input {
+    @apply h-10 min-w-0 rounded-sm border border-input bg-background px-2.5 text-sm;
+  }
+
+  .filter-group {
+    @apply flex flex-wrap items-center gap-1;
+  }
+
+  .filter-group > .control-label {
+    @apply mr-1;
+  }
+
+  .filter-pill {
+    @apply inline-flex min-h-8 items-center justify-center gap-1 whitespace-nowrap px-2 text-xs text-muted-foreground hover:bg-muted hover:text-foreground;
+  }
+
+  .filter-pill[aria-pressed="true"] {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .filter-pill:disabled {
+    @apply opacity-45;
+  }
+
+  .color-dot {
+    @apply inline-block size-3 shrink-0 rounded-full border;
+    border-color: #ffffff36;
+  }
+
+  .color-dot-empty {
+    background: linear-gradient(135deg, #34342f 47%, #9c9c8f 48%, #9c9c8f 53%, #34342f 54%);
+  }
+
+  .color-button {
+    @apply grid size-9 place-items-center border border-border bg-background hover:border-foreground;
+  }
+
+  .color-button .color-dot {
+    @apply size-4;
+  }
+
+  .color-button[aria-pressed="true"], .gallery-angle[aria-pressed="true"] {
+    @apply border-primary;
+  }
+
+  .gallery-stage {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    max-height: min(37rem, 70vh);
+  }
+
+  .key-spec-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (min-width: 640px) {
+    .key-spec-strip {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .gallery-angles {
+    @apply mt-3 flex gap-1.5 overflow-x-auto p-0.5;
+    scrollbar-width: thin;
+  }
+
+  .gallery-angle {
+    @apply w-13 shrink-0 border-2 border-transparent bg-card hover:border-foreground sm:w-16;
+  }
+
+  .compare-dock {
+    position: fixed;
+    z-index: 20;
+    inset-inline: max(0.75rem, calc((100vw - 76rem) / 2));
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    @apply border border-input bg-background/95 p-2 shadow-lg shadow-black/40 backdrop-blur-sm sm:p-3;
+  }
+
+  body:has([data-compare-dock]) main {
+    padding-bottom: 7.5rem;
+  }
+
+  .comparison-controls {
+    @apply flex flex-wrap items-center justify-between gap-2 border-y py-2.5;
+  }
+
+  .comparison-frame {
+    container-type: inline-size;
+    @apply min-w-0 border bg-card;
+  }
+
+  .comparison-scroll {
+    --label-width: 5.1rem;
+    --product-width: max(7.15rem, calc((100cqw - var(--label-width) - 8px) / 2));
+    overflow: auto;
+    max-height: 69dvh;
+    scrollbar-width: thin;
+  }
+
+  .comparison-matrix {
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+    width: max(100%, calc(var(--label-width) + var(--product-count) * var(--product-width)));
+    @apply text-left text-xs sm:text-sm;
+  }
+
+  .comparison-label-col {
+    width: var(--label-width);
+  }
+
+  .comparison-matrix th, .comparison-matrix td {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    overflow-wrap: anywhere;
+    @apply px-2 py-2.5 sm:px-3;
+  }
+
+  .comparison-matrix td {
+    vertical-align: top;
+  }
+
+  .comparison-matrix thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    background: #1c1e1a;
+  }
+
+  .comparison-matrix .matrix-label {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    @apply text-[0.68rem] leading-snug font-medium text-muted-foreground sm:text-xs;
+  }
+
+  .comparison-matrix thead .matrix-label {
+    z-index: 4;
+  }
+
+  .comparison-matrix [data-different="true"] > * {
+    background: #222619;
+  }
+
+  .matrix-group th {
+    background: #20221e;
+    @apply py-1.5 font-mono text-[0.65rem] tracking-wider text-muted-foreground uppercase;
+  }
+
+  .matrix-group span {
+    position: sticky;
+    left: 0.5rem;
+  }
+
+  .compare-thumb {
+    @apply h-14 w-11 shrink-0 sm:h-20 sm:w-16;
+  }
+
+  @media (min-width: 768px) {
+    .comparison-scroll {
+      --label-width: 10rem;
+      --product-width: 11rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .key-spec-strip {
+      grid-template-columns: repeat(var(--metric-count), minmax(0, 1fr));
+    }
+
+    .home-image {
+      aspect-ratio: 5 / 4;
+    }
+  }
+}

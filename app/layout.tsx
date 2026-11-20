@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CatalogNav, CompareDock } from "@/components/catalog/compare-selection";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: siteUrl,
   title: { default: "Rangeset — specs, not hype", template: "%s | Rangeset" },
-  description: "An English-language spec index for urban techwear and hardshell jackets.",
+  description: "Browse and compare published Arc’teryx product specifications.",
   openGraph: { siteName: "Rangeset", type: "website" },
 };
 
@@ -21,18 +22,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <span className="brand-mark" aria-hidden="true" />
               RANGESET
             </Link>
-            <nav aria-label="Main navigation" className="flex items-center gap-4 sm:gap-6">
-              <Link href="/products" className="font-mono text-xs tracking-wider uppercase hover:text-primary">Products</Link>
-              <Link href="/jackets" className="font-mono text-xs tracking-wider uppercase hover:text-primary">
-                Jackets
-              </Link>
-            </nav>
+            <CatalogNav />
           </div>
         </header>
         <main id="main" className="flex flex-1 flex-col">{children}</main>
+        <CompareDock />
         <footer className="border-t border-border">
           <div className="site-width py-5 font-mono text-xs tracking-wider text-muted-foreground">
-            Rangeset <span aria-hidden="true">/</span> Hardshell jacket index
+            Rangeset <span aria-hidden="true">/</span> Arc’teryx gear catalog
           </div>
         </footer>
       </body>

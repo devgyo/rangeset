@@ -1,31 +1,62 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ProductImage } from "@/components/catalog/product-media";
+import { categoryCounts, featuredFamilies, genderLabel } from "@/lib/arcteryx-view";
+import { listProducts } from "@/lib/catalog";
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/" },
-};
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
-export default function Home() {
+export default async function Home() {
+  const products = await listProducts();
+  const categories = categoryCounts(products);
+  const feature = products.find((item) => item.name === "Beta AR Jacket" && item.status === "active" && item.gender === "men" && item.hero)
+    ?? products.find((item) => item.hero && item.status === "active");
+  const families = featuredFamilies.filter((family) => products.some((item) => item.family === family));
   return (
-    <section className="hero flex flex-1 items-center">
-      <div className="site-width relative py-24 sm:py-32">
-        <h1 className="hero-title font-semibold">
-          <span className="mb-7 block font-mono text-xs font-medium tracking-[0.22em] text-primary uppercase">
-            Rangeset<span className="sr-only"> — </span>
-          </span>
-          Specs, <br />
-          <span className="text-primary">not hype.</span>
-        </h1>
-        <p className="mt-7 max-w-md text-base leading-relaxed text-muted-foreground sm:text-lg">
-          An index of urban techwear and hardshell jackets. Compare construction,
-          measurements, and features side by side.
-        </p>
-        <Button asChild size="lg" className="mt-9 h-11 gap-4 px-4">
-          <Link href="/jackets">Browse jackets <ArrowUpRight aria-hidden="true" /></Link>
-        </Button>
+    <>
+      <section className="hero border-b">
+        <div className="site-width grid items-center gap-8 py-9 sm:py-12 lg:grid-cols-[1.15fr_.85fr] lg:gap-12 lg:py-13">
+          <div>
+            <h1 className="home-title font-semibold">
+              <span className="control-label mb-4 block text-primary">Rangeset<span className="sr-only"> — </span></span>
+              Specs, <br /><span className="text-primary">not hype.</span>
+            </h1>
+            <p className="mt-5 max-w-md text-base leading-relaxed text-muted-foreground">Browse the Arc’teryx US catalog and compare published specs side by side.</p>
+            <Button asChild className="mt-6 h-10 gap-3 px-4">
+              <Link href="/products">Browse catalog <ArrowRight aria-hidden="true" /></Link>
+            </Button>
+          </div>
+          {feature && <Link href={`/products/${feature.slug}`} className="group block max-w-lg border bg-card">
+            <ProductImage src={feature.hero} studio={false} eager sizes="(min-width: 1024px) 40vw, 90vw" className="home-image" />
+            <div className="flex items-center justify-between gap-2 px-3.5 py-2.5">
+              <span className="text-sm font-medium">{feature.name} <span className="ml-1 text-xs text-muted-foreground">{genderLabel(feature.gender)}</span></span>
+              <ArrowUpRight size={16} className="text-primary" aria-hidden="true" />
+            </div>
+          </Link>}
+        </div>
+      </section>
+      <div className="site-width grid gap-9 py-8 sm:py-12">
+        <section aria-labelledby="categories-heading">
+          <h2 id="categories-heading" className="section-title mb-4">Browse by category</h2>
+          <div className="grid grid-cols-2 gap-px border bg-border sm:grid-cols-3 lg:grid-cols-5">
+            {categories.map(({ label, count }) =>
+              <Link key={label} href={`/products?category=${encodeURIComponent(label)}`} className="category-card">
+                <div className="flex items-center justify-between gap-2"><span className="font-mono text-xl tabular-nums text-primary">{count}</span><ArrowUpRight size={15} aria-hidden="true" /></div>
+                <span className="text-sm font-medium">{label}</span>
+              </Link>)}
+          </div>
+        </section>
+        {families.length > 0 && <section aria-labelledby="families-heading">
+          <h2 id="families-heading" className="section-title mb-4">Arc’teryx families</h2>
+          <div className="flex flex-wrap gap-2">
+            {families.map((family) => <Button asChild key={family} variant="outline" className="h-9 px-4">
+              <Link href={`/products?family=${family}`}>{family} <ArrowUpRight aria-hidden="true" /></Link>
+            </Button>)}
+          </div>
+        </section>}
       </div>
-    </section>
+    </>
   );
 }
