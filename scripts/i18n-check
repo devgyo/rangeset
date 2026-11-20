@@ -11,15 +11,6 @@ const writing = process.argv.includes("--write");
 const keys = new Set();
 const errors = [];
 
-const offlineFootwear = new Set([
-  "ui.per_shoe", "ui.pair", "ui.reference_shoe_basis", "group.footwear", "cat.footwear",
-  "field.weight_basis", "field.drop", "field.forefoot_stack", "field.heel_stack", "field.lugs",
-  "field.outsole", "field.midsole", "field.upper", "field.waterproof_lining",
-  "field.legacy_stack", "field.legacy_drop", "field.legacy_outsole",
-  "type.shoe", "type.boot", "type.sandal", "type.mule", "part.upper", "part.midsole", "part.outsole",
-  "help_label.drop", "help_label.stack", "note.published_drop_and_stack_heights_do_not_agree",
-]);
-
 const catalogues = Object.fromEntries(languages.map((locale) => [locale, {}]));
 for (const row of rows) {
   const {key, en} = row;
@@ -32,7 +23,7 @@ for (const row of rows) {
   const [, namespace, name] = match;
   for (const locale of languages) {
     const messages = catalogues[locale][namespace] ??= {};
-    if (!row[locale] && namespace !== "help" && !offlineFootwear.has(key)) {
+    if (!row[locale] && namespace !== "help") {
       errors.push(`Missing active translation: ${locale} ${key}`);
     }
     if (row["不翻标记"] && row[locale] !== en) errors.push(`Protected term changed: ${locale} ${key}`);
@@ -62,7 +53,6 @@ function checkFile(path, content) {
 for (const locale of languages) checkFile(`messages/${locale}.json`, JSON.stringify(catalogues[locale], null, 2) + "\n");
 const marked = rows.filter((row) => /needs_review|争议/.test(row["备注/needs_review"]));
 const helpFallback = rows.filter((row) => row.key.startsWith("help.") && (!row.zh || !row.ja));
-const footwearFallback = rows.filter((row) => offlineFootwear.has(row.key) && (!row.zh || !row.ja));
 const table = (items, columns) => items.map((row) => "| " + columns.map((name) => String(row[name] || "—").replaceAll("|", "\\|").replace(/\r?\n/g, " ")).join(" | ") + " |").join("\n");
 checkFile("docs/i18n/review.md", `# Rangeset i18n 人工审校
 
@@ -73,14 +63,6 @@ checkFile("docs/i18n/review.md", `# Rangeset i18n 人工审校
 | Key | English | 简体中文 | 日本語 | 备注 |
 | --- | --- | --- | --- | --- |
 ${table(marked, ["key", "en", "zh", "ja", "备注/needs_review"])}
-
-## 已下线的鞋类词条
-
-保留旧英文词条供兼容，本次不补译。
-
-| Key | English | 简体中文 | 日本語 |
-| --- | --- | --- | --- |
-${table(footwearFallback, ["key", "en", "zh", "ja"])}
 
 ## 回退到英文的说明
 

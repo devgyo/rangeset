@@ -2,7 +2,7 @@ import { compositionValue, constructions, fabricLayer, fabricLocation, fabricPar
 import { classifyArcProduct } from "./classification";
 import { mergeListValues } from "./merge";
 import { plainText, record, type ProductDetail } from "../arcteryx-view";
-import { fieldsByKey, type Context, type FabricPart, type Field, type ProductType, type ProtectionType } from "./registry";
+import { fieldsByKey, type Context, type FabricPart, type Field, type ProductType, type ProtectionType, productTypes } from "./registry";
 import { known, missing, type Evidence, type Fiber, type Parameter, type Part, type Profile, type Reference, type Value } from "./model";
 
 export type IndexedSpec = { key: string; value: unknown; unit: string | null; source: string; fetchedAt: string; sourceUrl?: string; rawText?: string | null };
@@ -11,8 +11,7 @@ type Line = { text: string; evidence: Evidence; group?: string };
 const scalarKeys: Record<string, string> = {
   weight_g: "weight", weight_size: "weight_size", fit: "fit", centre_back_length_cm: "back_length", inseam: "inseam",
   membrane: "membrane", layers: "laminate", recco: "recco", pit_zips: "pit_zips", helmet_hood: "helmet_hood",
-  waterproof_mm: "hydrostatic_head", breathability: "breathability", drop: "drop", lugs: "lugs", outsole: "outsole",
-  shoe_waterproof: "waterproof_lining",
+  waterproof_mm: "hydrostatic_head", breathability: "breathability",
 };
 const numberPattern = "(\\d+(?:[.,]\\d+)?)";
 const sizePattern = /\bsize\s+([a-z\d]+(?:[-/]\w+)*)(?=\s|[),:]|$)/i;
@@ -27,11 +26,6 @@ const indexedFeatures: Record<string, [RegExp, RegExp]> = Object.fromEntries(Obj
 ]]));
 const weightSize = (text: string) => text.match(/\bsize\s*[:=]?\s+((?:US|UK|EU)\s+\d+(?:\.\d+)?|[a-z\d]+(?:[-/.]\w+)*)(?=\s|[),;:]|$)/i)?.[1] ??
   text.match(/\((XX?S|S|M|L|XL|XXL|XXXL|[2-5]XL)\)/i)?.[1];
-function shoeWeightBasis(text: string): Reference["basis"] {
-  if (/\b(?:per pair|pair of shoes|weight (?:for|of) (?:a )?pair)\b|\/\s*pair\b/i.test(text)) return "pair";
-  if (/\b(?:per shoe|single shoe|one shoe|each shoe)\b|\/\s*shoe\b/i.test(text)) return "single";
-  return "unspecified";
-}
 const decimal = (value: string) => Number(value.replace(",", "."));
 const rounded = (value: number) => Math.round(value * 100) / 100;
 const clean = (value: string) => value.replace(/\s+/g, " ").trim();
@@ -216,7 +210,6 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
       insulations.push(insulationPart(label, text, line.evidence));
       continue;
     }
-    if (kind === "footwear" && /^(?:outsole|insole|midsole)$/i.test(label)) continue;
     const layerLabel = label.match(/^(?:(.+?)\s+)?(backer|backing|face(?: fabric)?)(?:\s*\(([^)]+)\))?$/i);
     if (layerLabel) {
       const owner = layerLabel[1] ?? layerLabel[3];
@@ -317,11 +310,9 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
   const rawWeight = record(raw.weight).value;
   if (typeof rawWeight === "string" && rawWeight.trim()) {
     const size = weightSize(rawWeight) ?? plainText(record(raw.weight).size);
-    const shoeBasis = shoeWeightBasis(rawWeight);
-    const ref: Reference = { size: size || undefined, kind, gender: product.gender ?? undefined, basis: kind === "footwear" ? shoeBasis : "item" };
+    const ref: Reference = { size: size || undefined, kind, gender: product.gender ?? undefined };
     values.weight = measure({ text: plainText(rawWeight), evidence: rawEvidence("product.weight.value", rawWeight, "parsed") }, "g", ref);
     if (size) add("weight_size", size, "product.weight.value", rawWeight, ref);
-    if (kind === "footwear" && shoeBasis !== "unspecified") add("weight_basis", shoeBasis, "product.weight.value", rawWeight);
   }
   garmentSize("back_length", /\bcent(?:re|er) back length\b/i);
   garmentSize("inseam", /\binseam\b[^;]*\d\s*(?:cm|mm|in|")/i);
@@ -377,40 +368,6 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
   explicit("leg_zips", /\b(?:leg side zip\w*|side zip\w* (?:on|at) (?:the )?legs?\b|side (?:leg )?zip\w* for (?:easy )?(?:on|off))/i, /\b(?:no|without) (?:leg )?side zip/i);
   collect("pockets", featureLines.filter(({ group }) => /pocket/i.test(group ?? "")));
 
-  if (kind === "footwear") {
-    const geometry = featureLines.filter(({ group }) => /geometry/i.test(group ?? ""));
-    for (const entry of geometry) {
-      const stack = entry.text.match(/\bdrop\s*\(stack\)\s*:\s*(\d+(?:\.\d+)?)\s*mm\s*\(\s*(\d+(?:\.\d+)?)\s*mm\s*[:/]\s*(\d+(?:\.\d+)?)\s*mm/i);
-      const drop = stack?.[1] ?? entry.text.match(/\bdrop\s*[:–-]?\s*(\d+(?:\.\d+)?)\s*mm/i)?.[1];
-      const lugs = entry.text.match(/(\d+(?:\.\d+)?)\s*mm\s*lugs?\b|\blugs?(?: depth)?\s*:\s*(\d+(?:\.\d+)?)\s*mm/i);
-      if (drop) put(values, "drop", Number(drop), [entry.evidence]);
-      if (stack) {
-        // Brand's Drop (Stack) notation lists heel then forefoot. Keep inconsistent geometry for review.
-        if (Math.abs(Number(stack[2]) - Number(stack[3]) - Number(stack[1])) > 0.5) {
-          for (const key of ["heel_stack", "forefoot_stack", "drop"]) values[key] = {
-            state: "review", evidence: [entry.evidence], note: "Published drop and stack heights do not agree.",
-          };
-        } else {
-          put(values, "heel_stack", Number(stack[2]), [entry.evidence]);
-          put(values, "forefoot_stack", Number(stack[3]), [entry.evidence]);
-        }
-      }
-      if (lugs) put(values, "lugs", Number(lugs[1] ?? lugs[2]), [entry.evidence]);
-      for (const [key, label] of [["heel_stack", "heel"], ["forefoot_stack", "forefoot"]]) {
-        const explicit = entry.text.match(new RegExp(`\\b${label}\\s+(?:stack(?: height)?\\s*)?[:–-]\\s*(\\d+(?:\\.\\d+)?)\\s*mm`, "i"));
-        if (explicit) put(values, key, Number(explicit[1]), [entry.evidence]);
-      }
-    }
-    const outsole = find(/\bVibram\b/i, featureLines.filter(({ group }) => /outsole/i.test(group ?? "")));
-    const compound = outsole[0]?.text.replace(/[®™]/g, "").match(/\bVibram(?:\s+[a-z\d -]+?)?(?=\s+outsole\b|[;,.]|$)/i)?.[0];
-    if (outsole.length) put(values, "outsole", compound ?? "Vibram", outsole.map(({ evidence }) => evidence));
-    const shoeLines = [...featureLines.filter(({ group }) => /footwear/i.test(group ?? "")), ...materialLines];
-    collect("midsole", find(/\bmidsole\b/i, shoeLines).filter(({ text }) => !/wraps the midsole/i.test(text)));
-    collect("upper", find(/\bupper\b/i, shoeLines));
-    const lining = find(/\b(?:GTX|GORE[ -]TEX)\b/i, [...shoeLines, ...tagLines]);
-    if (lining.length) put(values, "waterproof_lining", "GORE-TEX", lining.map(({ evidence }) => evidence));
-  }
-
   for (const [key, pattern] of [["fabric_origin", /^origin of fabric:/i], ["dye_origin", /^origin of dye(?:ing)?:/i], ["assembly_origin", /^origin of manufactur(?:e|ing):/i]] as const) {
     collect(key, find(pattern, materialLines), ({ text }) => text.slice(text.indexOf(":") + 1).trim());
   }
@@ -455,7 +412,7 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
     }
     if (existing?.state === "known" && comparisonText(existing.value) !== comparisonText(value)) {
       // Indexed names can omit the specific technology suffix. An older summary is not an independent source.
-      if (key === "outsole" || (key === "membrane" && comparisonText(existing.value).startsWith(comparisonText(value) + " "))) {
+      if (key === "membrane" && comparisonText(existing.value).startsWith(comparisonText(value) + " ")) {
         existing.evidence.push(evidence);
       } else values[key] = { state: "conflict", evidence: [...existing.evidence, evidence], note: "The indexed value differs from the parsed source text." };
     } else if (existing) existing.evidence.push(evidence);
@@ -463,7 +420,6 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
       const size = key === "weight" ? product.specs.weight_size?.value ?? weightSize(observation.rawText ?? "") : observation.rawText?.match(sizePattern)?.[1];
       const reference = ["weight", "weight_size", "back_length", "inseam"].includes(key) ? {
         kind, size: typeof size === "string" ? size : undefined, gender: product.gender ?? undefined,
-        basis: key === "weight" ? kind === "footwear" ? shoeWeightBasis(observation.rawText ?? "") : "item" : undefined,
       } : key === "breathability" || key === "hydrostatic_head" ? {
         unit: key === "hydrostatic_head" ? "mm" : observation.unit ?? undefined,
         method: key === "breathability" ? String(product.specs.breathability_method?.value ?? "") || undefined : undefined,
@@ -485,10 +441,10 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
   }
 
   let context: Context = {
-    kind, productType: productType.value as ProductType | undefined, protectionType: protectionType.value as ProtectionType | undefined,
+    kind, productType: typeof productType.value === "string" && Object.hasOwn(productTypes, productType.value) ? productType.value as ProductType : undefined, protectionType: protectionType.value as ProtectionType | undefined,
     insulated: kind === "insulated" || insulations.length > 0, snow: values.powder_skirt?.value === true ||
       /\b(?:ski(?:ing)?|snowboard(?:ing)?|snowsports?)\b/i.test([product.name, ...product.activities, ...product.subTags].join(" ")),
-    membrane: Boolean(values.membrane || values.waterproof_lining || values.laminate),
+    membrane: Boolean(values.membrane || values.laminate),
   };
   const overrides = input.overrides ?? new Map();
   applyOverrides(values, product, overrides);
@@ -496,15 +452,11 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
   const finalWeight = values.weight;
   if (finalWeight?.state === "known") {
     finalWeight.reference = {
-      kind, gender: product.gender ?? undefined, basis: kind === "footwear" ? "unspecified" : "item", ...finalWeight.reference,
+      kind, gender: product.gender ?? undefined, ...finalWeight.reference,
     };
     const size = values.weight_size;
-    const basis = values.weight_basis;
     if (size?.evidence[0]?.method === "manual" || (!finalWeight.reference.size && size?.state === "known")) {
       finalWeight.reference = { ...finalWeight.reference, size: typeof size.value === "string" ? size.value : undefined };
-    }
-    if (basis?.evidence[0]?.method === "manual") {
-      finalWeight.reference = { ...finalWeight.reference, basis: basis.value === "pair" || basis.value === "single" ? basis.value : "unspecified" };
     }
   }
   context = { ...context, insulated: context.insulated || values.insulation_type?.state === "known", membrane: context.membrane || Boolean(values.membrane) };
@@ -522,7 +474,7 @@ function parseManual(field: Field, original: unknown, previous: Parameter | unde
   let reference = previous?.reference;
   const ref = record(entry.reference);
   reference = { ...reference, ...Object.fromEntries(Object.entries(ref).filter(([key, value]) =>
-    ["size", "gender", "basis", "method", "unit", "kind"].includes(key) && typeof value === "string")) };
+    ["size", "gender", "method", "unit", "kind"].includes(key) && typeof value === "string")) };
   if (field.type === "enum" && typeof value === "number") value = String(value);
   if (field.type === "denier" && typeof value === "number") value = [value];
   if (field.type === "denier" && typeof value === "string") value = parseDenier(value);

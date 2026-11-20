@@ -5,7 +5,7 @@ export type Evidence = {
   url: string | null; path: string; raw: string; method: "published" | "parsed" | "indexed" | "manual" | "example";
   updatedAt: string | null;
 };
-export type Reference = { size?: string; gender?: string; basis?: "single" | "pair" | "item" | "unspecified"; method?: string; unit?: string | null; kind?: string };
+export type Reference = { size?: string; gender?: string; method?: string; unit?: string | null; kind?: string };
 export type Fiber = { fiber: string; pct: number; recycled: boolean | null };
 export type RecycledContent = { pct: number | null; scope: "fabric" | "face" | "garment" | "claim_only" };
 export type Part = { part: string; label: string; fields: Record<string, Parameter>; evidence: Evidence[]; backers?: Part[]; faces?: Part[] };
@@ -41,21 +41,14 @@ export function parameterStatus(field: Field, parameter: Parameter) {
 }
 
 export const weightReferenceNote = "Reference size not published";
-const shoeBasisNote = "The brand does not say whether the weight is for one shoe or a pair.";
 export function weightPresentation(parameter: Parameter) {
-  const ref = parameter.reference;
-  if (parameter.state !== "known") return { suffix: "", detailHelp: "", referenceMissing: parameter.state !== "inapplicable" && !ref?.size?.trim(), basisMissing: false };
-  const size = ref?.size?.trim();
-  const basis = ref?.basis === "single" ? "per shoe" : ref?.basis === "pair" ? "pair" : "";
-  const basisMissing = ref?.kind === "footwear" && !basis;
+  const size = parameter.reference?.size?.trim();
+  const referenceMissing = parameter.state !== "inapplicable" && !size;
   return {
-    suffix: [size, basis].filter(Boolean).join(", "),
-    detailHelp: [
-      !size && "The brand does not state which size was weighed; treat as approximate.",
-      basisMissing && shoeBasisNote,
-    ].filter(Boolean).join(" "),
-    referenceMissing: !size,
-    basisMissing,
+    suffix: size ?? "",
+    detailHelp: parameter.state === "known" && referenceMissing
+      ? "The brand does not state which size was weighed; treat as approximate." : "",
+    referenceMissing,
   };
 }
 
@@ -156,13 +149,10 @@ function compareKnownValues(field: Field, present: Parameter[]): Comparison {
   }
   if (field.compare === "measurement") {
     const contexts = present.map((item) => item.reference ?? {});
-    const first = contexts[0];
     const sized = contexts.filter((ref) => ref.size?.trim());
     const firstSized = sized[0];
     const sameSize = sized.every((ref) => normalize(ref.size!) === normalize(firstSized.size!) && ref.gender === firstSized.gender);
-    const sameBasis = contexts.every((ref) => ref.basis === first.basis && (ref.kind === "footwear") === (first.kind === "footwear"));
-    if (!sameSize || !sameBasis || (field.key !== "weight" && sized.length !== contexts.length) ||
-        (first.kind === "footwear" && !["single", "pair"].includes(first.basis ?? "")))
+    if (!sameSize || (field.key !== "weight" && sized.length !== contexts.length))
       return { differs: false, note: "Different or unpublished measurement references" };
   }
   if (field.compare === "method") {
@@ -186,7 +176,7 @@ export type ParameterRow = Comparison & { key: string; field: Field; label: stri
 export type ParameterGroup = { title: string; rows: ParameterRow[] };
 const partLabels: Record<string, string> = {
   main: "Main fabric", contrast: "Contrast fabric", lining: "Lining", reinforcement: "Reinforcement",
-  backer: "Backer", upper: "Upper", outsole: "Outsole", midsole: "Midsole",
+  backer: "Backer",
   down: "Down fill", synthetic: "Synthetic fill", body: "Body", sleeves: "Sleeves", hood: "Hood",
 };
 
@@ -246,11 +236,8 @@ export function parameterGroups(profiles: Profile[], mode: "detail" | "compare" 
         const parts = field.type === "parts" ? cells.flatMap((item) => item.state === "known" ? item.value as Part[] : []) : [];
         if (mode === "detail") return [{ key: field.key, field, label: field.label, cells, differs: false, subgroup: field.key === "garment_recycled_content" ? "Whole garment" : undefined }];
         if (!parts.length) {
-          const weights = field.key === "weight" ? cells.map(weightPresentation) : [];
-          const referenceNote = [
-            weights.some(({ referenceMissing }) => referenceMissing) && weightReferenceNote,
-            weights.some(({ basisMissing }) => basisMissing) && "Shoe weight basis not published (per shoe or pair)",
-          ].filter(Boolean).join(" · ");
+          const referenceNote = field.key === "weight" && cells.some((cell) => weightPresentation(cell).referenceMissing)
+            ? weightReferenceNote : undefined;
           return [{ key: field.key, field, label: field.label, cells, referenceNote, subgroup: field.key === "garment_recycled_content" ? "Whole garment" : undefined, ...compareValues(field, cells) }];
         }
         return [...new Set(parts.map(({ part }) => part))].sort().map((part) => {

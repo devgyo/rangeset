@@ -6,7 +6,7 @@ export function fabricLocation(label: string): FabricPart | undefined {
   const text = label.trim().toLowerCase().replace(/_/g, " ");
   const location = text.match(/^(?:secondary(?: fabric)?|inserts?)\s*\(([^()]+)\)$/)?.[1];
   if (location) return fabricLocation(location);
-  if (/^(?:body|main(?: fabric| material)?|shell(?: fabric)?|self|upper)$/.test(text)) return "body";
+  if (/^(?:body|main(?: fabric| material)?|shell(?: fabric)?|self)$/.test(text)) return "body";
   if (/^(?:lining|liner|inner lining|interior lining)$/.test(text)) return "lining";
   if (/\breinforcement\b|\breinforced (?:areas?|panels?|inserts?)\b/.test(text)) return "reinforcement";
   if (/^(?:contrast(?: fabric)?|(?:(?:contrast|side|stretch) )?panels?|(?:stretch |side )?inserts?)$/.test(text)) return "panel";

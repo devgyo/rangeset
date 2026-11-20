@@ -4,7 +4,7 @@ import { formatMoney, type Profile } from "./parameters/model";
 export const unpublished = "Not published";
 export const categoryOrder = [
   "Shell Jackets", "Insulated Jackets", "Pants", "Fleece", "Shirts and Tops",
-  "Footwear", "Base Layer", "Professional Use", "Shorts", "Dresses and Skirts",
+  "Base Layer", "Professional Use", "Shorts", "Dresses and Skirts",
 ];
 export const featuredFamilies = ["Beta", "Alpha", "Atom", "Gamma", "Norvan"];
 const families = new Map([
@@ -115,29 +115,9 @@ const derivedSpec = (value: Scalar, unit: string | null, date: string | null): C
 
 export function categorySpecs(
   category: string | null, materials: string[], features: ReturnType<typeof featuresOf>,
-  date: string | null, shellText: string,
+  date: string | null,
 ) {
   const specs: CatalogCard["specs"] = {};
-  if (category === "Footwear") {
-    const geometry = features.filter(({ label }) => /geometry/i.test(label)).flatMap(({ values }) => values);
-    const outsole = features.filter(({ label }) => /outsole/i.test(label)).flatMap(({ values }) => values);
-    const lines = geometry.join(" ");
-    const drop = lines.match(/\bdrop(?:\s*\(stack\))?\s*[:–-]?\s*(\d+(?:\.\d+)?)\s*mm\b/i);
-    const stack = lines.match(/\bstack(?:\s+height)?\s*[:–-]?\s*(\d+(?:\.\d+)?)\s*mm(?:\s*[:/×-]\s*(\d+(?:\.\d+)?)\s*mm)?\b/i)
-      ?? lines.match(/\bdrop\s*\(stack\)\s*:\s*\d+(?:\.\d+)?\s*mm\s*\(\s*(\d+(?:\.\d+)?)\s*mm\s*[:/]\s*(\d+(?:\.\d+)?)\s*mm/i);
-    const lugs = lines.match(/\b(\d+(?:\.\d+)?)\s*mm\s*(?:deep\s+)?lugs?\b/i)
-      ?? lines.match(/\blug depth\s*[:–-]?\s*(\d+(?:\.\d+)?)\s*mm\b/i);
-    const branded = outsole.join(" ").match(/\bVibram(?:[®™])?(?:\s+([\w -]+?))?(?=\s+outsole\b|[.,;]|$)/i);
-    if (drop) specs.drop = derivedSpec(Number(drop[1]), "mm", date);
-    if (stack) specs.stack = derivedSpec(stack[2] ? `${stack[1]} / ${stack[2]}` : Number(stack[1]), "mm", date);
-    if (lugs) specs.lugs = derivedSpec(Number(lugs[1]), "mm", date);
-    if (branded) specs.outsole = derivedSpec(branded[1] ? `Vibram ${branded[1].trim()}` : "Vibram", null, date);
-    else if (outsole[0]) specs.outsole = derivedSpec(outsole[0], null, date);
-    if (/\b(?:GTX|GORE[ -]TEX)\b/i.test(shellText)) specs.shoe_waterproof = derivedSpec("GORE-TEX", null, date);
-    else if (/\bwaterproof\b/i.test(shellText) && !/\b(?:non[ -]|not\s+)waterproof\b/i.test(shellText)) {
-      specs.shoe_waterproof = derivedSpec("Waterproof", null, date);
-    }
-  }
   if (category === "Insulated Jackets") {
     const lines = [...materials, ...features.filter(({ label }) => /insulation|construction/i.test(label)).flatMap(({ values }) => values)];
     const insulation = new Set<string>();
@@ -170,7 +150,6 @@ export const metricLabels: Record<string, string> = {
   weight_g: "Weight", membrane: "Membrane", layers: "Layers", face_denier: "Face denier",
   fabric_gsm: "Fabric weight", fit: "Fit", helmet_hood: "Helmet-compatible hood", pit_zips: "Pit zips",
   recco: "RECCO", centre_back_length_cm: "Centre back length", inseam: "Inseam",
-  drop: "Drop", stack: "Stack", lugs: "Lug depth", outsole: "Outsole", shoe_waterproof: "Waterproof",
   insulation: "Insulation", waterproof_mm: "Hydrostatic head", breathability: "Breathability",
   weight_size: "Weight reference size",
 };
@@ -185,22 +164,9 @@ export function keyMetrics(product: CatalogCard, detail = false): string[] {
     case "Pants":
     case "Shorts":
       return detail ? ["weight_g", "inseam", "fit", "fabric_gsm"] : ["weight_g", "inseam", "fit"];
-    case "Footwear":
-      return detail ? ["weight_g", "shoe_waterproof", "drop", "stack", "lugs", "outsole"]
-        : ["weight_g", "shoe_waterproof", product.specs.drop ? "drop" : "lugs"];
     default:
       return detail ? ["weight_g", "fabric_gsm", "fit", "centre_back_length_cm"] : ["weight_g", "fabric_gsm", "fit"];
   }
-}
-
-export function applicableMetric(key: string, category: string | null) {
-  if (["drop", "stack", "lugs", "outsole", "shoe_waterproof"].includes(key)) return category === "Footwear";
-  if (key === "inseam") return category === "Pants" || category === "Shorts";
-  if (key === "insulation") return category === "Insulated Jackets";
-  if (key === "centre_back_length_cm") return Boolean(category && !["Footwear", "Pants", "Shorts"].includes(category));
-  if (["helmet_hood", "pit_zips"].includes(key)) return ["Shell Jackets", "Insulated Jackets", "Fleece", "Professional Use"].includes(category ?? "");
-  if (["layers", "face_denier", "fabric_gsm", "recco", "fit"].includes(key)) return category !== "Footwear";
-  return true;
 }
 
 export function categoryCounts(products: { category: string | null }[]) {

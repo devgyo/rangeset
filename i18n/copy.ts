@@ -13,7 +13,7 @@ export const englishMessage = (key: string) => {
 const categoryKeys: Record<string, string> = {
   "Shell Jackets": "shell_jackets", "Insulated Jackets": "insulated_jackets", Pants: "pants",
   "Shirts and Tops": "shirts_tops", Fleece: "fleece", "Base Layer": "base_layer",
-  "Professional Use": "professional", Shorts: "shorts", "Dresses and Skirts": "dresses_skirts", Footwear: "footwear",
+  "Professional Use": "professional", Shorts: "shorts", "Dresses and Skirts": "dresses_skirts",
 };
 const options: Record<string, string> = {
   product_type: "type", protection_type: "protection", gender: "gender", wind: "wind",
@@ -29,7 +29,7 @@ const stretchKeys: Record<string, string> = {
 const metricKeys: Record<string, string> = {
   weight_g: "field.weight", membrane: "field.legacy_membrane", layers: "field.legacy_layers",
   face_denier: "field.legacy_face", fabric_gsm: "field.fabric_weight", fit: "field.fit", inseam: "field.inseam",
-  insulation: "group.warmth", shoe_waterproof: "value.waterproof", drop: "field.legacy_drop", lugs: "field.lugs",
+  insulation: "group.warmth",
 };
 
 const partByEnglish = Object.fromEntries(Object.entries(en.part).map(([key, label]) => [label, key]));
@@ -147,7 +147,7 @@ export function displayParameter(t: Translator, locale: string, field: Field, pa
   }).join(" · ");
   if (field.key === "fabric_name" && typeof parameter.value === "string") return fiberLabel(t, parameter.value);
   if (field.key === "down_species" && (parameter.value === "goose" || parameter.value === "duck")) return t(`value.${parameter.value}`);
-  if (field.key === "weight") return text.replace(/\b(per shoe|pair)(?=\))/g, (basis) => t(basis === "pair" ? "ui.pair" : "ui.per_shoe"));
+
   return text;
 }
 

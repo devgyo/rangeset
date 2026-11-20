@@ -9,7 +9,6 @@
     "origin": "Origin",
     "environment": "Environment & certifications",
     "supplemental": "Supplementary source text",
-    "footwear": "Footwear",
     "numbers": "Numbers"
   },
   "field": {
@@ -78,15 +77,6 @@
     "regulatory": "Other regulatory statements",
     "source_notes": "Supplemental material text",
     "feature_notes": "Other published features",
-    "weight_basis": "Weight basis",
-    "drop": "Heel-to-toe drop",
-    "forefoot_stack": "Forefoot stack height",
-    "heel_stack": "Heel stack height",
-    "lugs": "Lug depth",
-    "outsole": "Outsole rubber",
-    "midsole": "Midsole",
-    "upper": "Upper",
-    "waterproof_lining": "Waterproof lining",
     "legacy_membrane": "Membrane",
     "legacy_layers": "Layers",
     "legacy_face_denier": "Face fabric denier",
@@ -95,10 +85,7 @@
     "legacy_price": "Price",
     "legacy_pit_zips": "Pit zips",
     "legacy_helmet_hood": "Helmet hood",
-    "legacy_stack": "Stack",
-    "legacy_drop": "Drop",
-    "legacy_face": "Face denier",
-    "legacy_outsole": "Outsole"
+    "legacy_face": "Face denier"
   },
   "subgroup": {
     "whole_garment": "Whole garment"
@@ -115,10 +102,7 @@
     "down": "Down fill",
     "synthetic": "Synthetic fill",
     "sleeves": "Sleeves",
-    "hood": "Hood",
-    "upper": "Upper",
-    "midsole": "Midsole",
-    "outsole": "Outsole"
+    "hood": "Hood"
   },
   "gender": {
     "men": "Men’s",
@@ -163,8 +147,7 @@
     "base_layer": "Base Layer",
     "professional": "Professional Use",
     "shorts": "Shorts",
-    "dresses_skirts": "Dresses and Skirts",
-    "footwear": "Footwear"
+    "dresses_skirts": "Dresses and Skirts"
   },
   "protection": {
     "hard_shell": "Hardshell",
@@ -209,11 +192,7 @@
     "cap": "Cap",
     "beanie": "Beanie",
     "backpack": "Backpack",
-    "needs_review": "Needs review",
-    "shoe": "Shoe",
-    "boot": "Boot",
-    "sandal": "Sandal",
-    "mule": "Mule"
+    "needs_review": "Needs review"
   },
   "symbol": {
     "yes": "● Yes",
@@ -242,7 +221,6 @@
     "sources_name_different_primary_membranes": "Sources name different primary membranes.",
     "more_than_one_laminate_is_listed_for_the_primary_fabric": "More than one laminate is listed for the primary fabric.",
     "different_breathability_measures_are_published": "Different breathability measures are published.",
-    "published_drop_and_stack_heights_do_not_agree": "Published drop and stack heights do not agree.",
     "the_indexed_value_or_unit_could_not_be_normalized": "The indexed value or unit could not be normalized.",
     "the_indexed_value_differs_from_the_parsed_source_text": "The indexed value differs from the parsed source text.",
     "manual_value_does_not_match_the_field_definition": "Manual value does not match the field definition.",
@@ -391,9 +369,6 @@
     "size": "Size {size}",
     "weight_size_missing": "Reference size: {status}",
     "test_method_missing": "Test method: {status}",
-    "per_shoe": "per shoe",
-    "pair": "pair",
-    "reference_shoe_basis": "Shoe weight basis not published (per shoe or pair)",
     "recycled_claim": "Recycled material claimed · % not published",
     "scope_unknown": "scope not published",
     "scope_fabric": "fabric",
@@ -472,11 +447,8 @@
     "hydrostatic": "The height of a column of water the fabric can hold back in a test. Compare numbers from the same test method.",
     "breathability": "How readily moisture vapour passes through the fabric in a test. Compare numbers with the same test method and units.",
     "recco": "A small built-in reflector that helps rescue teams locate you with RECCO detectors. No battery needed. It does not replace an avalanche transceiver.",
-    "drop": "How much higher your heel sits than the front of your foot in the shoe.",
-    "stack": "How much material sits between your foot and the ground at the heel or forefoot.",
     "pfas": "A large group of chemicals. A product can meet a PFAS rule and still contain some of these chemicals.",
-    "weight_size": "The brand does not state which size was weighed; treat as approximate.",
-    "shoe_basis": "The brand does not say whether the weight is for one shoe or a pair."
+    "weight_size": "The brand does not state which size was weighed; treat as approximate."
   },
   "help_label": {
     "ripstop": "Ripstop",
@@ -493,8 +465,6 @@
     "hydrostatic": "Hydrostatic head",
     "breathability": "Breathability",
     "recco": "RECCO",
-    "drop": "Heel-to-toe drop",
-    "stack": "Stack height",
     "pfas": "PFAS"
   },
   "status_description": {

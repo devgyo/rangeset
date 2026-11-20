@@ -114,7 +114,7 @@ test("distinguishes omitted booleans, not applicable, explicit negatives, confli
   assert.equal(soft.values.hood.value, false);
   assert.equal(getParameter(soft, field("helmet_hood")).state, "inapplicable");
   assert.equal(getParameter(soft, field("recco")).state, "unpublished");
-  assert.equal(getParameter(soft, field("drop")).state, "inapplicable");
+  assert.equal(fieldsByKey.has("drop"), false);
   assert.equal(soft.values.pit_zips.state, "conflict");
   assert.equal(soft.values.weight.state, "conflict");
   assert.equal(partsOf(soft)[0].fields.fiber_content.state, "review");
@@ -127,25 +127,6 @@ test("distinguishes omitted booleans, not applicable, explicit negatives, confli
   assert.equal(hard.values.hydrostatic_head.value, 20000);
   assert.equal(hard.values.hydrostatic_head.reference?.method, "ISO 811");
   assert.deepEqual(hard.values.pfas.value, ["PFAS Compliant"]);
-});
-
-test("does not infer shoe weight basis and separates heel, forefoot, lugs and membrane", () => {
-  const shoe = product({ category: "Footwear", name: "Konseal GTX Shoe" });
-  const raw = { weight: { value: "365 g" }, features: [
-    feature("Footwear geometry", "4mm lugs", "Drop (Stack): 11mm (24mm : 13mm)"),
-    feature("Footwear construction", "Nubuck leather upper with GTX membrane", "Compressed EVA midsole"),
-    feature("Footwear outsole construction", "Vibram® XS Flash 2 outsole"),
-  ] };
-  const profile = normalizeArcProduct(shoe, { raw });
-  assert.equal(profile.values.weight.reference?.basis, "unspecified");
-  assert.equal(getParameter(profile, field("weight_basis")).state, "unpublished");
-  assert.deepEqual(["heel_stack", "forefoot_stack", "drop", "lugs"].map((key) => profile.values[key].value), [24, 13, 11, 4]);
-  assert.equal(profile.values.outsole.value, "Vibram XS Flash 2");
-  assert.equal(profile.values.waterproof_lining.value, "GORE-TEX");
-  const pair = normalizeArcProduct(shoe, { raw: { weight: { value: "730g/pair" } } });
-  assert.equal(pair.values.weight.value, 730);
-  assert.equal(pair.values.weight_basis.value, "pair");
-  assert.match(compareValues(field("weight"), [profile.values.weight, pair.values.weight]).note!, /measurement references/i);
 });
 
 test("manual values outrank parsed and indexed facts, preserve provenance, and accept explicit unknowns", () => {
@@ -243,8 +224,6 @@ test("classifies garment style independently from protective construction", () =
     [product({ name: "Fissile SV Down Jacket", category: "Insulated Jackets", subTags: ["Insulated Shell"] }), "jacket", "insulated_shell"],
     [product({ name: "Cormac Crew Neck Shirt SS", category: "Shirts and Tops" }), "t_shirt", null],
     [product({ name: "Cila SL Dress", category: "Dresses and Skirts" }), "dress", null],
-    [product({ name: "Konseal GTX Shoe", category: "Footwear", subTags: ["Waterproof"] }), "shoe", null],
-    [product({ name: "Konseal Trek Boot", category: "Footwear", subTags: ["Shoes"] }), "boot", null],
     [product({ name: "Rho Hoody", category: "Base Layer" }), "base_layer_top", null],
     [product({ name: "Rho Bottom", category: "Base Layer" }), "base_layer_bottom", null],
   ] as const;
@@ -315,8 +294,8 @@ test("detail hides unresolved features and inapplicable rows while keeping unpub
   for (const key of ["weight", "msrp", "fit", "back_length"]) {
     assert.equal(detail.find((row) => row.key === key)?.cells[0].state, "unpublished", key);
   }
-  for (const key of ["hood", "recco", "drop", "hydrostatic_head"]) assert.ok(!detail.some((row) => row.key === key), key);
-  for (const key of ["pit_zips", "powder_skirt", "drop", "protection_type"]) {
+  for (const key of ["hood", "recco", "hydrostatic_head"]) assert.ok(!detail.some((row) => row.key === key), key);
+  for (const key of ["pit_zips", "powder_skirt", "protection_type"]) {
     assert.equal(getParameter(shirt, field(key)).state, "inapplicable", key);
     assert.ok(!rows(shirt).some((row) => row.key === key), key);
   }
@@ -344,28 +323,19 @@ test("comparison keeps rows with known values and treats unpublished cells as we
   assert.ok(!visibleInComparison(negativeOnly, true));
 });
 
-test("weight uses inline sizes and shoe basis with one comparison reference note", () => {
-  const shoe = product({ name: "Konseal Shoe", category: "Footwear" });
+test("weight uses inline sizes with one comparison reference note", () => {
   const unspecified = normalizeArcProduct(product(), { raw: { weight: { value: "460 g" } } });
   const sized = normalizeArcProduct(product(), { raw: { weight: { value: "500 g (M)" } } });
-  const single = normalizeArcProduct(shoe, { raw: { weight: { value: "365 g (per shoe)" } } });
-  const pair = normalizeArcProduct(shoe, { raw: { weight: { value: "730g/pair" } } });
-  const footwearSize = normalizeArcProduct(shoe, { raw: { weight: { value: "365 g (size US 9.5 per shoe)" } } });
   const separateSize = normalizeArcProduct(product(), {
     raw: { weight: { value: "460 g" } },
     indexed: [{ key: "weight_size", value: "L", unit: null, source: "brand", fetchedAt: "2026-11-20" }],
   });
-  const shoeUnknown = normalizeArcProduct(shoe, { raw: { weight: { value: "360 g" } } });
   const weight = field("weight");
   assert.equal(formatValue(weight, unspecified.values.weight), "460 g");
   assert.equal(formatValue(weight, sized.values.weight), "500 g (M)");
-  assert.equal(formatValue(weight, single.values.weight), "365 g (per shoe)");
-  assert.equal(formatValue(weight, pair.values.weight), "730 g (pair)");
-  assert.equal(formatValue(weight, footwearSize.values.weight), "365 g (US 9.5, per shoe)");
   assert.equal(formatValue(weight, separateSize.values.weight), "460 g (L)");
   assert.equal(sized.values.weight_size.value, "M");
   assert.match(weightPresentation(unspecified.values.weight).detailHelp, /treat as approximate/);
-  assert.match(weightPresentation(shoeUnknown.values.weight).detailHelp, /one shoe or a pair/);
   assert.equal(weightPresentation(sized.values.weight).detailHelp, "");
   const detail = parameterGroups([sized]).flatMap(({ rows }) => rows);
   assert.ok(!detail.some(({ key }) => key === "weight_size"));
@@ -374,9 +344,6 @@ test("weight uses inline sizes and shoe basis with one comparison reference note
   assert.equal(row.referenceNote, "Reference size not published");
   assert.equal(row.differs, true);
   assert.equal(row.weakDifference, false);
-  const shoes = parameterGroups([shoeUnknown, single]).flatMap(({ rows }) => rows);
-  assert.match(shoes.find(({ key }) => key === "weight")?.referenceNote ?? "", /Shoe weight basis not published/);
-  assert.ok(!shoes.some(({ key }) => key === "weight_basis"));
 });
 
 test("normalizes fabric GSM, gm2 and ounces per square yard and keeps the imperial reading", () => {

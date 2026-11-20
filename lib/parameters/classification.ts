@@ -2,9 +2,13 @@ import { plainText, record, type ProductDetail } from "../arcteryx-view";
 import { known, missing, type Evidence, type Parameter } from "./model";
 import { productTypes, protectionTypes, type ProductKind } from "./registry";
 
-type Style = keyof typeof productTypes;
+// Legacy type codes are recognized at the catalog boundary so stored shoe records can stay intact.
+const footwearTypes = {shoe: "Shoe", boot: "Boot", sandal: "Sandal", mule: "Mule"} as const;
+const classificationTypes = {...productTypes, ...footwearTypes};
+type Style = keyof typeof classificationTypes;
 type Shell = keyof typeof protectionTypes;
 type Subject = Pick<ProductDetail, "name" | "category" | "subTags" | "isHardshell" | "url" | "verifiedAt" | "example">;
+type StyleSubject = Pick<Subject, "name" | "category"> & {subTags?: string[]};
 type Input = { raw?: Record<string, unknown>; fetchedAt?: string | null; overrides?: Map<string, unknown> };
 export type Classification = { productType: Parameter; protectionType: Parameter; kind: ProductKind };
 
@@ -25,13 +29,13 @@ const namePatterns: [Style, RegExp][] = [
   ["glove", /\bgloves?\b/i], ["beanie", /\bbeanies?\b/i], ["cap", /\bcaps?\b/i], ["hat", /\bhats?\b/i],
 ];
 
-const exactStyles = new Map<string, Style>(Object.entries(productTypes).map(([key, label]) => [label.toLowerCase(), key as Style]));
+const exactStyles = new Map<string, Style>(Object.entries(classificationTypes).map(([key, label]) => [label.toLowerCase(), key as Style]));
 function explicitStyle(text: string): Style | undefined {
   return exactStyles.get(text) ?? namePatterns.find(([, pattern]) => pattern.test(text) &&
     !text.includes(" and ") && !text.includes(" or ") && !text.includes("/"))?.[0];
 }
 
-function garmentStyle(product: Subject, raw: Record<string, unknown>, tags: string[]): Style | undefined {
+function garmentStyle(product: StyleSubject, raw: Record<string, unknown>, tags: string[]): Style | undefined {
   const category = (product.category ?? "").toLowerCase();
   const name = product.name;
   const marketing = plainText(raw.marketingName);
@@ -61,6 +65,14 @@ function garmentStyle(product: Subject, raw: Record<string, unknown>, tags: stri
   }))];
   if (candidates.length === 1) return candidates[0];
   return undefined;
+}
+
+export function isFootwearProduct(product: StyleSubject, {raw = {}, overrides}: Input = {}) {
+  if (product.category?.trim().toLowerCase() === "footwear") return true;
+  const manual = overrideCode(overrides?.get("parameters.product_type"));
+  const tags = [...(product.subTags ?? []), ...plainText(raw.subCategory).split(",").map((tag) => tag.trim()).filter(Boolean)];
+  const style = typeof manual === "string" && Object.hasOwn(classificationTypes, manual) ? manual : garmentStyle(product, raw, tags);
+  return style !== undefined && Object.hasOwn(footwearTypes, style);
 }
 
 const protectiveStyles: Style[] = ["jacket", "coat", "parka", "vest", "anorak", "hoodie", "pants", "bib_pants", "suit", "bomber", "blazer"];
@@ -108,7 +120,7 @@ export function classifyArcProduct(product: Subject, { raw = {}, fetchedAt, over
   const styleOverride = overrideCode(overrides.get(styleKey));
   const legacyShell = typeof styleOverride === "string" && Object.hasOwn(protectionTypes, styleOverride);
   const productType = overrides.has(styleKey) && !legacyShell ? manualParameter(overrides.get(styleKey), styleKey, productTypes, product.url)
-    : style ? known(style, evidence) : { ...missing("review"), evidence };
+    : style && Object.hasOwn(productTypes, style) ? known(style, evidence) : { ...missing("review"), evidence };
   const effectiveStyle = productType.state === "known" ? productType.value as Style : style;
 
   let protectionType: Parameter;
@@ -123,12 +135,11 @@ export function classifyArcProduct(product: Subject, { raw = {}, fetchedAt, over
     protectionType = missing("inapplicable");
   }
   const normalizedShell = protectionType.state === "known" ? protectionType.value : undefined;
-  const kind: ProductKind = (["shoe", "boot", "sandal", "mule"].some((type) => type === effectiveStyle) || product.category === "Footwear") ? "footwear"
-    : (["pants", "bib_pants", "shorts", "tights", "base_layer_bottom"].some((type) => type === effectiveStyle) || product.category === "Pants") ? "pants"
+  const kind: ProductKind = (["pants", "bib_pants", "shorts", "tights", "base_layer_bottom"].some((type) => type === effectiveStyle) || product.category === "Pants") ? "pants"
     : normalizedShell === "hard_shell" || normalizedShell === "soft_shell" || normalizedShell === "wind_shell" ? normalizedShell
     : normalizedShell === "insulated_shell" || product.category === "Insulated Jackets" ? "insulated"
     : effectiveStyle === "coat" || effectiveStyle === "parka" ? "coat"
-    : effectiveStyle && !["backpack", "hat", "cap", "beanie", "mitten", "glove"].includes(effectiveStyle) ? "top"
+    : effectiveStyle && Object.hasOwn(productTypes, effectiveStyle) && !["backpack", "hat", "cap", "beanie", "mitten", "glove"].includes(effectiveStyle) ? "top"
     : "other";
 
   return { productType, protectionType, kind };

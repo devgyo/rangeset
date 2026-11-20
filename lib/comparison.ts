@@ -9,7 +9,7 @@ export function comparisonHref(slugs: string[]) {
 
 export function comparisonIds(value: string | string[] | undefined) {
   if (typeof value !== "string") return [];
-  return [...new Set(value.split(",", 20).map((slug) => slug.trim()).filter((slug) => /^[a-z0-9-]{1,200}$/i.test(slug)))].slice(0, 4);
+  return [...new Set(value.split(",", 20).map((slug) => slug.trim()).filter((slug) => /^[a-z0-9-]{1,200}$/i.test(slug)))];
 }
 
 export type ComparisonGroup = ParameterGroup;

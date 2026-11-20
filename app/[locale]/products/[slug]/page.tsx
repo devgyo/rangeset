@@ -44,7 +44,7 @@ function Trims({ product, siblings, t, locale }: {product: ProductDetail; siblin
   const profile = parametersOf(product);
   const price = fieldsByKey.get("msrp")!;
   const weight = fieldsByKey.get("weight")!;
-  const notes = keyParameters(profile).filter((field) => ["protection", "warmth", "footwear", "sizing"].includes(field.group)
+  const notes = keyParameters(profile).filter((field) => ["protection", "warmth", "sizing"].includes(field.group)
     && !["weight", "back_length", "helmet_hood"].includes(field.key)).slice(0, 2);
   const rows = [...siblings].sort((a, b) => (a.msrp ?? Infinity) - (b.msrp ?? Infinity) || a.name.localeCompare(b.name));
   const number = (value: ReturnType<typeof getParameter>) => value.state === "known" && typeof value.value === "number" ? value.value : null;

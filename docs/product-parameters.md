@@ -1,6 +1,12 @@
-# Rangeset product parameter standard v1.3.0
+# Rangeset product parameter standard v1.4.0
 
-The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.3.0 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
+The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.4.0 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
+
+## Catalog scope
+
+Rangeset catalogs apparel. Catalog eligibility requires an allowed clothing category and excludes footwear product types even when they are assigned to an allowed category. Existing non-apparel entries already in the Professional Use category are retained for this release.
+
+The scope change and read-only catalog inventory are recorded in the [v1.4.0 verification report](catalog-scope-v1.4.0.md).
 
 ## Evidence and review
 
@@ -19,7 +25,7 @@ Existing `manual_overrides` entries apply after source extraction. A `parameters
 Example value for `parameters.weight`:
 
 ```json
-{"value":0.455,"unit":"kg","reference":{"size":"M","gender":"men","basis":"item"},"updatedAt":"2026-11-20"}
+{"value":0.455,"unit":"kg","reference":{"size":"M","gender":"men"},"updatedAt":"2026-11-20"}
 ```
 
 Use a JSON null to explicitly keep a field unpublished. A structured override such as `parameters.materials` accepts an array of records with `part`, `label`, and `fields`. Use optional `faces` and `backers` arrays on the owning fabric record. Older location keys and standalone layers are mapped when their parent is unambiguous. For example:
@@ -40,11 +46,11 @@ Details show applicable, known values, with a dash for unpublished core measurem
 
 Differences only includes confirmed differences and rows with a published value alongside an unpublished one. The latter are flagged as unable to compare, without confirmed-difference highlighting. Lists ignore source order, and fabrics and fills align by part. Prices require the same currency. Length measurements require matching published size and fit range.
 
-The Weight row includes the reference size and single-shoe or pair basis when published. The data model still holds both references. Unpublished sizes are flagged once under the comparison row heading. Published sizes must agree when both are known. Comparing shoe weights also requires the same published shoe basis.
+The Weight row includes the reference size when published. Unpublished sizes are flagged once under the comparison row heading. Published sizes must agree when both are known.
 
 ## Coverage limits
 
-Weight reference sizes, shoe weight basis, down fill mass, and test conditions are often absent. Fill-power values keep their published number with units and methods withheld when the source does not identify them. Broad construction claims and treatment labels do not establish a temperature rating or absence of PFAS. Brand-labelled fabric, dyeing, and assembly locations remain distinct. Unclear material text and otherwise unmapped feature statements are available under Supplementary source text.
+Weight reference sizes, down fill mass, and test conditions are often absent. Fill-power values keep their published number with units and methods withheld when the source does not identify them. Broad construction claims and treatment labels do not establish a temperature rating or absence of PFAS. Brand-labelled fabric, dyeing, and assembly locations remain distinct. Unclear material text and otherwise unmapped feature statements are available under Supplementary source text.
 
 Terminology references include the [denier definition in the US Code of Federal Regulations](https://www.govinfo.gov/content/pkg/CFR-2025-title21-vol8/xhtml/CFR-2025-title21-vol8-chapI-subchapK.html), [GORE-TEX laminate construction](https://www.gore-tex.com/en_uk/blog/the-gore-tex-membrane-what-it-is-how-it-works-and-why-you-need-it), and [IDFB fill-power terminology](https://idfb.net/consumer-resources/down-better-insulation-better-for-your-health).
 
@@ -73,7 +79,6 @@ The component fields appear within each fabric or fill record.
 | --- | --- | --- | --- | --- | --- |
 | `weight` | Weight | number | g | all | measurement |
 | `weight_size` | Weight reference size (data only) | text | — | all | reference |
-| `weight_basis` | Weight basis (data only) | enum | — | shoe | exact |
 | `fit` | Fit | text | — | apparel | exact |
 | `back_length` | Centre back length | number | cm | upper | measurement |
 | `inseam` | Inseam | number | cm | bottom | measurement |
@@ -139,19 +144,6 @@ Waterproof ratings and breathability will be added in a future version.
 | `leg_zips` | Leg side zippers | boolean | — | bottom | exact |
 | `recco` | Search-and-rescue reflector | boolean | — | outerwear or pants | exact |
 | `pockets` | Pockets | list | — | apparel | set |
-
-### Footwear
-
-| Key | Field | Type | Standard unit | Applies to | Compare |
-| --- | --- | --- | --- | --- | --- |
-| `drop` | Heel-to-toe drop | number | mm | shoe | exact |
-| `forefoot_stack` | Forefoot stack height | number | mm | shoe | exact |
-| `heel_stack` | Heel stack height | number | mm | shoe | exact |
-| `lugs` | Lug depth | number | mm | shoe | exact |
-| `outsole` | Outsole rubber | text | — | shoe | exact |
-| `midsole` | Midsole | list | — | shoe | set |
-| `upper` | Upper | list | — | shoe | set |
-| `waterproof_lining` | Waterproof lining | text | — | shoe | exact |
 
 ### Origin
 

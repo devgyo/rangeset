@@ -7,6 +7,7 @@ import { ArrowRight, Check, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductImage } from "@/components/catalog/product-media";
 import { comparisonHref } from "@/lib/comparison";
+import {isCatalogProduct} from "@/lib/catalog-scope";
 import type { CatalogCard } from "@/lib/arcteryx-view";
 
 const storageKey = "rangeset:comparison";
@@ -36,7 +37,7 @@ function decodeSelection(value: string): PickedProduct[] {
       image: typeof item.image === "string" && item.image.startsWith("https://images.arcteryx.com/") ? item.image : null,
       category: typeof item.category === "string" ? item.category : null,
       gender: ["men", "women", "unisex"].includes(item.gender) ? item.gender : null,
-    } as PickedProduct])).values()].slice(0, 4);
+    } as PickedProduct])).values()].filter((product) => isCatalogProduct(product)).slice(0, 4);
   } catch { return []; }
 }
 

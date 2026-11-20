@@ -1,6 +1,6 @@
 # Rangeset 术语表 v0.1（简体中文 / 日本語）
 
-来源字段：`lib/parameters/registry.ts` v1.3.0、`model.ts`、`fabric.ts`、`components/catalog/*`、`app/*`；品类来自 Neon `products.category`。鞋类专用字段（drop/stack/lugs/outsole/midsole/upper/waterproof_lining/weight_basis）已跳过。
+来源字段：`lib/parameters/registry.ts` v1.4.0、`model.ts`、`fabric.ts`、`components/catalog/*`、`app/*`；品类来自 Neon `products.category`。收录范围见 v1.4.0 参数标准。
 
 此页保留原始调研的可读结构。运行时术语及补充键以 `glossary.csv` 为准。待审项见 [review.md](review.md)。依据代号见文末。
 

@@ -173,40 +173,6 @@
 | value.duck | duck | 鸭 | アヒル | needs_review: v1 补充草译。 |
 | value.minimum | Minimum | 最低值 | 最低値 | needs_review: v1 补充草译。 |
 
-## 已下线的鞋类词条
-
-保留旧英文词条供兼容，本次不补译。
-
-| Key | English | 简体中文 | 日本語 |
-| --- | --- | --- | --- |
-| ui.per_shoe | per shoe | — | — |
-| ui.pair | pair | — | — |
-| ui.reference_shoe_basis | Shoe weight basis not published (per shoe or pair) | — | — |
-| group.footwear | Footwear | — | — |
-| cat.footwear | Footwear | — | — |
-| field.weight_basis | Weight basis | — | — |
-| field.drop | Heel-to-toe drop | — | — |
-| field.forefoot_stack | Forefoot stack height | — | — |
-| field.heel_stack | Heel stack height | — | — |
-| field.lugs | Lug depth | — | — |
-| field.outsole | Outsole rubber | — | — |
-| field.midsole | Midsole | — | — |
-| field.upper | Upper | — | — |
-| field.waterproof_lining | Waterproof lining | — | — |
-| field.legacy_stack | Stack | — | — |
-| field.legacy_drop | Drop | — | — |
-| field.legacy_outsole | Outsole | — | — |
-| type.shoe | Shoe | — | — |
-| type.boot | Boot | — | — |
-| type.sandal | Sandal | — | — |
-| type.mule | Mule | — | — |
-| part.upper | Upper | — | — |
-| part.midsole | Midsole | — | — |
-| part.outsole | Outsole | — | — |
-| help_label.drop | Heel-to-toe drop | — | — |
-| help_label.stack | Stack height | — | — |
-| note.published_drop_and_stack_heights_do_not_agree | Published drop and stack heights do not agree. | — | — |
-
 ## 回退到英文的说明
 
 - `help.ripstop`
@@ -218,8 +184,5 @@
 - `help.upf`
 - `help.hydrostatic`
 - `help.breathability`
-- `help.drop`
-- `help.stack`
 - `help.pfas`
 - `help.weight_size`
-- `help.shoe_basis`

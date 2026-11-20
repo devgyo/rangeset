@@ -26,7 +26,7 @@ export function SourcesSwitch() {
 const localizedHelpLabels: Partial<Record<Term, string>> = {
   denier: "field.denier", ripstop: "construction.ripstop", stretch: "field.fabric_stretch", fill: "field.fill_power",
   gsm: "keep.g/m²", membrane: "field.membrane", dwr: "keep.dwr", upf: "keep.upf", hydrostatic: "field.hydrostatic_head",
-  breathability: "field.breathability", recco: "keep.recco", drop: "field.drop", pfas: "keep.pfas",
+  breathability: "field.breathability", recco: "keep.recco", pfas: "keep.pfas",
 };
 
 function Help({ term }: { term: Term }) {
@@ -96,11 +96,8 @@ export function ParameterValue({ field, value, withEvidence = true, comparison =
   const reference = displayReference(t, field, value);
   const status = parameterStatus(field, value);
   const statusKey = value.state === "unpublished" ? "unpublished" : value.value === true ? "yes" : "no";
-  const weight = field.key === "weight" && !comparison ? weightPresentation(value) : null;
-  const weightHelp = weight ? [
-    weight.referenceMissing && t("help.weight_size"),
-    weight.basisMissing && t("help.shoe_basis"),
-  ].filter(Boolean).join(" ") : "";
+  const weightHelp = field.key === "weight" && !comparison && value.state === "known" && weightPresentation(value).referenceMissing
+    ? t("help.weight_size") : "";
   const tech = field.format === "layers" && value.state === "known" && Object.hasOwn(terms, text) ? text as Term : undefined;
   const numeric = ["number", "denier", "money", "layers"].includes(field.format);
   return <div className="min-w-0">

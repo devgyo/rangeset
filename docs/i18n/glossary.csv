@@ -330,9 +330,6 @@ ui.no_jackets,No jackets in the index yet.,没有匹配的商品。,該当する
 ui.size,Size {size},尺码 {size},サイズ{size},本地化补充,,,needs_review: v1 补充草译。
 ui.weight_size_missing,Reference size: {status},称重尺码 · {status},重量の基準サイズ · {status},本地化补充,,,复用现有标签或格式。
 ui.test_method_missing,Test method: {status},测试方法：{status},試験方法：{status},本地化补充,,,needs_review: v1 补充草译。
-ui.per_shoe,per shoe,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-ui.pair,pair,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-ui.reference_shoe_basis,Shoe weight basis not published (per shoe or pair),,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
 ui.recycled_claim,Recycled material claimed · % not published,标注使用再生材料 · 比例未公布,リサイクル素材を使用 · 比率は未公表,本地化补充,,,needs_review: v1 补充草译。
 ui.scope_unknown,scope not published,未公布,未公表,本地化补充,,,复用已有术语 status.missing。
 ui.scope_fabric,fabric,面料,素材,本地化补充,,,复用已有术语 group.fabric。
@@ -348,18 +345,7 @@ seo.catalog_description,Browse Arc’teryx US gear and compare published specifi
 seo.compare_description,Compare published specifications for up to four Arc’teryx products.,并排对比最多 4 款 Arc’teryx 商品的已公布参数。,Arc’teryx製品の公表スペックを最大4点まで並べて比較できます。,本地化补充,,,needs_review: v1 补充草译。
 seo.jackets_description,"Browse and compare hardshell jackets by membrane, construction, weight, price, and features.",按防水膜、结构、重量、价格和功能浏览和对比硬壳夹克。,防水メンブレン、構造、重量、価格、機能からハードシェルジャケットを比較できます。,本地化补充,,,needs_review: v1 补充草译。
 seo.product_description,Published configuration and specs for the {brand} {name}.,{brand} {name} 的已公布配置与参数。,{brand} {name}の公表仕様とスペック。,本地化补充,,,needs_review: v1 补充草译。
-group.footwear,Footwear,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
 group.numbers,Numbers,数值参数,数値スペック,本地化补充,,,needs_review: v1 补充草译。
-cat.footwear,Footwear,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-field.weight_basis,Weight basis,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-field.drop,Heel-to-toe drop,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-field.forefoot_stack,Forefoot stack height,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-field.heel_stack,Heel stack height,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-field.lugs,Lug depth,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-field.outsole,Outsole rubber,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-field.midsole,Midsole,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-field.upper,Upper,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-field.waterproof_lining,Waterproof lining,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
 field.legacy_membrane,Membrane,防水膜,防水メンブレン,本地化补充,,,本地化复用已有术语 field.membrane，保留既有英文。
 field.legacy_layers,Layers,面料层数,レイヤー構造,本地化补充,,,本地化复用已有术语 field.laminate，保留既有英文。
 field.legacy_face_denier,Face fabric denier,旦数,デニール,本地化补充,,,本地化复用已有术语 field.denier，保留既有英文。
@@ -368,17 +354,7 @@ field.legacy_waterproof,Waterproof rating,防水等级,防水性能,本地化补
 field.legacy_price,Price,官方定价,希望小売価格,本地化补充,,,本地化复用已有术语 field.msrp，保留既有英文。
 field.legacy_pit_zips,Pit zips,腋下透气拉链,ピットジップ,本地化补充,,,本地化复用已有术语 field.pit_zips，保留既有英文。
 field.legacy_helmet_hood,Helmet hood,头盔兼容风帽,ヘルメット対応フード,本地化补充,,,本地化复用已有术语 field.helmet_hood，保留既有英文。
-field.legacy_stack,Stack,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-field.legacy_drop,Drop,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
 field.legacy_face,Face denier,旦数,デニール,本地化补充,,,本地化复用已有术语 field.denier，保留既有英文。
-field.legacy_outsole,Outsole,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-type.shoe,Shoe,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-type.boot,Boot,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-type.sandal,Sandal,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-type.mule,Mule,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-part.upper,Upper,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-part.midsole,Midsole,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
-part.outsole,Outsole,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
 status.missing,Not published,未公布,未公表,本地化补充,,,取自 symbol.unpublished 的文字部分。
 status.yes,Yes,有,あり,本地化补充,,,取自 symbol.yes 的文字部分。
 status.no,No,无,なし,本地化补充,,,取自 symbol.no 的文字部分。
@@ -417,14 +393,9 @@ help.breathability,How readily moisture vapour passes through the fabric in a te
 help_label.breathability,Breathability,透湿性,透湿性,本地化补充,,,needs_review: v1 补充草译。
 help.recco,A small built-in reflector that helps rescue teams locate you with RECCO detectors. No battery needed. It does not replace an avalanche transceiver.,内置的小型反射器，搜救队可用 RECCO 探测器找到你。无需电池。不能代替雪崩信标。,内蔵の小さなリフレクターで、救助隊がRECCO探知機で位置を特定できます。電池は不要です。雪崩ビーコンの代わりにはなりません。,本地化补充,,,术语说明试译见风格指南。
 help_label.recco,RECCO,RECCO,RECCO,本地化补充,,,needs_review: v1 补充草译。
-help.drop,How much higher your heel sits than the front of your foot in the shoe.,,,本地化补充,,,说明待审，回退英文。
-help_label.drop,Heel-to-toe drop,,,本地化补充,,,用于英文标题。其他语言优先使用同概念的术语表字段。
-help.stack,How much material sits between your foot and the ground at the heel or forefoot.,,,本地化补充,,,说明待审，回退英文。
-help_label.stack,Stack height,,,本地化补充,,,用于英文标题。其他语言优先使用同概念的术语表字段。
 help.pfas,A large group of chemicals. A product can meet a PFAS rule and still contain some of these chemicals.,,,本地化补充,,,说明待审，回退英文。
 help_label.pfas,PFAS,PFAS,PFAS,本地化补充,,,needs_review: v1 补充草译。
 help.weight_size,The brand does not state which size was weighed; treat as approximate.,,,本地化补充,,,说明待审，回退英文。
-help.shoe_basis,The brand does not say whether the weight is for one shoe or a pair.,,,本地化补充,,,说明待审，回退英文。
 status_description.yes,The brand explicitly lists this feature.,品牌明确列出了这项功能。,ブランドがこの機能を明記しています。,本地化补充,,,needs_review: v1 补充草译。
 status_description.no,The brand explicitly says this feature is absent.,品牌明确说明没有这项功能。,ブランドがこの機能がないことを明記しています。,本地化补充,,,needs_review: v1 补充草译。
 status_description.unpublished,The brand has not published enough information to confirm this value.,品牌公布的信息不足以确认这项参数。,ブランドの公表情報ではこの値を確認できません。,本地化补充,,,needs_review: v1 补充草译。
@@ -439,7 +410,6 @@ note.multiple_reference_sizes_or_measurements_are_published,Multiple reference s
 note.sources_name_different_primary_membranes,Sources name different primary membranes.,不同来源标注的主防水膜不一致。,出典によって主な防水メンブレンの記載が異なります。,本地化补充,,,needs_review: v1 补充草译。
 note.more_than_one_laminate_is_listed_for_the_primary_fabric,More than one laminate is listed for the primary fabric.,主要面料标注了多种层压结构。,主素材に複数のラミネート構造が記載されています。,本地化补充,,,needs_review: v1 补充草译。
 note.different_breathability_measures_are_published,Different breathability measures are published.,品牌公布了不同口径的透湿数据。,測定基準の異なる透湿データが公表されています。,本地化补充,,,needs_review: v1 补充草译。
-note.published_drop_and_stack_heights_do_not_agree,Published drop and stack heights do not agree.,,,本地化补充,,,追加键：原术语表未覆盖。译名待审，暂用英文。
 note.the_indexed_value_or_unit_could_not_be_normalized,The indexed value or unit could not be normalized.,无法将录入值或单位转换为统一格式。,登録された値または単位を共通形式に変換できません。,本地化补充,,,needs_review: v1 补充草译。
 note.the_indexed_value_differs_from_the_parsed_source_text,The indexed value differs from the parsed source text.,录入值与从原文提取的值不一致。,登録値と出典の原文から読み取った値が一致しません。,本地化补充,,,needs_review: v1 补充草译。
 note.manual_value_does_not_match_the_field_definition,Manual value does not match the field definition.,手动录入值与字段定义不符。,手動入力値が項目の定義に合っていません。,本地化补充,,,needs_review: v1 补充草译。

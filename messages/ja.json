@@ -9,7 +9,6 @@
     "origin": "生産地",
     "environment": "環境・認証",
     "supplemental": "補足（原文）",
-    "footwear": "Footwear",
     "numbers": "数値スペック"
   },
   "field": {
@@ -78,15 +77,6 @@
     "regulatory": "その他の法規関連表示",
     "source_notes": "その他の素材表記（原文）",
     "feature_notes": "その他の機能（原文）",
-    "weight_basis": "Weight basis",
-    "drop": "Heel-to-toe drop",
-    "forefoot_stack": "Forefoot stack height",
-    "heel_stack": "Heel stack height",
-    "lugs": "Lug depth",
-    "outsole": "Outsole rubber",
-    "midsole": "Midsole",
-    "upper": "Upper",
-    "waterproof_lining": "Waterproof lining",
     "legacy_membrane": "防水メンブレン",
     "legacy_layers": "レイヤー構造",
     "legacy_face_denier": "デニール",
@@ -95,10 +85,7 @@
     "legacy_price": "希望小売価格",
     "legacy_pit_zips": "ピットジップ",
     "legacy_helmet_hood": "ヘルメット対応フード",
-    "legacy_stack": "Stack",
-    "legacy_drop": "Drop",
-    "legacy_face": "デニール",
-    "legacy_outsole": "Outsole"
+    "legacy_face": "デニール"
   },
   "subgroup": {
     "whole_garment": "製品全体"
@@ -115,10 +102,7 @@
     "down": "ダウン",
     "synthetic": "化繊中綿",
     "sleeves": "袖",
-    "hood": "フード",
-    "upper": "Upper",
-    "midsole": "Midsole",
-    "outsole": "Outsole"
+    "hood": "フード"
   },
   "gender": {
     "men": "メンズ",
@@ -163,8 +147,7 @@
     "base_layer": "ベースレイヤー",
     "professional": "プロフェッショナル",
     "shorts": "ショーツ",
-    "dresses_skirts": "ワンピース・スカート",
-    "footwear": "Footwear"
+    "dresses_skirts": "ワンピース・スカート"
   },
   "protection": {
     "hard_shell": "ハードシェル",
@@ -209,11 +192,7 @@
     "cap": "キャップ",
     "beanie": "ビーニー",
     "backpack": "バックパック",
-    "needs_review": "要確認",
-    "shoe": "Shoe",
-    "boot": "Boot",
-    "sandal": "Sandal",
-    "mule": "Mule"
+    "needs_review": "要確認"
   },
   "symbol": {
     "yes": "● あり",
@@ -242,7 +221,6 @@
     "sources_name_different_primary_membranes": "出典によって主な防水メンブレンの記載が異なります。",
     "more_than_one_laminate_is_listed_for_the_primary_fabric": "主素材に複数のラミネート構造が記載されています。",
     "different_breathability_measures_are_published": "測定基準の異なる透湿データが公表されています。",
-    "published_drop_and_stack_heights_do_not_agree": "Published drop and stack heights do not agree.",
     "the_indexed_value_or_unit_could_not_be_normalized": "登録された値または単位を共通形式に変換できません。",
     "the_indexed_value_differs_from_the_parsed_source_text": "登録値と出典の原文から読み取った値が一致しません。",
     "manual_value_does_not_match_the_field_definition": "手動入力値が項目の定義に合っていません。",
@@ -391,9 +369,6 @@
     "size": "サイズ{size}",
     "weight_size_missing": "重量の基準サイズ · {status}",
     "test_method_missing": "試験方法：{status}",
-    "per_shoe": "per shoe",
-    "pair": "pair",
-    "reference_shoe_basis": "Shoe weight basis not published (per shoe or pair)",
     "recycled_claim": "リサイクル素材を使用 · 比率は未公表",
     "scope_unknown": "未公表",
     "scope_fabric": "素材",
@@ -479,8 +454,6 @@
     "hydrostatic": "耐水圧",
     "breathability": "透湿性",
     "recco": "RECCO",
-    "drop": "Heel-to-toe drop",
-    "stack": "Stack height",
     "pfas": "PFAS"
   },
   "status_description": {

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { categorySpecs, colorwaysOf, featuresOf, genderLabel, keyMetrics, plainText, productFamily, productGender, type ProductDetail } from "../arcteryx-view";
+import { categorySpecs, colorwaysOf, genderLabel, keyMetrics, plainText, productFamily, productGender, type ProductDetail } from "../arcteryx-view";
 import { buildComparison, comparisonIds } from "../comparison";
 
 test("converts descriptions to React-safe plain text with spacing and entity decoding", () => {
@@ -12,7 +12,6 @@ test("converts descriptions to React-safe plain text with spacing and entity dec
 
 test("uses whole product-family prefixes and the published unisex flag", () => {
   assert.equal(productFamily("  beta AR Jacket"), "Beta");
-  assert.equal(productFamily("Konseal-GTX Shoe"), "Konseal");
   assert.equal(productFamily("Sabre SV Jacket"), "Sabre");
   assert.equal(productFamily("Betamax Jacket"), null);
   assert.equal(productFamily("Alar Wool Coat"), null);
@@ -22,27 +21,12 @@ test("uses whole product-family prefixes and the published unisex flag", () => {
   assert.equal(genderLabel(null), "Not published");
 });
 
-test("parses the published footwear geometry format and distinguishes missing waterproofing", () => {
-  const features = featuresOf([
-    { label: "Footwear geometry", value: ["4mm lugs", "Drop (Stack):  11mm (24mm : 13mm)"] },
-    { label: "Footwear outsole construction", value: ["Vibram® XS Flash 2 outsole delivers outstanding grip"] },
-  ]);
-  const specs = categorySpecs("Footwear", [], features, "2026-11-20", "Konseal GTX Shoe");
-  assert.deepEqual(["drop", "stack", "lugs", "outsole", "shoe_waterproof"].map((key) => specs[key]?.value),
-    [11, "24 / 13", 4, "Vibram XS Flash 2", "GORE-TEX"]);
-  assert.equal(specs.drop?.unit, "mm");
-  assert.equal(specs.outsole?.source, "brand");
-  assert.equal(categorySpecs("Footwear", [], [], null, "Water resistant trail shoe").shoe_waterproof, undefined);
-  assert.equal(categorySpecs("Footwear", [], [], null, "Non-waterproof shoe").shoe_waterproof, undefined);
-  assert.equal(categorySpecs("Shell Jackets", [], features, null, "GTX jacket").drop, undefined);
-});
-
 test("identifies documented insulation with fill power and leaves unsupported text blank", () => {
   const specs = categorySpecs("Insulated Jackets", [
     "Down Insulation: 750 fill European grey goose down", "Synthetic Insulation: Coreloft™ Continuous, 102gsm",
-  ], [], null, "");
+  ], [], null);
   assert.equal(specs.insulation?.value, "Down · 750 fill + Coreloft");
-  assert.equal(categorySpecs("Insulated Jackets", ["Nylon exterior"], [], null, "").insulation, undefined);
+  assert.equal(categorySpecs("Insulated Jackets", ["Nylon exterior"], [], null).insulation, undefined);
 });
 
 test("validates image hosts, swatches, and gallery metadata", () => {
@@ -86,10 +70,10 @@ test("compares normalized values and marks category-specific metrics as inapplic
   assert.equal(rows.find(({ key }) => key === "pit_zips")?.differs, false);
   assert.equal(rows.find(({ key }) => key === "pit_zips")?.weakDifference, true);
   assert.equal(rows.find(({ key }) => key === "pit_zips")?.cells[0].value, false);
-  const shoe = product({ category: "Footwear", specs: { drop: spec(8, "mm") } });
-  const mixed = buildComparison([shell, shoe]).flatMap(({ rows }) => rows);
-  assert.equal(mixed.find(({ key }) => key === "drop")?.cells[0].state, "inapplicable");
+  const pants = product({ name: "Test Pants", category: "Pants", specs: { inseam: spec(80, "cm") } });
+  const mixed = buildComparison([shell, pants]).flatMap(({ rows }) => rows);
+  assert.equal(mixed.find(({ key }) => key === "inseam")?.cells[0].state, "inapplicable");
   assert.equal(mixed.find(({ key }) => key === "pit_zips")?.cells[1].state, "inapplicable");
-  assert.ok(!keyMetrics(shoe, true).includes("inseam"));
-  assert.deepEqual(comparisonIds(" one,one,two,https://bad,three,four,five"), ["one", "two", "three", "four"]);
+  assert.ok(keyMetrics(pants, true).includes("inseam"));
+  assert.deepEqual(comparisonIds(" one,one,two,https://bad,three,four,five"), ["one", "two", "three", "four", "five"]);
 });

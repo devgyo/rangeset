@@ -1,10 +1,10 @@
 export const fabricParts = { body: "Body", reinforcement: "Reinforcement", panel: "Panel", lining: "Lining" } as const;
 export type FabricPart = keyof typeof fabricParts;
 
-export const parameterVersion = "1.3.0";
+export const parameterVersion = "1.4.0";
 export const groups = {
   identity: "General", sizing: "Dimensions & fit", fabric: "Main fabric", protection: "Protection",
-  warmth: "Insulation", features: "Features", footwear: "Footwear", origin: "Origin",
+  warmth: "Insulation", features: "Features", origin: "Origin",
   environment: "Environment & certifications", supplemental: "Supplementary source text",
 } as const;
 export const terms = {
@@ -22,8 +22,6 @@ export const terms = {
   hydrostatic: { label: "Hydrostatic head", text: "The height of a column of water the fabric can hold back in a test. Compare numbers from the same test method." },
   breathability: { label: "Breathability", text: "How readily moisture vapour passes through the fabric in a test. Compare numbers with the same test method and units." },
   recco: { label: "RECCO", text: "A small built-in reflector that helps rescue teams locate you with RECCO detectors. No battery needed. It does not replace an avalanche transceiver." },
-  drop: { label: "Heel-to-toe drop", text: "How much higher your heel sits than the front of your foot in the shoe." },
-  stack: { label: "Stack height", text: "How much material sits between your foot and the ground at the heel or forefoot." },
   pfas: { label: "PFAS", text: "A large group of chemicals. A product can meet a PFAS rule and still contain some of these chemicals." },
 } as const;
 export type Term = keyof typeof terms;
@@ -35,16 +33,15 @@ export const productTypes = {
   zip_top: "Zip-neck top", halter_top: "Halter top", crewneck: "Crewneck", bomber: "Bomber jacket", blazer: "Blazer",
   base_layer_top: "Base layer top", base_layer_bottom: "Base layer bottom",
   dress: "Dress", skirt: "Skirt", skort: "Skort", suit: "Suit",
-  shoe: "Shoe", boot: "Boot", sandal: "Sandal", mule: "Mule",
   backpack: "Backpack", mitten: "Mitten", glove: "Glove", hat: "Hat", cap: "Cap", beanie: "Beanie",
 } as const;
 export const protectionTypes = {
   hard_shell: "Hardshell", soft_shell: "Softshell", wind_shell: "Windshell", insulated_shell: "Insulated shell",
 } as const;
-export type ProductKind = "hard_shell" | "soft_shell" | "wind_shell" | "coat" | "insulated" | "pants" | "top" | "footwear" | "other";
+export type ProductKind = "hard_shell" | "soft_shell" | "wind_shell" | "coat" | "insulated" | "pants" | "top" | "other";
 export type ProductType = keyof typeof productTypes;
 export type ProtectionType = keyof typeof protectionTypes;
-type Scope = "all" | "apparel" | "upper" | "bottom" | "shoe" | "shell" | "technical" | "warm" | "snow" | "hooded_style" | "outerwear" | "outerwear_or_pants";
+type Scope = "all" | "apparel" | "upper" | "bottom" | "shell" | "technical" | "warm" | "snow" | "hooded_style" | "outerwear" | "outerwear_or_pants";
 export type Context = { kind: ProductKind; productType?: ProductType; protectionType?: ProtectionType; insulated: boolean; snow: boolean; membrane: boolean };
 type ValueType = "text" | "number" | "boolean" | "enum" | "list" | "parts" | "denier" | "composition" | "recycled";
 type CompareRule = "exact" | "set" | "parts" | "measurement" | "method" | "reference";
@@ -69,7 +66,7 @@ export const registry: Field[] = [
   field("product_line", "Product line", "identity", 30, "text", "all", "Collection within the brand."),
   field("family", "Model family", "identity", 40, "text", "all", "Related models identified by their shared name."),
   field("category", "Category", "identity", 50, "text", "all", "Catalog category."),
-  field("product_type", "Product type", "identity", 60, "enum", "all", "The specific garment, footwear or gear style.", {
+  field("product_type", "Product type", "identity", 60, "enum", "all", "The specific garment or gear style.", {
     options: productTypes, reviewLabel: "Needs review",
   }),
   field("gender", "Gender", "identity", 70, "enum", "all", "Brand’s intended fit range.", { options: { men: "Men’s", women: "Women’s", unisex: "Unisex" } }),
@@ -78,7 +75,6 @@ export const registry: Field[] = [
   field("release", "Release year / season", "identity", 110, "text", "all", "Release year or season reported by the brand."),
   field("weight", "Weight", "sizing", 10, "number", "all", "Mass of the item as measured by the brand.", { unit: "g", compare: "measurement", core: true, highlight: ["all"] }),
   field("weight_size", "Weight reference size", "sizing", 20, "text", "all", "Size used for the reported weight.", { compare: "reference", dataOnly: true }),
-  field("weight_basis", "Weight basis", "sizing", 30, "enum", "shoe", "Whether the weight is for one shoe or a pair.", { options: { single: "One shoe", pair: "Pair" }, dataOnly: true }),
   field("fit", "Fit", "sizing", 40, "text", "apparel", "Published description of the cut.", { highlight: ["apparel"], core: true }),
   field("back_length", "Centre back length", "sizing", 50, "number", "upper", "Length measured at the centre back in the published reference size.", { unit: "cm", compare: "measurement", core: true, highlight: ["upper"] }),
   field("inseam", "Inseam", "sizing", 60, "number", "bottom", "Length along the inside leg in the published reference size.", { unit: "cm", compare: "measurement", core: true, highlight: ["bottom"] }),
@@ -121,14 +117,6 @@ export const registry: Field[] = [
   field("leg_zips", "Leg side zippers", "features", 60, "boolean", "bottom", "Zippers along the side of a pant leg."),
   field("recco", "Search-and-rescue reflector", "features", 70, "boolean", "outerwear_or_pants", terms.recco.text, { help: "recco" }),
   field("pockets", "Pockets", "features", 80, "list", "apparel", "Pocket configurations explicitly described by the brand."),
-  field("drop", "Heel-to-toe drop", "footwear", 10, "number", "shoe", terms.drop.text, { unit: "mm", help: "drop", highlight: ["shoe"] }),
-  field("forefoot_stack", "Forefoot stack height", "footwear", 20, "number", "shoe", terms.stack.text, { unit: "mm", help: "stack" }),
-  field("heel_stack", "Heel stack height", "footwear", 30, "number", "shoe", terms.stack.text, { unit: "mm", help: "stack" }),
-  field("lugs", "Lug depth", "footwear", 40, "number", "shoe", "Height of the tread projections on the sole.", { unit: "mm", highlight: ["shoe"] }),
-  field("outsole", "Outsole rubber", "footwear", 50, "text", "shoe", "Published rubber or compound on the ground-contacting sole.", { highlight: ["shoe"] }),
-  field("midsole", "Midsole", "footwear", 60, "list", "shoe", "Published cushioning or structure between the foot and outsole."),
-  field("upper", "Upper", "footwear", 70, "list", "shoe", "Published material around the top and sides of the foot."),
-  field("waterproof_lining", "Waterproof lining", "footwear", 80, "text", "shoe", "Published waterproof liner or membrane in the shoe."),
   field("fabric_origin", "Fabric origin", "origin", 10, "list", "all", "Locations where fabric was made."),
   field("dye_origin", "Dyeing origin", "origin", 20, "list", "all", "Locations where fabric was dyed."),
   field("assembly_origin", "Manufacturing origin", "origin", 30, "list", "all", "Locations where the finished item was made."),
@@ -145,22 +133,20 @@ export const registry: Field[] = [
 export const fieldsByKey = new Map(registry.map((item) => [item.key, item]));
 export function appliesTo(scope: Scope, context: Context) {
   const { kind, productType, protectionType } = context;
-  const shoe = productType ? ["shoe", "boot", "sandal", "mule"].includes(productType) : kind === "footwear";
   const outerwear = productType
     ? ["jacket", "vest", "coat", "parka", "anorak", "bomber", "blazer", "suit"].includes(productType) ||
       (productType === "hoodie" && (Boolean(protectionType) || context.insulated))
     : ["hard_shell", "soft_shell", "wind_shell", "coat", "insulated"].includes(kind);
   const pants = productType ? ["pants", "bib_pants"].includes(productType) : kind === "pants";
   const shell = Boolean(protectionType);
-  const apparel = !shoe && kind !== "other";
+  const apparel = kind !== "other";
   switch (scope) {
     case "all": return true;
     case "apparel": return apparel;
     case "upper": return apparel && kind !== "pants" && productType !== "skirt" && productType !== "skort";
     case "bottom": return kind === "pants";
-    case "shoe": return shoe;
     case "shell": return shell;
-    case "technical": return !shoe && (context.membrane || shell || pants);
+    case "technical": return context.membrane || shell || pants;
     case "warm": return context.insulated;
     case "hooded_style": return outerwear || productType === "hoodie" || productType === "base_layer_top";
     case "outerwear": return outerwear && productType !== "vest";

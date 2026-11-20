@@ -12,12 +12,17 @@ import {
   type CatalogCard, type CatalogSpec, type ProductDetail,
 } from "@/lib/arcteryx-view";
 
+import {isCatalogProduct} from "@/lib/catalog-scope";
 import { classifyArcProduct, classificationFilterValue } from "@/lib/parameters/classification";
 import { normalizeArcProduct, type IndexedSpec } from "@/lib/parameters/arcteryx";
 
 export const catalogEnabled = Boolean(process.env.DATABASE_URL);
 
 const raw = productRaw.payload;
+const classificationPayload = sql<Record<string, unknown>>`jsonb_build_object(
+  'marketingName', ${raw}->'marketingName', 'productType', ${raw}->'productType',
+  'category', ${raw}->'category', 'subCategory', ${raw}->'subCategory'
+)`;
 const cardPayload = sql<Record<string, unknown>>`jsonb_build_object(
   'image', ${raw} #>> '{colourOptions,0,image,url}',
   'mainImage', jsonb_build_object('url', ${raw} #>> '{mainImage,url}'),
@@ -25,18 +30,14 @@ const cardPayload = sql<Record<string, unknown>>`jsonb_build_object(
     from jsonb_array_elements(case when jsonb_typeof(${raw}->'colourOptions') = 'array' then ${raw}->'colourOptions' else '[]'::jsonb end)
     with ordinality as colors(colour, position)),
   'activities', ${raw}->'activities',
-  'marketingName', ${raw}->'marketingName', 'productType', ${raw}->'productType',
-  'category', ${raw}->'category', 'subCategory', ${raw}->'subCategory',
   'veilance', jsonb_path_exists(${raw}, '$.breadcrumbs[*] ? (@.label like_regex "^Veilance$" flag "i" || @.url like_regex "(^|/)veilance(/|$)" flag "i")'),
   'shortDescription', left(${raw}->>'shortDescription', 6000),
   'weight', ${raw}->'weight', 'price', ${raw}->'price', 'currencyCode', ${raw}->'currencyCode', 'isUnisex', ${raw}->'isUnisex',
-  'features', case when ${products.category} = 'Footwear' then
-    jsonb_path_query_array(${raw}, '$.features[*] ? (@.label like_regex "geometry|outsole" flag "i")')
-    when ${products.category} = 'Insulated Jackets' then
+  'features', case when ${products.category} = 'Insulated Jackets' then
     jsonb_path_query_array(${raw}, '$.features[*] ? (@.label like_regex "insulation|construction" flag "i")') end,
   'materials', case when ${products.category} = 'Insulated Jackets' then
     jsonb_path_query_array(${raw}, '$.materials[*] ? (@ like_regex "down|insulation|coreloft|primaloft|octa|climashield|polartec alpha" flag "i")') end
-)`;
+) || ${classificationPayload}`;
 
 type Scope = { category: string; family: string };
 async function catalogRows(slugs?: string[], mode: "none" | "card" | "detail" = "none", scope?: Scope) {
@@ -58,9 +59,8 @@ async function catalogRows(slugs?: string[], mode: "none" | "card" | "detail" = 
       where override.product_id = ${products.id}
     ), '{}'::jsonb)`,
     payloadFetchedAt: mode === "detail" ? productRaw.fetchedAt : sql<null>`null`,
-    payload: mode === "card" ? cardPayload : mode === "detail" ? raw : sql<null>`null`,
-  }).from(products).innerJoin(brands, eq(products.brandId, brands.id));
-  if (mode !== "none") query.leftJoin(productRaw, eq(productRaw.productId, products.id));
+    payload: mode === "card" ? cardPayload : mode === "detail" ? raw : classificationPayload,
+  }).from(products).innerJoin(brands, eq(products.brandId, brands.id)).leftJoin(productRaw, eq(productRaw.productId, products.id));
   const rows = await query.where(slugs ? inArray(products.slug, slugs) : scoped).orderBy(products.name, products.id);
   return rows.map(({ overrideValues, ...row }) => {
     const overrides = new Map(Object.entries(overrideValues));
@@ -78,7 +78,7 @@ async function catalogRows(slugs?: string[], mode: "none" | "card" | "detail" = 
       status: status === "active" || status === "discontinued" || status === "pending_review" ? status : row.status,
       url: safeSource(overrides.get("url")) ?? row.url,
     };
-  });
+  }).filter((row) => isCatalogProduct(row, {raw: record(row.payload), overrides: row.overrides}));
 }
 
 function safeSource(value: unknown) {
@@ -168,7 +168,7 @@ const isBoolean = (value: unknown): value is boolean => typeof value === "boolea
 const cardSpecKeys = ["weight_g", "membrane", "layers", "face_denier", "fabric_gsm", "inseam", "fit"];
 const defaultUnits: Record<string, string> = {
   weight_g: "g", layers: "layers", face_denier: "D", fabric_gsm: "g/m²", centre_back_length_cm: "cm", inseam: "cm",
-  drop: "mm", stack: "mm", lugs: "mm", waterproof_mm: "mm",
+  waterproof_mm: "mm",
 };
 
 function scalar(value: unknown): value is CatalogSpec["value"] {
@@ -201,7 +201,7 @@ function toView(row: CatalogRow, dbSpecs: SpecRow[], dbPrices: PriceRow[], detai
   const features = featuresOf(payload.features);
   const materials = textList(payload.materials);
   const verifiedAt = isoDate(row.lastSeen);
-  const specs = categorySpecs(row.category, materials, features, verifiedAt, [row.name, ...row.subTags].join(" "));
+  const specs = categorySpecs(row.category, materials, features, verifiedAt);
   for (const spec of dbSpecs) {
     if (spec.source === "brand" && scalar(spec.value)) specs[spec.key] = {
       value: typeof spec.value === "string" ? plainText(spec.value) : spec.value,
@@ -283,7 +283,7 @@ function exampleProducts(): ProductDetail[] {
 }
 
 async function loadProducts(mode: "card" | "detail", slugs?: string[], scope?: Scope) {
-  if (!catalogEnabled) return exampleProducts().filter(({ slug }) => !slugs || slugs.includes(slug));
+  if (!catalogEnabled) return exampleProducts().filter((product) => isCatalogProduct(product) && (!slugs || slugs.includes(product.slug)));
   const rows = await catalogRows(slugs, mode, scope);
   if (!rows.length) return [];
   const db = catalogDb();

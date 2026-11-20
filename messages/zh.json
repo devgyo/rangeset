@@ -9,7 +9,6 @@
     "origin": "产地",
     "environment": "环保与认证",
     "supplemental": "原文补充",
-    "footwear": "Footwear",
     "numbers": "数值参数"
   },
   "field": {
@@ -78,15 +77,6 @@
     "regulatory": "其他法规声明",
     "source_notes": "其他材料原文",
     "feature_notes": "其他功能原文",
-    "weight_basis": "Weight basis",
-    "drop": "Heel-to-toe drop",
-    "forefoot_stack": "Forefoot stack height",
-    "heel_stack": "Heel stack height",
-    "lugs": "Lug depth",
-    "outsole": "Outsole rubber",
-    "midsole": "Midsole",
-    "upper": "Upper",
-    "waterproof_lining": "Waterproof lining",
     "legacy_membrane": "防水膜",
     "legacy_layers": "面料层数",
     "legacy_face_denier": "旦数",
@@ -95,10 +85,7 @@
     "legacy_price": "官方定价",
     "legacy_pit_zips": "腋下透气拉链",
     "legacy_helmet_hood": "头盔兼容风帽",
-    "legacy_stack": "Stack",
-    "legacy_drop": "Drop",
-    "legacy_face": "旦数",
-    "legacy_outsole": "Outsole"
+    "legacy_face": "旦数"
   },
   "subgroup": {
     "whole_garment": "整件"
@@ -115,10 +102,7 @@
     "down": "羽绒填充",
     "synthetic": "合成棉填充",
     "sleeves": "袖子",
-    "hood": "风帽",
-    "upper": "Upper",
-    "midsole": "Midsole",
-    "outsole": "Outsole"
+    "hood": "风帽"
   },
   "gender": {
     "men": "男装",
@@ -163,8 +147,7 @@
     "base_layer": "打底层",
     "professional": "专业用途",
     "shorts": "短裤",
-    "dresses_skirts": "连衣裙与半身裙",
-    "footwear": "Footwear"
+    "dresses_skirts": "连衣裙与半身裙"
   },
   "protection": {
     "hard_shell": "硬壳",
@@ -209,11 +192,7 @@
     "cap": "棒球帽",
     "beanie": "毛线帽",
     "backpack": "背包",
-    "needs_review": "待核实",
-    "shoe": "Shoe",
-    "boot": "Boot",
-    "sandal": "Sandal",
-    "mule": "Mule"
+    "needs_review": "待核实"
   },
   "symbol": {
     "yes": "● 有",
@@ -242,7 +221,6 @@
     "sources_name_different_primary_membranes": "不同来源标注的主防水膜不一致。",
     "more_than_one_laminate_is_listed_for_the_primary_fabric": "主要面料标注了多种层压结构。",
     "different_breathability_measures_are_published": "品牌公布了不同口径的透湿数据。",
-    "published_drop_and_stack_heights_do_not_agree": "Published drop and stack heights do not agree.",
     "the_indexed_value_or_unit_could_not_be_normalized": "无法将录入值或单位转换为统一格式。",
     "the_indexed_value_differs_from_the_parsed_source_text": "录入值与从原文提取的值不一致。",
     "manual_value_does_not_match_the_field_definition": "手动录入值与字段定义不符。",
@@ -391,9 +369,6 @@
     "size": "尺码 {size}",
     "weight_size_missing": "称重尺码 · {status}",
     "test_method_missing": "测试方法：{status}",
-    "per_shoe": "per shoe",
-    "pair": "pair",
-    "reference_shoe_basis": "Shoe weight basis not published (per shoe or pair)",
     "recycled_claim": "标注使用再生材料 · 比例未公布",
     "scope_unknown": "未公布",
     "scope_fabric": "面料",
@@ -479,8 +454,6 @@
     "hydrostatic": "静水压",
     "breathability": "透湿性",
     "recco": "RECCO",
-    "drop": "Heel-to-toe drop",
-    "stack": "Stack height",
     "pfas": "PFAS"
   },
   "status_description": {
