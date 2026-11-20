@@ -12,6 +12,8 @@ import {
   type CatalogCard, type CatalogSpec, type ProductDetail,
 } from "@/lib/arcteryx-view";
 
+import { normalizeArcProduct, type IndexedSpec } from "@/lib/parameters/arcteryx";
+
 export const catalogEnabled = Boolean(process.env.DATABASE_URL);
 
 const raw = productRaw.payload;
@@ -24,7 +26,7 @@ const cardPayload = sql<Record<string, unknown>>`jsonb_build_object(
   'activities', ${raw}->'activities',
   'veilance', jsonb_path_exists(${raw}, '$.breadcrumbs[*] ? (@.label like_regex "^Veilance$" flag "i" || @.url like_regex "(^|/)veilance(/|$)" flag "i")'),
   'shortDescription', left(${raw}->>'shortDescription', 6000),
-  'price', ${raw}->'price', 'currencyCode', ${raw}->'currencyCode', 'isUnisex', ${raw}->'isUnisex',
+  'weight', ${raw}->'weight', 'price', ${raw}->'price', 'currencyCode', ${raw}->'currencyCode', 'isUnisex', ${raw}->'isUnisex',
   'features', case when ${products.category} = 'Footwear' then
     jsonb_path_query_array(${raw}, '$.features[*] ? (@.label like_regex "geometry|outsole" flag "i")')
     when ${products.category} = 'Insulated Jackets' then
@@ -52,6 +54,7 @@ async function catalogRows(slugs?: string[], mode: "none" | "card" | "detail" = 
       from ${manualOverrides} as override
       where override.product_id = ${products.id}
     ), '{}'::jsonb)`,
+    payloadFetchedAt: mode === "detail" ? productRaw.fetchedAt : sql<null>`null`,
     payload: mode === "card" ? cardPayload : mode === "detail" ? raw : sql<null>`null`,
   }).from(products).innerJoin(brands, eq(products.brandId, brands.id));
   if (mode !== "none") query.leftJoin(productRaw, eq(productRaw.productId, products.id));
@@ -178,7 +181,7 @@ function msrpAmount(value: unknown) {
 
 type CatalogRow = Awaited<ReturnType<typeof catalogRows>>[number];
 type PriceRow = Pick<typeof prices.$inferSelect, "productId" | "variant" | "price" | "currency" | "inStock">;
-type SpecRow = Pick<typeof productSpecs.$inferSelect, "productId" | "key" | "value" | "unit" | "source" | "fetchedAt">;
+type SpecRow = IndexedSpec & { productId: number };
 
 function byProduct<T extends { productId: number }>(rows: T[]) {
   const groups = new Map<number, T[]>();
@@ -190,7 +193,7 @@ function byProduct<T extends { productId: number }>(rows: T[]) {
   return groups;
 }
 
-function toView(row: CatalogRow, dbSpecs: SpecRow[], dbPrices: PriceRow[], detail: boolean): ProductDetail {
+function toView(row: CatalogRow, dbSpecs: SpecRow[], dbPrices: PriceRow[], detail: boolean, withParameters: boolean): ProductDetail {
   const payload = record(row.payload);
   const features = featuresOf(payload.features);
   const materials = textList(payload.materials);
@@ -220,7 +223,7 @@ function toView(row: CatalogRow, dbSpecs: SpecRow[], dbPrices: PriceRow[], detai
   const colorOptions = payload.colourOptions;
   const summary = plainText(payload.shortDescription);
   const veilance = payload.veilance === true || entriesOfBreadcrumbs(payload.breadcrumbs);
-  return {
+  const product: ProductDetail = {
     name: row.name, slug: row.slug, brand: row.brand, category: row.category, url: row.url,
     gender: productGender(row.gender, row.overrides.has("gender") ? undefined : payload.isUnisex),
     family: productFamily(row.name), subTags: row.subTags, veilance, isHardshell: row.isHardshell, status: row.status,
@@ -236,6 +239,10 @@ function toView(row: CatalogRow, dbSpecs: SpecRow[], dbPrices: PriceRow[], detai
       .map((option) => plainText(record(option).label)).filter(Boolean),
     colorways: detail ? colorwaysOf(colorOptions) : [],
   };
+  if (withParameters) product.parameters = normalizeArcProduct(product, {
+    raw: payload, fetchedAt: row.payloadFetchedAt, indexed: dbSpecs, overrides: row.overrides,
+  });
+  return product;
 }
 
 function entriesOfBreadcrumbs(value: unknown) {
@@ -288,7 +295,7 @@ async function loadProducts(mode: "card" | "detail", slugs?: string[], scope?: S
   ]);
   const specsByProduct = byProduct(specs);
   const pricesByProduct = byProduct(latest);
-  return rows.map((row) => toView(row, specsByProduct.get(row.id) ?? [], pricesByProduct.get(row.id) ?? [], mode === "detail"));
+  return rows.map((row) => toView(row, specsByProduct.get(row.id) ?? [], pricesByProduct.get(row.id) ?? [], mode === "detail", mode === "detail" || Boolean(scope)));
 }
 
 function cardOnly(product: ProductDetail): CatalogCard {

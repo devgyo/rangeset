@@ -9,9 +9,9 @@ import { rememberSelection, useCompareSelection, type PickedProduct } from "@/co
 import { GenderPill, ProductImage } from "@/components/catalog/product-media";
 import { formatPrice, genderLabel } from "@/lib/arcteryx-view";
 import { comparisonHref, type ComparisonGroup } from "@/lib/comparison";
-import { cn } from "@/lib/utils";
+import { ParameterGroupSources, ParameterLabel, ParameterValue, SourcesSwitch } from "./parameter-table";
 
-export type ComparisonProduct = PickedProduct & { msrp: number | null; example?: boolean; discontinued?: boolean };
+export type ComparisonProduct = PickedProduct & { msrp: number | null; priceLabel?: string; example?: boolean; discontinued?: boolean };
 export type PickerProduct = ComparisonProduct & { keywords: string };
 
 function ProductPicker({ products, selected, onPick, onClose }: {
@@ -80,23 +80,24 @@ function CompareTable({ products, groups, highlight, differencesOnly, remove }: 
               {product.discontinued && <span className="text-xs text-[#efc9ae]">Discontinued</span>}
               {product.example && <span className="text-xs text-muted-foreground">Example</span>}
             </div>
-            <span className="mt-1 block font-mono text-xs tabular-nums text-primary">{formatPrice(product.msrp)}</span>
+            <span className="mt-1 block font-mono text-xs tabular-nums text-primary">{product.priceLabel ?? formatPrice(product.msrp)}</span>
           </th>)}
         </tr></thead>
-        {visible.map(({ title, rows }) => <tbody key={title}>
-          <tr className="matrix-group"><th scope="rowgroup" colSpan={products.length + 1}><span>{title}</span></th></tr>
-          {rows.map(({ key, label, cells, differs }) => <tr key={key} data-different={highlight && differs ? "true" : undefined}>
-            <th scope="row" className="matrix-label">{label}</th>
-            {cells.map(({ text, numeric, value }, index) =>
-              <td key={products[index].slug} className={cn(numeric && "font-mono tabular-nums", value === null && "text-muted-foreground")}>
-                {typeof text === "string" ? text : <ul className="space-y-1.5">{text.map((entry, index) => <li key={index}>{entry}</li>)}</ul>}
-              </td>)}
+        {visible.map(({ title, rows }) => <ParameterGroupSources key={title}><tbody>
+          <tr className="matrix-group"><th scope="rowgroup" colSpan={products.length + 1}><div className="parameter-group-heading"><span>{title}</span><SourcesSwitch /></div></th></tr>
+          {rows.map(({ key, label, field, cells, differs, note }) => <tr key={key} data-parameter-row data-different={highlight && differs ? "true" : undefined}>
+            <th scope="row" className="matrix-label">
+              <ParameterLabel field={field} label={label} />
+              {note && <span className="mt-1 block text-[0.625rem] font-normal text-[#f3cf92]">{note}</span>}
+            </th>
+            {cells.map((value, index) =>
+              <td key={products[index].slug}><ParameterValue field={field} value={value} /></td>)}
           </tr>)}
-        </tbody>)}
+        </tbody></ParameterGroupSources>)}
       </table>
     </div>
     {!visible.length && products.length >= 2 && <p role="status" className="border-t p-4 text-sm text-muted-foreground">
-      {differencesOnly ? "No differences in the published specs shown." : "No shared published specs."}
+      {differencesOnly ? "No confirmed differences among directly comparable values." : "No shared published specs."}
     </p>}
   </div>;
 }
@@ -152,7 +153,7 @@ export function ComparisonGrid({ products, catalog, groups, explicitIds }: {
     </div>
     {picking && products.length < 4 && <ProductPicker products={catalog} selected={products} onClose={closePicker}
       onPick={(product) => { if (!pending) { update([...products, product]); closePicker(); } }} />}
-    {mixed && <p className="border-b px-0 py-3 text-sm text-muted-foreground">Mixed categories — shared specs only</p>}
+    {mixed && <p className="border-b px-0 py-3 text-sm text-muted-foreground">Mixed categories · Some parameters may not apply</p>}
     {products.length < 2 && <p className="my-4 text-sm text-muted-foreground">{products.length ? "Add one more product to compare specs." : "Select two to four products to compare."}</p>}
     {products.length > 0 ? <div className="mt-3">
       <CompareTable products={products} groups={products.length > 1 ? groups : []} highlight={highlight} differencesOnly={differences}

@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { ComparisonGrid, type ComparisonProduct, type PickerProduct } from "@/components/catalog/comparison-grid";
-import { genderLabel, type CatalogCard } from "@/lib/arcteryx-view";
+import { genderLabel, type CatalogCard, type ProductDetail } from "@/lib/arcteryx-view";
 import { listProducts, readProducts } from "@/lib/catalog";
 import { buildComparison, comparisonIds } from "@/lib/comparison";
+
+import { parametersOf } from "@/lib/parameters/arcteryx";
+import { formatValue, getParameter } from "@/lib/parameters/model";
+import { fieldsByKey } from "@/lib/parameters/registry";
 
 export const metadata: Metadata = {
   title: "Compare products",
@@ -23,10 +27,14 @@ function picker(product: CatalogCard): PickerProduct {
 export default async function ComparePage({ searchParams }: PageProps<"/compare">) {
   const { ids } = await searchParams;
   const [products, catalog] = await Promise.all([readProducts(comparisonIds(ids)), listProducts()]);
+  const price = fieldsByKey.get("msrp")!;
+  const selected = products.map((product: ProductDetail) => ({
+    ...summary(product), priceLabel: formatValue(price, getParameter(parametersOf(product), price)),
+  }));
   return (
     <div className="site-width py-7 sm:py-11">
       <h1 className="page-title mb-5 sm:mb-7">Compare products</h1>
-      <ComparisonGrid products={products.map(summary)} catalog={catalog.map(picker)}
+      <ComparisonGrid products={selected} catalog={catalog.map(picker)}
         groups={buildComparison(products)} explicitIds={ids !== undefined} />
     </div>
   );

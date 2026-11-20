@@ -394,6 +394,7 @@
     --product-width: max(7.15rem, calc((100cqw - var(--label-width) - 8px) / 2));
     overflow: auto;
     max-height: 69dvh;
+    scroll-padding-top: 12rem;
     scrollbar-width: thin;
   }
 
@@ -448,9 +449,10 @@
     @apply py-1.5 font-mono text-[0.65rem] tracking-wider text-muted-foreground uppercase;
   }
 
-  .matrix-group span {
+  .matrix-group .parameter-group-heading {
     position: sticky;
     left: 0.5rem;
+    width: min(100%, calc(100cqw - 1.75rem));
   }
 
   .compare-thumb {
@@ -472,5 +474,64 @@
     .home-image {
       aspect-ratio: 5 / 4;
     }
+  }
+}
+
+@layer components {
+  .parameter-label {
+    @apply inline-flex max-w-full flex-wrap items-center gap-x-1;
+  }
+
+  .parameter-help {
+    @apply inline-flex align-middle;
+  }
+
+  .parameter-help-button {
+    @apply inline-grid size-6 shrink-0 place-items-center rounded-sm text-muted-foreground hover:text-primary focus-visible:text-primary;
+  }
+
+  .parameter-help-button[aria-expanded="true"] {
+    @apply text-primary;
+  }
+
+  .parameter-tooltip {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    width: min(17rem, calc(100vw - 20px));
+    overflow-y: auto;
+    @apply rounded-sm border border-input bg-popover p-3 text-left text-xs leading-relaxed font-normal text-muted-foreground shadow-xl;
+  }
+
+  .parameter-group-heading {
+    @apply flex items-center justify-between gap-2;
+  }
+
+  .parameter-sources-switch {
+    @apply min-h-7 shrink-0 border border-border px-2 text-xs font-normal normal-case tracking-normal text-muted-foreground hover:border-input hover:text-foreground;
+  }
+
+  .parameter-sources-switch[aria-checked="true"] {
+    @apply border-primary/40 bg-primary/10 text-primary;
+  }
+
+  .parameter-sources {
+    @apply mt-2 border-l border-border pl-2 text-[0.69rem] leading-snug text-muted-foreground;
+  }
+
+  .parameter-parts {
+    @apply grid gap-2;
+  }
+
+  .parameter-part {
+    @apply min-w-0 border border-border p-2.5;
+  }
+
+  .parameter-sections > section > dl > div > dd > .parameter-parts {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  }
+
+  .comparison-matrix .parameter-part {
+    @apply p-1.5 sm:p-2.5;
   }
 }

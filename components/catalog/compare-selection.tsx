@@ -96,7 +96,7 @@ export function CompareDock() {
               </div>
             ))}
           </div>
-          {mixed && <p className="mt-1 text-xs text-muted-foreground">Mixed categories — shared specs only</p>}
+          {mixed && <p className="mt-1 text-xs text-muted-foreground">Mixed categories · Some parameters may not apply</p>}
         </div>
         <div className="ml-auto flex shrink-0 gap-1.5">
           <Button type="button" variant="ghost" className="h-9" onClick={() => rememberSelection([])}>Clear</Button>

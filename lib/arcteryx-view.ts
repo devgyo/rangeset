@@ -1,4 +1,5 @@
 import { decode } from "html-entities";
+import type { Profile } from "./parameters/model";
 
 export const unpublished = "Not published";
 export const categoryOrder = [
@@ -29,7 +30,7 @@ export type Colorway = ColorSwatch & { photos: Photo[] };
 export type ProductDetail = CatalogCard & {
   url: string | null; verifiedAt: string | null; description: string; materials: string[];
   features: { label: string; values: string[] }[];
-  facility: string; year: number | null; season: string; sizes: string[]; colorways: Colorway[];
+  facility: string; year: number | null; season: string; sizes: string[]; colorways: Colorway[]; parameters?: Profile;
 };
 
 export function plainText(value: unknown): string {
