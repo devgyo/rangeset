@@ -1,6 +1,6 @@
 # Rangeset 术语表 v0.1（简体中文 / 日本語）
 
-来源字段：`lib/parameters/registry.ts` v1.5.1、`model.ts`、`fabric.ts`、`components/catalog/*`、`app/*`；品类来自 Neon `products.category`。收录范围见 v1.5.1 参数标准。
+来源字段：`lib/parameters/registry.ts` v1.6.0、`model.ts`、`fabric.ts`、`components/catalog/*`、`app/*`；品类来自 Neon `products.category`。收录范围见 v1.6.0 参数标准。
 
 此页保留原始调研的可读结构。运行时术语及补充键以 `glossary.csv` 为准。待审项见 [review.md](review.md)。依据代号见文末。
 
@@ -238,6 +238,8 @@
 | Search products or specs | 搜索商品或参数 | 商品名・スペックで検索 |  |  |
 | Search by name, category, or gender | 按名称、品类或性别搜索 | 名前・カテゴリー・性別で検索 |  |  |
 | Sort | 排序 | 並び替え |  |  |
+| Featured | 综合排序 | おすすめ順 |  |  |
+| Featured: in stock on the brand site, complete card specs, and released in the latest two seasons come first; brands are interleaved by share within each group. No paid placement, no scores, no brand favoritism. | 综合排序：官网有货、卡片参数齐全、近两季发布的优先；同组内各品牌按占比穿插。不收费、不打分、不看品牌。 | おすすめ順：公式サイトで在庫あり・カード項目がそろっている・直近2シーズン発売の商品を優先し、各グループ内ではブランドを掲載数の比率で交互に並べます。掲載料・スコア付け・ブランドによる優遇はありません。 |  |  |
 | All | 全部 | すべて |  |  |
 | Family | 系列 | シリーズ |  |  |
 | Line | 产品线 | ライン |  |  |

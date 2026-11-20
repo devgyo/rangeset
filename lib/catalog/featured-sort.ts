@@ -1,0 +1,88 @@
+export const defaultCatalogSort = "featured";
+export const catalogSorts = [defaultCatalogSort, "name", "price-asc", "price-desc", "weight"] as const;
+export type CatalogSort = (typeof catalogSorts)[number];
+
+export function catalogSort(value: string | null): CatalogSort {
+  return catalogSorts.find((sort) => sort === value) ?? defaultCatalogSort;
+}
+
+type Tier = "A" | "B" | "C" | "D";
+const tiers: readonly Tier[] = ["A", "B", "C", "D"];
+
+export type FeaturedProduct = {
+  slug: string;
+  name: string;
+  brandSlug: string;
+  styleFamily: string | null;
+  releaseSeason: number | null;
+  inStock: boolean | null;
+  stockRatio: number | null;
+  cardValueCount: number;
+};
+
+export function releaseSeasonRank(year: number | null, season: string): number | null {
+  if (year === null) return null;
+  const code = season.toLowerCase().trim().replace(/\s+/g, "").replace(/[–-]/g, "/");
+  if (/^(s|ss|spring|summer|spring\/summer)$/.test(code)) return year * 2;
+  if (/^(fw|aw|fall|autumn|winter|(?:fall|autumn)\/winter)$/.test(code)) return year * 2 + 1;
+  return null;
+}
+
+function tierFor(product: FeaturedProduct, recent: ReadonlySet<number>): Tier {
+  if (product.inStock === false || (product.stockRatio !== null && product.stockRatio < 0.5)) return "D";
+  if (product.cardValueCount < 3) return "C";
+  return product.releaseSeason !== null && recent.has(product.releaseSeason) ? "A" : "B";
+}
+
+function groupBy<T, K>(products: readonly T[], keyOf: (product: T) => K): Map<K, T[]> {
+  const groups = new Map<K, T[]>();
+  for (const product of products) {
+    const key = keyOf(product);
+    const group = groups.get(key);
+    if (group) group.push(product);
+    else groups.set(key, [product]);
+  }
+  return groups;
+}
+
+const nameOrder = new Intl.Collator("en");
+
+function brandQueue<T extends FeaturedProduct>(products: T[]): T[] {
+  const ordered = [...products].sort((a, b) => (b.releaseSeason ?? -1) - (a.releaseSeason ?? -1)
+    || nameOrder.compare(a.name, b.name) || nameOrder.compare(a.slug, b.slug));
+  const families = groupBy(ordered, (product) =>
+    JSON.stringify([product.releaseSeason, product.styleFamily, product.styleFamily ? null : product.slug]));
+  return [...families.values()].flat();
+}
+
+function interleaveBrands<T extends FeaturedProduct>(products: T[]): T[] {
+  const brands = groupBy(products, (product) => product.brandSlug);
+  const active = [...brands.keys()].sort().map((brand) => {
+    const queue = brandQueue(brands.get(brand)!);
+    return {queue, count: queue.length, position: 0, current: 0};
+  });
+  const result: T[] = [];
+  let total = products.length;
+  while (active.length) {
+    let selected = 0;
+    for (const [index, brand] of active.entries()) {
+      brand.current += brand.count;
+      if (brand.current > active[selected].current) selected = index;
+    }
+    const brand = active[selected];
+    result.push(brand.queue[brand.position++]);
+    brand.current -= total;
+    if (brand.position === brand.count) {
+      active.splice(selected, 1);
+      total -= brand.count;
+    }
+  }
+  return result;
+}
+
+export function rankFeatured<T extends FeaturedProduct>(products: readonly T[]): {product: T; tier: Tier}[] {
+  const recent = new Set([...new Set(products.flatMap(({releaseSeason}) => releaseSeason === null ? [] : [releaseSeason]))]
+    .sort((a, b) => b - a).slice(0, 2));
+  const grouped = groupBy(products, (product) => tierFor(product, recent));
+  return tiers.flatMap((tier) => interleaveBrands(grouped.get(tier) ?? []).map((product) => ({product, tier})));
+}

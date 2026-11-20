@@ -13,7 +13,8 @@ import {
 } from "@/lib/arcteryx-view";
 
 import {isCatalogProduct} from "@/lib/catalog-scope";
-import {selectCardParameters, type CardParameters} from "@/lib/parameters/card";
+import {countCardValues, selectCardParameters, type CardParameters} from "@/lib/parameters/card";
+import {releaseSeasonRank, type FeaturedProduct} from "@/lib/catalog/featured-sort";
 import { classificationFilterValue } from "@/lib/parameters/classification";
 import { normalizeArcProduct, parametersOf, type IndexedSpec } from "@/lib/parameters/arcteryx";
 
@@ -41,7 +42,8 @@ const cardPayload = sql<Record<string, unknown>>`jsonb_build_object(
 ) || ${classificationPayload}`;
 
 const catalogCardPayload = sql<Record<string, unknown>>`${cardPayload} || jsonb_build_object(
-  'materials', ${raw}->'materials', 'fit', ${raw}->'fit'
+  'materials', ${raw}->'materials', 'fit', ${raw}->'fit',
+  'origYear', ${raw}->'origYear', 'origSeason', ${raw}->'origSeason'
 )`;
 
 type Scope = { category: string; family: string };
@@ -56,6 +58,14 @@ async function catalogRows(slugs?: string[], mode: "none" | "card" | "detail" = 
   ) : undefined;
   const query = db.select({
     id: products.id, slug: products.slug, brand: brands.name, name: products.name,
+    brandSlug: brands.slug, styleFamily: products.analyticsFamily,
+    stockRatio: mode === "card" && !scope ? sql<number | null>`(
+      select avg(${prices.inStock}::int)::float8
+      from ${prices}
+      where ${prices.productId} = ${products.id}
+        and ${prices.channel} = 'brand_us' and ${prices.variant} <> ''
+        and ${prices.fetchedAt} = ${productRaw.fetchedAt}
+    )` : sql<null>`null`,
     category: products.category, gender: products.gender, url: products.url,
     status: products.status, lastSeen: products.lastSeen, isHardshell: products.isHardshell, subTags: products.subTags,
     overrideValues: sql<Record<string, unknown>>`coalesce((
@@ -201,7 +211,9 @@ function byProduct<T extends { productId: number }>(rows: T[]) {
   return groups;
 }
 
-function toView(row: CatalogRow, dbSpecs: SpecRow[], dbPrices: PriceRow[], detail: boolean): ProductDetail {
+type CatalogView = ProductDetail & Pick<FeaturedProduct, "brandSlug" | "styleFamily" | "stockRatio">;
+
+function toView(row: CatalogRow, dbSpecs: SpecRow[], dbPrices: PriceRow[], detail: boolean): CatalogView {
   const payload = record(row.payload);
   const features = featuresOf(payload.features);
   const materials = textList(payload.materials);
@@ -232,8 +244,9 @@ function toView(row: CatalogRow, dbSpecs: SpecRow[], dbPrices: PriceRow[], detai
   const colorOptions = payload.colourOptions;
   const summary = plainText(payload.shortDescription);
   const veilance = payload.veilance === true || entriesOfBreadcrumbs(payload.breadcrumbs);
-  const product: ProductDetail = {
+  const product: CatalogView = {
     name: row.name, slug: row.slug, brand: row.brand, category: row.category, url: row.url,
+    brandSlug: row.brandSlug, styleFamily: row.styleFamily, stockRatio: row.stockRatio,
     gender: productGender(row.gender, row.overrides.has("gender") ? undefined : payload.isUnisex),
     family: productFamily(row.name), subTags: row.subTags, veilance, isHardshell: row.isHardshell, status: row.status,
     image: safeImage(payload.image ?? record(record((Array.isArray(colorOptions) ? colorOptions : [])[0]).image).url),
@@ -259,7 +272,7 @@ function entriesOfBreadcrumbs(value: unknown) {
     plainText(label).toLowerCase() === "veilance" || (typeof url === "string" && /(?:^|\/)veilance(?:\/|$)/i.test(url)));
 }
 
-function exampleProducts(): ProductDetail[] {
+function exampleProducts(): CatalogView[] {
   const keys = {
     weight: "weight_g", weightSize: "weight_size", membrane: "membrane", layers: "layers", faceDenier: "face_denier",
     backLength: "centre_back_length_cm", fit: "fit", pitZips: "pit_zips", helmetHood: "helmet_hood",
@@ -275,6 +288,7 @@ function exampleProducts(): ProductDetail[] {
     }
     return {
       slug: item.slug, brand: item.brand, name: item.model, category: "Shell Jackets", gender: null, family: null,
+      brandSlug: item.brand.toLowerCase(), styleFamily: null, stockRatio: null,
       subTags: [], veilance: false, isHardshell: true, status: item.status ?? "active", example: true,
       image: null, hero: null, swatches: [], activities: [], summary: "", msrp: item.specs.price?.value ?? null,
       inStock: null, specs, url: item.sourceUrl, verifiedAt: item.verifiedAt, description: "", materials: [], features: [],
@@ -307,16 +321,18 @@ async function loadProducts(mode: "card" | "detail", slugs?: string[], scope?: S
   return rows.map((row) => toView(row, specsByProduct.get(row.id) ?? [], pricesByProduct.get(row.id) ?? [], mode === "detail"));
 }
 
-export type CatalogListing = CatalogCard & {card: CardParameters};
+export type CatalogListing = CatalogCard & FeaturedProduct & {card: CardParameters};
 
-function cardOnly(product: ProductDetail): CatalogListing {
+function cardOnly(product: CatalogView): CatalogListing {
   const { slug, name, brand, category, gender, family, subTags, veilance, isHardshell, status, example,
     image, hero, swatches, activities, summary, msrp, currency, inStock, specs } = product;
   const profile = parametersOf(product);
+  const card = selectCardParameters(profile);
   return { slug, name, brand, category, gender, family, subTags, veilance, isHardshell, status, example,
     image, hero, swatches, activities, summary, msrp, currency: example ? "USD" : currency, inStock, specs,
     productType: classificationFilterValue(profile.values.product_type), protectionType: classificationFilterValue(profile.values.protection_type),
-    card: selectCardParameters(profile) };
+    brandSlug: product.brandSlug, styleFamily: product.styleFamily, stockRatio: product.stockRatio,
+    releaseSeason: releaseSeasonRank(product.year, product.season), cardValueCount: countCardValues(card, profile), card };
 }
 
 export const listProducts = cache(async () => (await loadProducts("card")).map(cardOnly));

@@ -320,6 +320,8 @@
     "color_count": "{count} 种配色",
     "catalog_filters": "目录筛选",
     "product_categories": "品类",
+    "sort_featured": "综合排序",
+    "sort_featured_help": "综合排序：官网有货、卡片参数齐全、近两季发布的优先；同组内各品牌按占比穿插。不收费、不打分、不看品牌。",
     "sort_name": "商品名 A–Z",
     "sort_price_asc": "价格从低到高",
     "sort_price_desc": "价格从高到低",

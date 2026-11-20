@@ -29,6 +29,8 @@ test("all three language catalogs, home navigation, and searches exclude footwea
       assert.ok(!html.includes("Footwear"), prefix + path);
       for (const slug of shoeSlugs) assert.ok(!html.includes(slug), slug);
       if (path === "/products") {
+        assert.match(html, /<option value="featured" selected=""/);
+        assert.ok(html.includes(translations[prefix].ui.sort_featured_help), prefix);
         const cards = [...html.matchAll(/<article class="gear-card [^"]*">([\s\S]*?)<\/article>/g)];
         assert.ok(cards.length > 0, prefix);
         for (const [, card] of cards) {

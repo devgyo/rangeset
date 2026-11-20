@@ -11,15 +11,20 @@ import { ColorDot, GenderPill, ProductBadges, ProductImage } from "@/components/
 import { categoryCounts, type CatalogCard } from "@/lib/arcteryx-view";
 
 import {ParameterHelp} from "@/components/catalog/parameter-help";
+import {catalogSort, defaultCatalogSort, rankFeatured, type CatalogSort} from "@/lib/catalog/featured-sort";
 import {searchCatalog} from "@/lib/catalog-search";
 import type {CatalogListing} from "@/lib/catalog";
 import { cardFields, fieldsByKey } from "@/lib/parameters/registry";
 import { missing } from "@/lib/parameters/model";
 
 const PAGE_SIZE = 24;
-const sortOptions = [
-  ["name", "ui.sort_name"], ["price-asc", "ui.sort_price_asc"], ["price-desc", "ui.sort_price_desc"], ["weight", "ui.sort_weight"],
-];
+const sortLabels: Record<CatalogSort, string> = {
+  featured: "ui.sort_featured",
+  name: "ui.sort_name",
+  "price-asc": "ui.sort_price_asc",
+  "price-desc": "ui.sort_price_desc",
+  weight: "ui.sort_weight",
+};
 const genders = [["", "ui.all"], ["men", "ui.filter_men"], ["women", "ui.filter_women"], ["unisex", "gender.unisex"]];
 const lines = [["", "ui.all"], ["mainline", "ui.mainline"], ["veilance", "keep.veilance"]];
 
@@ -78,7 +83,7 @@ export function CatalogBrowser({ products }: { products: CatalogListing[] }) {
   const gender = params.get("gender") ?? "";
   const line = params.get("line") ?? "";
   const family = params.get("family") ?? "";
-  const sort = params.get("sort") ?? "name";
+  const sort = catalogSort(params.get("sort"));
   const productType = params.get("type") ?? "";
   const protectionType = params.get("protection") ?? (params.get("hard") === "1" ? "hard_shell" : "");
   const deferredQuery = useDeferredValue(query);
@@ -122,18 +127,19 @@ export function CatalogBrowser({ products }: { products: CatalogListing[] }) {
     (!gender || product.gender === gender) && (!family || product.family === family) &&
     (!line || product.veilance === (line === "veilance")) && (!productType || product.productType === productType) &&
     (!protectionType || product.protectionType === protectionType));
-  const results = searchCatalog(filtered, deferredQuery);
-  if (sort !== "name") results.sort((a, b) => {
-    const first = sort === "weight" ? a.card.weight : a.msrp;
-    const second = sort === "weight" ? b.card.weight : b.msrp;
-    if (typeof first !== "number") return typeof second === "number" ? 1 : 0;
-    if (typeof second !== "number") return -1;
-    if (sort !== "weight" && a.currency !== b.currency) {
-      return (a.currency ?? "").localeCompare(b.currency ?? "");
-    }
-    return (first - second) * (sort === "price-desc" ? -1 : 1) || a.name.localeCompare(b.name);
-  });
-  else results.sort((a, b) => a.name.localeCompare(b.name));
+  const matches = searchCatalog(filtered, deferredQuery);
+  const results = sort === defaultCatalogSort ? rankFeatured(matches).map(({product}) => product)
+    : [...matches].sort((a, b) => {
+      if (sort === "name") return a.name.localeCompare(b.name);
+      const first = sort === "weight" ? a.card.weight : a.msrp;
+      const second = sort === "weight" ? b.card.weight : b.msrp;
+      if (typeof first !== "number") return typeof second === "number" ? 1 : 0;
+      if (typeof second !== "number") return -1;
+      if (sort !== "weight" && a.currency !== b.currency) {
+        return (a.currency ?? "").localeCompare(b.currency ?? "");
+      }
+      return (first - second) * (sort === "price-desc" ? -1 : 1) || a.name.localeCompare(b.name);
+    });
   const count = page.filters === deferredParams ? page.count : PAGE_SIZE;
 
   return (
@@ -153,12 +159,16 @@ export function CatalogBrowser({ products }: { products: CatalogListing[] }) {
             <input ref={searchInput} type="search" defaultValue={query} onChange={(event) => update({ q: event.target.value }, true)}
               placeholder={t("card.search_placeholder")} className="catalog-input w-full pl-9" />
           </label>
-          <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>{t("ui.sort")}</span>
-            <select value={sort} onChange={(event) => update({ sort: event.target.value === "name" ? "" : event.target.value })} className="catalog-input">
-              {sortOptions.map(([value, label]) => <option key={value} value={value}>{t(label)}</option>)}
-            </select>
-          </label>
+          <div className="flex items-center gap-2" data-parameter-inline>
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{t("ui.sort")}</span>
+              <select value={sort} data-parameter-value
+                onChange={(event) => update({ sort: event.target.value === defaultCatalogSort ? "" : event.target.value })} className="catalog-input">
+                {Object.entries(sortLabels).map(([value, label]) => <option key={value} value={value}>{t(label)}</option>)}
+              </select>
+            </label>
+            <ParameterHelp label={t("ui.sort_featured")} text={t("ui.sort_featured_help")} />
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
           <div role="group" aria-label={t("field.gender")} className="filter-group">
@@ -192,7 +202,7 @@ export function CatalogBrowser({ products }: { products: CatalogListing[] }) {
       </section>
       <div className="mb-3 flex min-h-7 items-center justify-between gap-3">
         <p role="status" className="font-mono text-xs tabular-nums text-muted-foreground">{t("ui.product_count", {count: results.length})}</p>
-        {Boolean(category || query || gender || line || family || productType || protectionType || sort !== "name") &&
+        {Boolean(category || query || gender || line || family || productType || protectionType || sort !== defaultCatalogSort) &&
           <button type="button" className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             onClick={() => window.history.pushState(null, "", location.pathname)}>{t("ui.reset_filters")}</button>}
       </div>

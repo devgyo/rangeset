@@ -1,6 +1,6 @@
-# Rangeset product parameter standard v1.5.1
+# Rangeset product parameter standard v1.6.0
 
-The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.5.1 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
+The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.6.0 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
 
 ## Catalog scope
 
@@ -32,6 +32,19 @@ When multiple Body records exist, the composition from the named Body record tak
 | `oversized` | Oversized, Oversized Fit | Oversized | 超宽松版型 | オーバーサイズ |
 
 The mapping ignores case and normalizes hyphens and spacing. Search accepts the short or full model number from the Arc’teryx catalog slug, case-insensitively. It first applies the normal token search. When no result matches, it may omit the whole qualifiers `hooded`, `hoodie`, and `hoody`, or normalize the possessive `jacket's` to `jacket`. On retry, an exact product name takes precedence over other token matches. Search does not apply fuzzy matching. See the [card coverage and verification report](catalog-cards-v1.5.0.md).
+
+## Featured catalog sort
+
+Featured is the default in all three languages. It ranks the current filtered and searched result set before pagination:
+
+- **A:** at least three card values, with a release in one of the two latest distinct published seasons in the results.
+- **B:** at least three card values, with an older or unpublished release season.
+- **C:** at most two card values.
+- **D:** explicitly sold out, or fewer than half of the reported size–color combinations are in stock. D takes precedence over all other tiers.
+
+Unknown stock does not downgrade a product. A published value or an explicit N/A counts toward card completeness. The main-fabric composition fallback counts when shown. Within each tier, smooth weighted round-robin interleaves brands in proportion to their product counts. Brand queues use newest season first, same-season style families together, then name A–Z. Missing release seasons follow dated items within their tier and brand. Selecting Featured clears the sort URL parameter. Name, price and weight remain available.
+
+See [the composite sort report](composite-sort-v1.6.0.md) for the algorithm and data rules.
 
 ## Evidence and review
 
@@ -202,4 +215,4 @@ These fields support internal data review. They are excluded from detail and com
 
 ## Changelog
 
-- **v1.5.1** removes the source controls, source links, and original source text from product detail and comparison views. Evidence remains available internally for conflict handling and data verification.
+- **v1.6.0** introduces Featured as the default catalog sort and removes the source controls, source links, and original source text from product detail and comparison views. Evidence remains available internally for conflict handling and data verification.

@@ -281,6 +281,8 @@ ui.view_product,View {name},查看 {name},{name}を見る,本地化补充,,,need
 ui.color_count,{count} colors,{count} 种配色,{count}色,本地化补充,,,needs_review: v1 补充草译。
 ui.catalog_filters,Catalog filters,目录筛选,カタログの絞り込み,本地化补充,,,needs_review: v1 补充草译。
 ui.product_categories,Product categories,品类,カテゴリー,本地化补充,,,本地化复用已有术语 field.category，保留既有英文。
+ui.sort_featured,Featured,综合排序,おすすめ順,界面,,,
+ui.sort_featured_help,"Featured: in stock on the brand site, complete card specs, and released in the latest two seasons come first; brands are interleaved by share within each group. No paid placement, no scores, no brand favoritism.",综合排序：官网有货、卡片参数齐全、近两季发布的优先；同组内各品牌按占比穿插。不收费、不打分、不看品牌。,おすすめ順：公式サイトで在庫あり・カード項目がそろっている・直近2シーズン発売の商品を優先し、各グループ内ではブランドを掲載数の比率で交互に並べます。掲載料・スコア付け・ブランドによる優遇はありません。,界面,,,
 ui.sort_name,Name A–Z,商品名 A–Z,商品名順（A–Z）,本地化补充,,,needs_review: v1 补充草译。
 ui.sort_price_asc,Price low–high,价格从低到高,価格が安い順,本地化补充,,,needs_review: v1 补充草译。
 ui.sort_price_desc,Price high–low,价格从高到低,価格が高い順,本地化补充,,,needs_review: v1 补充草译。

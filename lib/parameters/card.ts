@@ -1,5 +1,5 @@
-import {cardFitAliases, type CardFit} from "./registry";
-import type {Fiber, Parameter, Part, Profile, RecycledContent} from "./model";
+import {cardFields, cardFitAliases, fieldsByKey, type CardFit} from "./registry";
+import {getParameter, type Fiber, type Parameter, type Part, type Profile, type RecycledContent} from "./model";
 
 export type CardParameters = {
   weight: number | null;
@@ -41,4 +41,20 @@ export function selectCardParameters(profile: Profile): CardParameters {
     mainFabric: (published(named?.fields.fabric_name) as string | undefined) ?? null,
     composition: primary ? {primary, fibers, recycled: recycled.size === 1 ? [...recycled][0] : null} : null,
   };
+}
+
+export function countCardValues(card: CardParameters, profile: Profile): number {
+  const materials = getParameter(profile, fieldsByKey.get("materials")!);
+  const body = materials.state === "known" ? (materials.value as Part[]).filter(({part}) => part === "body") : [];
+  const noBodyComposition = materials.state === "inapplicable" ||
+    (body.length > 0 && body.every(({fields}) => fields.fiber_content?.state === "inapplicable"));
+
+  const present = {
+    weight: card.weight !== null || getParameter(profile, fieldsByKey.get("weight")!).state === "inapplicable",
+    fit: card.fit !== null || getParameter(profile, fieldsByKey.get("fit")!).state === "inapplicable",
+    mainFabric: card.mainFabric !== null || card.composition !== null || materials.state === "inapplicable" ||
+      (noBodyComposition && body.every(({fields}) => fields.fabric_name?.state === "inapplicable")),
+    composition: card.composition !== null || noBodyComposition,
+  };
+  return cardFields.filter(({key}) => present[key]).length;
 }

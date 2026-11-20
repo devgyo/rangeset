@@ -320,6 +320,8 @@
     "color_count": "{count} colors",
     "catalog_filters": "Catalog filters",
     "product_categories": "Product categories",
+    "sort_featured": "Featured",
+    "sort_featured_help": "Featured: in stock on the brand site, complete card specs, and released in the latest two seasons come first; brands are interleaved by share within each group. No paid placement, no scores, no brand favoritism.",
     "sort_name": "Name A–Z",
     "sort_price_asc": "Price low–high",
     "sort_price_desc": "Price high–low",

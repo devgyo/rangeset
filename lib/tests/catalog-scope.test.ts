@@ -31,7 +31,7 @@ test("catalog guard recognizes raw and overridden footwear types in an allowed c
 });
 
 test("public parameter registry omits footwear parameter choices and help without removing clothing fit and lining", () => {
-  assert.equal(parameterVersion, "1.5.1");
+  assert.equal(parameterVersion, "1.6.0");
   assert.ok(!Object.hasOwn(groups, "footwear"));
   for (const style of ["shoe", "boot", "sandal", "mule"]) assert.ok(!Object.hasOwn(productTypes, style));
   for (const key of ["drop", "forefoot_stack", "heel_stack", "lugs", "outsole", "midsole", "upper", "waterproof_lining", "weight_basis"]) {

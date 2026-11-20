@@ -320,6 +320,8 @@
     "color_count": "{count}色",
     "catalog_filters": "カタログの絞り込み",
     "product_categories": "カテゴリー",
+    "sort_featured": "おすすめ順",
+    "sort_featured_help": "おすすめ順：公式サイトで在庫あり・カード項目がそろっている・直近2シーズン発売の商品を優先し、各グループ内ではブランドを掲載数の比率で交互に並べます。掲載料・スコア付け・ブランドによる優遇はありません。",
     "sort_name": "商品名順（A–Z）",
     "sort_price_asc": "価格が安い順",
     "sort_price_desc": "価格が高い順",
