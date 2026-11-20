@@ -450,6 +450,7 @@
   }
 
   .matrix-group .parameter-group-heading {
+    display: block;
     position: sticky;
     left: 0.5rem;
     width: min(100%, calc(100cqw - 1.75rem));
@@ -501,22 +502,6 @@
     width: min(17rem, calc(100vw - 20px));
     overflow-y: auto;
     @apply rounded-sm border border-input bg-popover p-3 text-left text-xs leading-relaxed font-normal text-muted-foreground shadow-xl;
-  }
-
-  .parameter-group-heading {
-    @apply flex items-center justify-between gap-2;
-  }
-
-  .parameter-sources-switch {
-    @apply min-h-7 shrink-0 border border-border px-2 text-xs font-normal normal-case tracking-normal text-muted-foreground hover:border-input hover:text-foreground;
-  }
-
-  .parameter-sources-switch[aria-checked="true"] {
-    @apply border-primary/40 bg-primary/10 text-primary;
-  }
-
-  .parameter-sources {
-    @apply mt-2 border-l border-border pl-2 text-[0.69rem] leading-snug text-muted-foreground;
   }
 
   .parameter-parts {

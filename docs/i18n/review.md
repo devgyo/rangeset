@@ -10,7 +10,6 @@
 | field.product_type | Product type | 款式 | アイテム | 争议：中文「款式」也可指设计风格；日文「アイテム」为服装零售惯用 |
 | field.colors | Colorways | 配色数 | カラー展開数 | 字段为数量；needs_review: 日文常写「カラー展開」，「数」为我方补 |
 | field.weave | Construction | 织法 | 織り・編み | 争议：含针织（Jersey/Knit），「织法」在中文可涵盖针织；needs_review |
-| field.fabric_issues | Unassigned material | 部位未明的材料 | 部位不明の素材 | needs_review: 内部审核用语，可再简化 |
 | field.upf | Sun protection | 防晒 | UVカット | needs_review: 日文亦常写「UPF」或「紫外線カット」 |
 | field.hydrostatic_head | Hydrostatic head | 静水压 | 耐水圧 | 争议：中文电商常写「防水指数」；检测标准称「静水压」 |
 | field.breathability | Breathability | 透湿性 | 透湿性 | 争议：中文口语「透气」，但「透气」也指空气透过；用「透湿」更准 |
@@ -36,7 +35,6 @@
 | type.parka | Parka | 派克大衣 | パーカ | needs_review: 日文「パーカ」也指连帽卫衣 |
 | type.suit | Suit | 套装 | スーツ | needs_review: 需先确认数据里 suit 指西装套装还是连体服 |
 | symbol.no | ○ No | ○ 无 | ○ なし | 注意：日本对比表惯用 ◯=有、×=无；我们 ○=无，日文版必须带文字「なし」，不能只显示符号；needs_review |
-| ui.indexed_brand_value | Indexed brand value | 品牌数据库字段 | ブランド登録値 | needs_review: 内部来源类型，可考虑不对用户显示 |
 | ui.language | Language | 语言 | 言語 | needs_review: v1 补充草译。 |
 | ui.navigation | Main navigation | 主导航 | メインナビゲーション | needs_review: v1 补充草译。 |
 | ui.hero_first | Specs, | 看参数， | 宣伝文句より、 | needs_review: v1 补充草译。 |

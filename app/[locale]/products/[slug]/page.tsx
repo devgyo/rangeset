@@ -6,7 +6,6 @@ import {currentLocale} from "@/i18n/seo";
 import {pageAlternates} from "@/i18n/routing";
 import {activityLabel, categoryLabel, displayParameter, genderDisplay, type Translator} from "@/i18n/copy";
 import { notFound } from "next/navigation";
-import { ArrowUpRight } from "lucide-react";
 import { ProductGallery } from "@/components/catalog/product-gallery";
 import { CompareButton } from "@/components/catalog/compare-selection";
 import { comparisonHref } from "@/lib/comparison";
@@ -19,6 +18,7 @@ import { formatPrice, type ProductDetail } from "@/lib/arcteryx-view";
 import { ParameterLabel, ParameterLegend, ParameterSections, ParameterValue } from "@/components/catalog/parameter-table";
 import { parametersOf } from "@/lib/parameters/arcteryx";
 import { compareValues, getParameter, keyParameters, parameterGroups } from "@/lib/parameters/model";
+import {publicParameterGroups, withoutParameterEvidence} from "@/lib/public-parameters";
 import { fieldsByKey, parameterVersion } from "@/lib/parameters/registry";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/products/[slug]">): Promise<Metadata> {
@@ -85,7 +85,7 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
   const [siblings, t, locale] = await Promise.all([relatedProducts(product), getTranslations(), currentLocale()]);
   const profile = parametersOf(product);
   const core = keyParameters(profile);
-  const sections = parameterGroups([profile]);
+  const sections = publicParameterGroups(parameterGroups([profile]));
   const priceField = fieldsByKey.get("msrp")!;
 
   return <article className="site-width py-7 sm:py-11">
@@ -105,15 +105,11 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
             {t(product.inStock === true ? "ui.in_stock" : product.inStock === false ? "ui.out_of_stock" : "ui.stock_not_published")}
           </Badge>
         </div>
-        {(product.summary || product.description) && <p className="mt-5 max-w-prose text-base leading-relaxed text-muted-foreground">{product.summary || product.description}</p>}
         {product.activities.length > 0 && <ul aria-label={t("field.activities")} className="mt-4 flex flex-wrap gap-1.5">
           {product.activities.map((activity) => <li key={activity}><Badge variant="outline">{activityLabel(t, activity)}</Badge></li>)}
         </ul>}
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <CompareButton product={{ slug: product.slug, name: product.name, image: product.image, category: product.category, gender: product.gender }} />
-          {product.url && <a href={product.url} className="back-link px-1 py-2">
-            {t(product.example ? "ui.example_source" : locale === "en" ? "ui.official_arc_page" : "ui.official_page")} <ArrowUpRight size={16} aria-hidden="true" />
-          </a>}
         </div>
       </div>
       <div className="min-w-0 lg:col-start-1 lg:row-start-1">
@@ -125,7 +121,7 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
       <dl className="key-spec-strip grid gap-px border bg-border" style={{ "--metric-count": core.length } as CSSProperties}>
         {core.map((field) => <div data-parameter-row key={field.key} className={`min-w-0 bg-card p-3 sm:p-4 ${core.length % 2 ? "max-sm:last:col-span-2" : ""}`}>
           <dt className="control-label"><ParameterLabel field={field} /></dt>
-          <dd className="mt-1 break-words text-sm leading-snug sm:text-base"><ParameterValue field={field} value={getParameter(profile, field)} withEvidence={false} /></dd>
+          <dd className="mt-1 break-words text-sm leading-snug sm:text-base"><ParameterValue field={field} value={withoutParameterEvidence(field, getParameter(profile, field))} /></dd>
         </div>)}
       </dl>
     </section>}

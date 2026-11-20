@@ -1,13 +1,14 @@
 import assert from "node:assert/strict";
 import {test} from "node:test";
 import {createTranslator} from "next-intl";
-import {categoryLabel, displayParameter, englishMessage, formatSeason, partDisplay} from "../../i18n/copy";
+import {categoryLabel, displayParameter, formatSeason, partDisplay} from "../../i18n/copy";
 import {languageAlternates, languageTags, localizedPath, pageAlternates} from "../../i18n/routing";
 import en from "../../messages/en.json";
 import zh from "../../messages/zh.json";
 import ja from "../../messages/ja.json";
 import {categoryOrder} from "../arcteryx-view";
 import {known, missing} from "../parameters/model";
+import {withoutParameterEvidence} from "../public-parameters";
 import {fieldsByKey, groups, productTypes, protectionTypes} from "../parameters/registry";
 
 const messages = {en, zh, ja};
@@ -35,8 +36,12 @@ test("unchanged English paths and self-canonicals use one locale map", () => {
 
 test("generated messages cover the registry and only the five approved help translations", () => {
   for (const [locale, catalogue] of Object.entries(messages)) {
-    for (const key of fieldsByKey.keys()) assert.ok(Object.hasOwn(catalogue.field, key), locale + " " + key);
-    for (const key of Object.keys(groups)) assert.ok(Object.hasOwn(catalogue.group, key), locale + " " + key);
+    for (const field of fieldsByKey.values()) {
+      if (field.group !== "supplemental") assert.ok(Object.hasOwn(catalogue.field, field.key), locale + " " + field.key);
+    }
+    for (const key of Object.keys(groups)) {
+      if (key !== "supplemental") assert.ok(Object.hasOwn(catalogue.group, key), locale + " " + key);
+    }
     for (const key of Object.keys(productTypes)) assert.ok(Object.hasOwn(catalogue.type, key), locale + " " + key);
     for (const key of Object.keys(protectionTypes)) assert.ok(Object.hasOwn(catalogue.protection, key), locale + " " + key);
   }
@@ -70,9 +75,13 @@ test("seasons, part labels and categories use the glossary without modifying sou
   for (const category of categoryOrder) assert.equal(categoryLabel(translators.en, category), category);
   assert.equal(categoryLabel(translators.zh, "Shell Jackets"), zh.cat.shell_jackets);
   const evidence = "Body: 100D GORE-TEX® PRO ePE, 136 gsm, FC0 DWR";
-  assert.equal(englishMessage("ui.parsed_brand_text"), "Parsed brand text");
-  const raw = known([evidence], []);
-  assert.equal(displayParameter(translators.ja, "ja", field("source_notes"), raw), evidence);
+  const raw = known("GORE-TEX® PRO ePE", [{
+    url: "https://example.com/source", path: "product.materials[0]", raw: evidence, method: "parsed", updatedAt: null,
+  }]);
+  const publicValue = withoutParameterEvidence(field("fabric_name"), raw);
+  assert.equal(displayParameter(translators.ja, "ja", field("fabric_name"), publicValue), raw.value);
+  assert.deepEqual(publicValue.evidence, []);
+  assert.equal(raw.evidence[0].raw, evidence);
 });
 
 test("localizes clothing fibers, proportions and activity values while keeping trademarks unchanged", () => {

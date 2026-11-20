@@ -1,6 +1,6 @@
-# Rangeset product parameter standard v1.5.0
+# Rangeset product parameter standard v1.5.1
 
-The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.5.0 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
+The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.5.1 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
 
 ## Catalog scope
 
@@ -35,7 +35,7 @@ The mapping ignores case and normalizes hyphens and spacing. Search accepts the 
 
 ## Evidence and review
 
-Each fact carries the source URL, original field path and text, extraction method, and source update time when available. Parsed and indexed evidence remains attached when the values conflict. Each group in both tables has a **Show sources** switch. Sources start hidden. When claims are merged, their original evidence is retained. Existing raw payloads and indexed specs stay in their original storage.
+Each fact carries the source URL, original field path and text, extraction method, and source update time when available. Evidence is retained internally for resolving conflicts and verifying data. Product detail and comparison pages omit evidence, source links, and raw source text from their parameter presentation. Existing raw payloads and indexed specs stay in their original storage.
 
 - **Not published** means there is no usable published observation for an applicable field.
 - **Not applicable** means the field does not apply to the product's construction or type.
@@ -75,7 +75,7 @@ The Weight row includes the reference size when published. Unpublished sizes are
 
 ## Coverage limits
 
-Weight reference sizes, down fill mass, and test conditions are often absent. Fill-power values keep their published number with units and methods withheld when the source does not identify them. Broad construction claims and treatment labels do not establish a temperature rating or absence of PFAS. Brand-labelled fabric, dyeing, and assembly locations remain distinct. Unclear material text and otherwise unmapped feature statements are available under Supplementary source text.
+Weight reference sizes, down fill mass, and test conditions are often absent. Fill-power values keep their published number with units and methods withheld when the source does not identify them. Broad construction claims and treatment labels do not establish a temperature rating or absence of PFAS. Brand-labelled fabric, dyeing, and assembly locations remain distinct. Unclear material text and otherwise unmapped feature statements remain available in internal records.
 
 Terminology references include the [denier definition in the US Code of Federal Regulations](https://www.govinfo.gov/content/pkg/CFR-2025-title21-vol8/xhtml/CFR-2025-title21-vol8-chapI-subchapK.html), [GORE-TEX laminate construction](https://www.gore-tex.com/en_uk/blog/the-gore-tex-membrane-what-it-is-how-it-works-and-why-you-need-it), and [IDFB fill-power terminology](https://idfb.net/consumer-resources/down-better-insulation-better-for-your-health).
 
@@ -112,7 +112,7 @@ The component fields appear within each fabric or fill record.
 
 ### Main fabric
 
-Published material records are organized as **Body**, **Reinforcement**, **Panel**, then **Lining**. The source label and original text remain in the evidence. Face and Backer are layers of an identified part. Contrast panels and explicit inserts map to Panel, reinforced inserts to Reinforcement, and a secondary layer explicitly described as a lining maps to Lining. A bare “Secondary” or a material name with no supported location is preserved as `needs_review` under Supplementary source text. A product with only Body omits the Body heading on the detail page.
+Published material records are organized as **Body**, **Reinforcement**, **Panel**, then **Lining**. The source label and original text remain in the evidence. Face and Backer are layers of an identified part. Contrast panels and explicit inserts map to Panel, reinforced inserts to Reinforcement, and a secondary layer explicitly described as a lining maps to Lining. A bare “Secondary” or a material name with no supported location is preserved internally as `needs_review`. A product with only Body omits the Body heading on the detail page.
 
 | Key | Field | Definition |
 | --- | --- | --- |
@@ -189,7 +189,9 @@ Waterproof ratings and breathability will be added in a future version.
 | `microfibers` | Microfiber statements | list | — | all | set |
 | `regulatory` | Other regulatory statements | list | — | all | set |
 
-### Supplementary source text
+### Internal review fields
+
+These fields support internal data review. They are excluded from detail and comparison pages.
 
 | Key | Field | Type | Standard unit | Applies to | Compare |
 | --- | --- | --- | --- | --- | --- |
@@ -197,3 +199,7 @@ Waterproof ratings and breathability will be added in a future version.
 | `fabric_issues` | Unassigned material | list | — | all | set |
 | `feature_notes` | Other published features | list | — | all | set |
 
+
+## Changelog
+
+- **v1.5.1** removes the source controls, source links, and original source text from product detail and comparison views. Evidence remains available internally for conflict handling and data verification.

@@ -1,7 +1,7 @@
 import type { ProductDetail } from "./arcteryx-view";
 import { parametersOf } from "./parameters/arcteryx";
 import { parameterGroups, type ParameterGroup } from "./parameters/model";
-import { groups } from "./parameters/registry";
+import {publicParameterGroups} from "./public-parameters";
 
 export function comparisonHref(slugs: string[]) {
   return slugs.length ? "/compare?ids=" + slugs.map(encodeURIComponent).join(",") : "/compare";
@@ -15,5 +15,5 @@ export function comparisonIds(value: string | string[] | undefined) {
 export type ComparisonGroup = ParameterGroup;
 
 export function buildComparison(products: ProductDetail[]): ComparisonGroup[] {
-  return parameterGroups(products.map(parametersOf), "compare").filter(({ title }) => title !== groups.supplemental);
+  return publicParameterGroups(parameterGroups(products.map(parametersOf), "compare"));
 }

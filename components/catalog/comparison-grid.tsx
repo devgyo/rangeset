@@ -9,7 +9,7 @@ import { rememberSelection, useCompareSelection, type PickedProduct } from "@/co
 import { GenderPill, ProductImage } from "@/components/catalog/product-media";
 import { comparisonHref, type ComparisonGroup } from "@/lib/comparison";
 import { visibleInComparison } from "@/lib/parameters/model";
-import { localGroup, ParameterGroupSources, ParameterLabel, ParameterLegend, ParameterValue, SourcesSwitch } from "./parameter-table";
+import { localGroup, ParameterLabel, ParameterLegend, ParameterValue } from "./parameter-table";
 
 export type ComparisonProduct = PickedProduct & { msrp: number | null; currency?: string | null; priceLabel?: string; example?: boolean; discontinued?: boolean };
 export type PickerProduct = ComparisonProduct & { keywords: string };
@@ -85,8 +85,8 @@ function CompareTable({ products, groups, highlight, differencesOnly, remove }: 
             <span className="mt-1 block font-mono text-xs tabular-nums text-primary">{product.priceLabel ?? displayPrice(t, product.msrp, product.currency)}</span>
           </th>)}
         </tr></thead>
-        {visible.map(({ title, rows }) => <ParameterGroupSources key={title}><tbody>
-          <tr className="matrix-group"><th scope="rowgroup" colSpan={products.length + 1}><div className="parameter-group-heading"><span>{localGroup(t, title)}</span><SourcesSwitch /></div></th></tr>
+        {visible.map(({ title, rows }) => <tbody key={title}>
+          <tr className="matrix-group"><th scope="rowgroup" colSpan={products.length + 1}><div className="parameter-group-heading">{localGroup(t, title)}</div></th></tr>
           {rows.map(({ key, label, field, cells, differs, note, referenceNote, subgroup }, index) => <Fragment key={key}>
             {subgroup && subgroup !== rows[index - 1]?.subgroup && <tr className="matrix-group">
               <th colSpan={products.length + 1}><span className="parameter-group-heading">{partDisplay(t, subgroup)}</span></th>
@@ -101,7 +101,7 @@ function CompareTable({ products, groups, highlight, differencesOnly, remove }: 
                 <td key={products[index].slug}><ParameterValue field={field} value={value} comparison /></td>)}
             </tr>
           </Fragment>)}
-        </tbody></ParameterGroupSources>)}
+        </tbody>)}
       </table>
     </div>
     {!visible.length && products.length >= 2 && <p role="status" className="border-t p-4 text-sm text-muted-foreground">

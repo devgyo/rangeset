@@ -78,3 +78,19 @@ test("sitemap excludes every retired shoe slug in all languages", options, async
   for (const prefix of locales) assert.ok(xml.includes(prefix + "/products/" + beta + "</loc>"));
   for (const slug of shoeSlugs) assert.ok(!xml.includes(slug), slug);
 });
+
+test("detail and comparison pages keep source controls, links and raw evidence out of every locale", options, async () => {
+  const ifora = "arcteryx-womens-ifora-jacket-9524-x000009524";
+  for (const prefix of locales) {
+    for (const route of ["/products/" + ifora, "/compare?ids=" + ifora + "," + adze]) {
+      const response = await get(prefix + route);
+      assert.equal(response.status, 200, prefix + route);
+      const html = await response.text();
+      const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "");
+      assert.match(markup, /data-parameter-row/);
+      assert.doesNotMatch(markup, /Show sources|显示来源|出典を表示|Read original text|查看原文|原文を見る|role="switch"|parameter-sources/i);
+      assert.doesNotMatch(markup, /<a\b[^>]*href="https?:\/\/(?:[^/"]+\.)?arcteryx\.com\//i);
+      assert.doesNotMatch(html, /product\.materials\[\d+\]|product\.features\[\d+\]|Supplementary source text/);
+    }
+  }
+});

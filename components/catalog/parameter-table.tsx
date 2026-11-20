@@ -1,27 +1,9 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
-import {displayParameter, displayReference, englishMessage, listItem, localNote, partDisplay, useCopy, type Translator} from "@/i18n/copy";
+import {displayParameter, displayReference, listItem, localNote, partDisplay, useCopy, type Translator} from "@/i18n/copy";
 import { ParameterHelp } from "./parameter-help";
 import { fieldsByKey, groups as groupLabels, terms, type Field, type Term } from "@/lib/parameters/registry";
-import { parameterStatus, visibleOnDetail, weightPresentation, type Evidence, type Parameter, type ParameterGroup, type Part } from "@/lib/parameters/model";
-
-const SourcesContext = createContext({ visible: false, toggle: () => {} });
-
-export function ParameterGroupSources({ children }: { children: ReactNode }) {
-  const [visible, setVisible] = useState(false);
-  return <SourcesContext.Provider value={{ visible, toggle: () => setVisible((current) => !current) }}>
-    {children}
-  </SourcesContext.Provider>;
-}
-
-export function SourcesSwitch() {
-  const {t} = useCopy();
-  const { visible, toggle } = useContext(SourcesContext);
-  return <button type="button" role="switch" aria-checked={visible} className="parameter-sources-switch" onClick={toggle}>
-    {t("ui.show_sources")}
-  </button>;
-}
+import { parameterStatus, visibleOnDetail, weightPresentation, type Parameter, type ParameterGroup, type Part } from "@/lib/parameters/model";
 
 const localizedHelpLabels: Partial<Record<Term, string>> = {
   denier: "field.denier", ripstop: "construction.ripstop", stretch: "field.fabric_stretch", fill: "field.fill_power",
@@ -42,56 +24,39 @@ export function ParameterLabel({ field, label = field.label }: { field: Field; l
   return <span className="parameter-label"><span>{text}</span>{field.help && <Help term={field.help} />}</span>;
 }
 
-const methods: Record<Evidence["method"], string> = {
-  published: "ui.brand_source", parsed: "ui.parsed_brand_text", indexed: "ui.indexed_brand_value",
-  manual: "ui.manual_override", example: "ui.example_data",
-};
 const groupNameKeys = Object.fromEntries(Object.entries(groupLabels).map(([key, label]) => [label, key]));
 export const localGroup = (t: Translator, title: string) => t("group." + groupNameKeys[title]);
 
-function SourceNotes({ evidence }: { evidence: Evidence[] }) {
-  const { visible } = useContext(SourcesContext);
-  if (!visible || !evidence.length) return null;
-  const entries = [...new Map(evidence.map((source) => [JSON.stringify(source), source])).values()];
-  return <ul lang="en" className="parameter-sources space-y-2">{entries.map((source, index) => <li key={index}>
-    <span>{englishMessage(methods[source.method])} · {source.updatedAt ? <time dateTime={source.updatedAt}>{source.updatedAt.slice(0, 10)}</time> : englishMessage("ui.date_not_published")}</span>
-    {source.url && /^https?:\/\//i.test(source.url) && <a className="spec-link block wrap-anywhere" href={source.url}>{source.url}</a>}
-    <code className="block wrap-anywhere">{source.path}</code>
-    <span className="block wrap-anywhere">{source.raw}</span>
-  </li>)}</ul>;
-}
-
-function PartFields({ fields, withEvidence, comparison }: { fields: Part["fields"]; withEvidence: boolean; comparison: boolean }) {
+function PartFields({ fields, comparison }: { fields: Part["fields"]; comparison: boolean }) {
   return <dl className="grid gap-1.5">
     {Object.entries(fields).sort(([a], [b]) => fieldsByKey.get(a)!.order - fieldsByKey.get(b)!.order).map(([key, value]) => {
       const definition = fieldsByKey.get(key)!;
       if (!comparison && !visibleOnDetail(definition, value)) return null;
       return <div key={key} data-parameter-row>
         <dt className="text-xs text-muted-foreground"><ParameterLabel field={definition} /></dt>
-        <dd><ParameterValue field={definition} value={value} withEvidence={withEvidence} /></dd>
+        <dd><ParameterValue field={definition} value={value} /></dd>
       </div>;
     })}
   </dl>;
 }
 
-function Parts({ parts, field, withEvidence, comparison }: { parts: Part[]; field: Field; withEvidence: boolean; comparison: boolean }) {
+function Parts({ parts, field, comparison }: { parts: Part[]; field: Field; comparison: boolean }) {
   const {t, locale} = useCopy();
   return <div className="parameter-parts">
     {parts.map((part, index) => <div key={index} className="parameter-part">
       <p className="mb-1 font-medium">{locale === "en" ? part.label : partDisplay(t, part.label)}</p>
-      <PartFields fields={part.fields} withEvidence={withEvidence} comparison={comparison} />
-      {withEvidence && !Object.keys(part.fields).length && <SourceNotes evidence={part.evidence} />}
+      <PartFields fields={part.fields} comparison={comparison} />
     </div>)}
     {!parts.length && <span>{displayParameter(t, locale, field, {state: "unpublished", evidence: []})}</span>}
   </div>;
 }
 
-export function ParameterValue({ field, value, withEvidence = true, comparison = false }: { field: Field; value: Parameter; withEvidence?: boolean; comparison?: boolean }) {
+export function ParameterValue({ field, value, comparison = false }: { field: Field; value: Parameter; comparison?: boolean }) {
   const {t, locale} = useCopy();
   if (value.entries) return <div className="grid gap-2">{value.entries.map((entry, index) =>
-    <ParameterValue key={index} field={field} value={entry} withEvidence={withEvidence} comparison={comparison} />
+    <ParameterValue key={index} field={field} value={entry} comparison={comparison} />
   )}</div>;
-  if (field.type === "parts" && value.state === "known") return <Parts parts={value.value as Part[]} field={field} withEvidence={withEvidence} comparison={comparison} />;
+  if (field.type === "parts" && value.state === "known") return <Parts parts={value.value as Part[]} field={field} comparison={comparison} />;
   const text = displayParameter(t, locale, field, value);
   const reference = displayReference(t, field, value);
   const status = parameterStatus(field, value);
@@ -113,7 +78,6 @@ export function ParameterValue({ field, value, withEvidence = true, comparison =
       </span>}
     {reference && <p className="text-xs text-muted-foreground">{reference}</p>}
     {value.note && <p className="text-xs text-muted-foreground">{localNote(t, value.note)}</p>}
-    {withEvidence && <SourceNotes evidence={value.evidence} />}
   </div>;
 }
 
@@ -128,18 +92,10 @@ export function ParameterSections({ groups }: { groups: ParameterGroup[] }) {
   const {t} = useCopy();
   return <div className="parameter-sections grid gap-5 lg:grid-cols-2 lg:items-start">
     {groups.map(({ title, rows }) => (
-      <ParameterGroupSources key={title}>
-        <section aria-label={localGroup(t, title)} className={`min-w-0 border bg-card px-3.5 py-4 sm:px-5 ${title === "Supplementary source text" || rows.some(({ field }) => field.type === "parts") ? "lg:col-span-2" : ""}`}>
-          <div className="parameter-group-heading mb-3">
-            <h3 className="font-semibold">{localGroup(t, title)}</h3>
-            <SourcesSwitch />
-          </div>
-          {title === "Supplementary source text" ? <details>
-            <summary className="cursor-pointer text-sm text-muted-foreground">{t("ui.read_original_text")}</summary>
-            <SectionRows rows={rows} />
-          </details> : <SectionRows rows={rows} />}
-        </section>
-      </ParameterGroupSources>
+      <section key={title} aria-label={localGroup(t, title)} className={`min-w-0 border bg-card px-3.5 py-4 sm:px-5 ${rows.some(({ field }) => field.type === "parts") ? "lg:col-span-2" : ""}`}>
+        <h3 className="mb-3 font-semibold">{localGroup(t, title)}</h3>
+        <SectionRows rows={rows} />
+      </section>
     ))}
   </div>;
 }

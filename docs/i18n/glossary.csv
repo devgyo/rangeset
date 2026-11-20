@@ -7,7 +7,6 @@ group.warmth,Insulation,保暖,保温,分组,,https://www.montbell.jp/generalpag
 group.features,Features,功能细节,機能・仕様,分组,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,AZ1「功能和规格」；AJ1「技術的な特徴」
 group.origin,Origin,产地,生産地,分组,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/cerium-jacket-m,
 group.environment,Environment & certifications,环保与认证,環境・認証,分组,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,AZ1「可持续发展」/AJ1「サステナビリティ」；字段含法规与认证，用更中性的说法
-group.supplemental,Supplementary source text,原文补充,補足（原文）,分组,,,
 field.brand,Brand,品牌,ブランド,字段,,,
 field.model,Model,型号,モデル名,字段,,https://arcteryx.jp/pages/260618_beta-series,争议：AZ1 的「型号」指货号 X000011062；我们指款名，备选「款名」
 field.product_line,Product line,产品线,ライン,字段,,,Mainline / Veilance / System_A 这一层
@@ -37,7 +36,6 @@ field.fabric_certifications,Certifications,认证,認証,字段,,https://arctery
 field.fabric_treatment,Fabric treatment,面料处理,生地加工,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,AZ1「面料处理」，AJ1「生地加工」——官方原词
 field.garment_recycled_content,Garment recycled content,整件再生成分,製品全体のリサイクル素材比率,字段,,,
 subgroup.whole_garment,Whole garment,整件,製品全体,字段,,,
-field.fabric_issues,Unassigned material,部位未明的材料,部位不明の素材,字段,,,needs_review: 内部审核用语，可再简化
 field.protection_type,Protection type,防护类型,シェルの種類,字段,,,
 field.protection,Protection claims,防护特性,防護性能の表示,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,AZ1「技术特点：防水/防风/透气/耐磨」
 field.membrane,Waterproof membrane,防水膜,防水メンブレン,字段,,https://www.gore-tex.com.cn/support/frequently-asked-questions https://www.montbell.jp/generalpage/disp.php?id=794,GCN1 用「薄膜」；MB1「メンブレン（膜）」
@@ -72,8 +70,6 @@ field.certifications,Certifications & standards,认证与标准,認証・規格,
 field.pfas,PFAS statements,PFAS 声明,PFASに関する表示,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,PFAS 不翻
 field.microfibers,Microfiber statements,微纤维脱落说明,マイクロファイバー排出の表示,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/cerium-jacket-m,AZ1「洗涤时可能会将塑料微纤维释放到环境中」
 field.regulatory,Other regulatory statements,其他法规声明,その他の法規関連表示,字段,,,needs_review
-field.source_notes,Supplemental material text,其他材料原文,その他の素材表記（原文）,字段,,,
-field.feature_notes,Other published features,其他功能原文,その他の機能（原文）,字段,,,
 part.body,Body,衣身,ボディ,部位,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/cerium-jacket-m,AJ2 写「ボディ部」
 part.reinforcement,Reinforcement,加固部位,補強部,部位,,https://arcteryx.com/cn/brandActivitiesDetails/1727079560248,needs_review: 日文未找到官方原词
 part.panel,Panel,拼接部位,切り替え部,部位,,https://arcteryx.com/us/zh/shop/womens/beta-ar-jacket-9863,needs_review: AZ2 把 insert 译「嵌料」；「拼接」更普通易懂
@@ -220,20 +216,12 @@ ui.specs,Specs,参数,スペック,界面,,,
 ui.specifications,Specifications,参数,スペック,界面,,,
 ui.key_specs,Key specs,主要参数,主なスペック,界面,,,
 ui.full_specifications,Full specifications,全部参数,すべてのスペック,界面,,,
-ui.show_sources,Show sources,显示来源,出典を表示,界面,,,
-ui.read_original_text,Read original text,查看原文,原文を見る,界面,,,
-ui.brand_source,Brand source,品牌官网,ブランド公式,界面,,,
-ui.parsed_brand_text,Parsed brand text,从品牌原文解析,ブランド原文から抽出,界面,,,
-ui.indexed_brand_value,Indexed brand value,品牌数据库字段,ブランド登録値,界面,,,needs_review: 内部来源类型，可考虑不对用户显示
-ui.manual_override,Manual override,人工修正,手動修正,界面,,,
-ui.date_not_published,Date not published,日期未公布,日付未公表,界面,,,
 ui.example_data,Example data,示例数据,サンプルデータ,界面,,,
 ui.example,Example,示例,サンプル,界面,,,
 ui.discontinued,Discontinued,已停产,廃番,界面,,https://www.rakuten.co.jp/canpanera/contents/arcteryx/jacket/beta/compare/,RKT「廃番」
 ui.in_stock,In stock,有货,在庫あり,界面,,https://arcteryx.jp/products/cerium-jacket-m,AJ3「在庫あり」
 ui.out_of_stock,Out of stock,缺货,在庫切れ,界面,,https://arcteryx.jp/products/cerium-jacket-m,
 ui.stock_not_published,Stock not published,库存未公布,在庫情報なし,界面,,,
-ui.official_page,Official page,官网页面,公式ページ,界面,,,
 ui.product_not_found,Product not found,未找到该商品,商品が見つかりません,界面,,,
 ui.skip_to_content,Skip to content,跳到正文,本文へスキップ,界面,,,
 ui.weight_reference,Weight reference,称重尺码,重量の基準サイズ,界面,,,
@@ -281,8 +269,6 @@ ui.breadcrumb,Breadcrumb,当前位置,パンくずリスト,本地化补充,,,ne
 ui.family_variants,Other {family} {category},{family} 系列的其他{category},{family}シリーズのほかの{category},本地化补充,,,needs_review: v1 补充草译。
 ui.family_comparison,Scrollable family comparison,商品对比,商品を比較,本地化补充,,,本地化复用已有术语 ui.compare_products，保留既有英文。
 ui.msrp,MSRP,官方定价,希望小売価格,本地化补充,,,本地化复用已有术语 field.msrp，保留既有英文。
-ui.example_source,Example source,示例数据,サンプルデータ,本地化补充,,,本地化复用已有术语 ui.example_data，保留既有英文。
-ui.official_arc_page,Official Arc’teryx page,官网页面,公式ページ,本地化补充,,,本地化复用已有术语 ui.official_page，保留既有英文。
 ui.parameter_version,Parameter standard v{version},版本 v{version},バージョン v{version},本地化补充,,,复用现有标签或格式。
 ui.legend,Parameter status legend,参数状态图例,スペックの状態を示す凡例,本地化补充,,,needs_review: v1 补充草译。
 ui.about,About {label},{label},{label},本地化补充,,,复用现有标签或格式。

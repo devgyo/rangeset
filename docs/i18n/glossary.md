@@ -1,6 +1,6 @@
 # Rangeset 术语表 v0.1（简体中文 / 日本語）
 
-来源字段：`lib/parameters/registry.ts` v1.5.0、`model.ts`、`fabric.ts`、`components/catalog/*`、`app/*`；品类来自 Neon `products.category`。收录范围见 v1.5.0 参数标准。
+来源字段：`lib/parameters/registry.ts` v1.5.1、`model.ts`、`fabric.ts`、`components/catalog/*`、`app/*`；品类来自 Neon `products.category`。收录范围见 v1.5.1 参数标准。
 
 此页保留原始调研的可读结构。运行时术语及补充键以 `glossary.csv` 为准。待审项见 [review.md](review.md)。依据代号见文末。
 
@@ -16,7 +16,6 @@
 | Features | 功能细节 | 機能・仕様 | AZ1 AJ1 | AZ1「功能和规格」；AJ1「技術的な特徴」 |
 | Origin | 产地 | 生産地 | AZ1 AJ3 |  |
 | Environment & certifications | 环保与认证 | 環境・認証 | AZ1 AJ1 | AZ1「可持续发展」/AJ1「サステナビリティ」；字段含法规与认证，用更中性的说法 |
-| Supplementary source text | 原文补充 | 補足（原文） |  |  |
 
 ## 字段
 
@@ -51,7 +50,6 @@
 | Fabric treatment | 面料处理 | 生地加工 | AZ1 AJ1 | AZ1「面料处理」，AJ1「生地加工」——官方原词 |
 | Garment recycled content | 整件再生成分 | 製品全体のリサイクル素材比率 |  |  |
 | Whole garment | 整件 | 製品全体 |  |  |
-| Unassigned material | 部位未明的材料 | 部位不明の素材 |  | needs_review: 内部审核用语，可再简化 |
 | Protection type | 防护类型 | シェルの種類 |  |  |
 | Protection claims | 防护特性 | 防護性能の表示 | AZ1 AJ1 | AZ1「技术特点：防水/防风/透气/耐磨」 |
 | Waterproof membrane | 防水膜 | 防水メンブレン | GCN1 MB1 | GCN1 用「薄膜」；MB1「メンブレン（膜）」 |
@@ -86,8 +84,6 @@
 | PFAS statements | PFAS 声明 | PFASに関する表示 | AZ1 AJ1 | PFAS 不翻 |
 | Microfiber statements | 微纤维脱落说明 | マイクロファイバー排出の表示 | AZ1 AJ3 | AZ1「洗涤时可能会将塑料微纤维释放到环境中」 |
 | Other regulatory statements | 其他法规声明 | その他の法規関連表示 |  | needs_review |
-| Supplemental material text | 其他材料原文 | その他の素材表記（原文） |  |  |
-| Other published features | 其他功能原文 | その他の機能（原文） |  |  |
 
 ## 部位
 
@@ -279,20 +275,12 @@
 | Specifications | 参数 | スペック |  |  |
 | Key specs | 主要参数 | 主なスペック |  |  |
 | Full specifications | 全部参数 | すべてのスペック |  |  |
-| Show sources | 显示来源 | 出典を表示 |  |  |
-| Read original text | 查看原文 | 原文を見る |  |  |
-| Brand source | 品牌官网 | ブランド公式 |  |  |
-| Parsed brand text | 从品牌原文解析 | ブランド原文から抽出 |  |  |
-| Indexed brand value | 品牌数据库字段 | ブランド登録値 |  | needs_review: 内部来源类型，可考虑不对用户显示 |
-| Manual override | 人工修正 | 手動修正 |  |  |
-| Date not published | 日期未公布 | 日付未公表 |  |  |
 | Example data | 示例数据 | サンプルデータ |  |  |
 | Example | 示例 | サンプル |  |  |
 | Discontinued | 已停产 | 廃番 | RKT | RKT「廃番」 |
 | In stock | 有货 | 在庫あり | AJ3 | AJ3「在庫あり」 |
 | Out of stock | 缺货 | 在庫切れ | AJ3 |  |
 | Stock not published | 库存未公布 | 在庫情報なし |  |  |
-| Official page | 官网页面 | 公式ページ |  |  |
 | Product not found | 未找到该商品 | 商品が見つかりません |  |  |
 | Skip to content | 跳到正文 | 本文へスキップ |  |  |
 | Weight reference | 称重尺码 | 重量の基準サイズ |  |  |
