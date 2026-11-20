@@ -512,5 +512,12 @@
     "modal": "モダール",
     "aramid": "アラミド",
     "ptfe": "PTFE"
+  },
+  "card": {
+    "weight_help": "計量時の基準サイズはブランドによって異なります。Arc’teryxは基準サイズを公表していません。",
+    "fiber_share": "{fiber}{pct}%",
+    "recycled_share": "リサイクル素材{pct}%",
+    "search_placeholder": "商品名・スペック・品番で検索",
+    "main_fabric": "主素材"
   }
 }

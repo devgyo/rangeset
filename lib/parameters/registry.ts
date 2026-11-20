@@ -1,7 +1,23 @@
 export const fabricParts = { body: "Body", reinforcement: "Reinforcement", panel: "Panel", lining: "Lining" } as const;
 export type FabricPart = keyof typeof fabricParts;
 
-export const parameterVersion = "1.4.0";
+export const parameterVersion = "1.5.0";
+export const cardFields = [
+  {key: "weight", label: "field.weight", help: "card.weight_help"},
+  {key: "fit", label: "field.fit"},
+  {key: "mainFabric", label: "card.main_fabric"},
+  {key: "composition", label: "field.fiber_content"},
+] as const;
+
+export const cardFitAliases = {
+  next_to_skin: ["Next to Skin", "Next-to-skin"],
+  fitted: ["Fitted", "Fitted Fit"],
+  regular: ["Regular", "Regular Fit"],
+  relaxed: ["Relaxed", "Relaxed Fit"],
+  oversized: ["Oversized", "Oversized Fit"],
+} as const;
+export type CardFit = keyof typeof cardFitAliases;
+
 export const groups = {
   identity: "General", sizing: "Dimensions & fit", fabric: "Main fabric", protection: "Protection",
   warmth: "Insulation", features: "Features", origin: "Origin",

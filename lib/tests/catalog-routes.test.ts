@@ -4,6 +4,7 @@ import {test} from "node:test";
 import en from "../../messages/en.json";
 import zh from "../../messages/zh.json";
 import ja from "../../messages/ja.json";
+import {cardFields} from "../parameters/registry";
 
 const site = process.env.TEST_SITE_URL;
 const locales = ["", "/zh", "/ja"] as const;
@@ -27,7 +28,14 @@ test("all three language catalogs, home navigation, and searches exclude footwea
       const html = await rendered(response);
       assert.ok(!html.includes("Footwear"), prefix + path);
       for (const slug of shoeSlugs) assert.ok(!html.includes(slug), slug);
-      if (path === "/products") assert.match(html, /class="gear-card /);
+      if (path === "/products") {
+        const cards = [...html.matchAll(/<article class="gear-card [^"]*">([\s\S]*?)<\/article>/g)];
+        assert.ok(cards.length > 0, prefix);
+        for (const [, card] of cards) {
+          const keys = [...card.matchAll(/data-card-field="([^"]+)"/g)].map(([, key]) => key);
+          assert.deepEqual(keys, cardFields.map(({key}) => key), prefix);
+        }
+      }
       if (path.includes("?")) assert.ok(!html.includes('class="gear-card '), prefix + path);
     }
   }

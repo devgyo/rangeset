@@ -172,6 +172,11 @@
 | value.goose | goose | 鹅 | ガチョウ | needs_review: v1 补充草译。 |
 | value.duck | duck | 鸭 | アヒル | needs_review: v1 补充草译。 |
 | value.minimum | Minimum | 最低值 | 最低値 | needs_review: v1 补充草译。 |
+| card.weight_help | Brands use different reference sizes for weighing. Arc’teryx does not publish the reference size. | 各品牌称重时使用的参考尺码不同。Arc’teryx 未公布参考尺码。 | 計量時の基準サイズはブランドによって異なります。Arc’teryxは基準サイズを公表していません。 | needs_review: 卡片说明草译。 |
+| card.fiber_share | {fiber} {pct}% | {fiber} {pct}% | {fiber}{pct}% | needs_review: 卡片成分显示。 |
+| card.recycled_share | {pct}% recycled | 再生 {pct}% | リサイクル素材{pct}% | needs_review: 卡片再生成分显示。 |
+| card.search_placeholder | Search products, specs, or model numbers | 搜索商品、参数或款号 | 商品名・スペック・品番で検索 | needs_review: 款号搜索占位。 |
+| card.main_fabric | Main fabric | 主面料 | 主素材 | needs_review: 卡片仅展示 Body。 |
 
 ## 回退到英文的说明
 

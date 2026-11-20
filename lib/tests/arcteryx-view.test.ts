@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { categorySpecs, colorwaysOf, genderLabel, keyMetrics, plainText, productFamily, productGender, type ProductDetail } from "../arcteryx-view";
+import { categorySpecs, colorwaysOf, genderLabel, plainText, productFamily, productGender, type ProductDetail } from "../arcteryx-view";
 import { buildComparison, comparisonIds } from "../comparison";
 
 test("converts descriptions to React-safe plain text with spacing and entity decoding", () => {
@@ -74,6 +74,5 @@ test("compares normalized values and marks category-specific metrics as inapplic
   const mixed = buildComparison([shell, pants]).flatMap(({ rows }) => rows);
   assert.equal(mixed.find(({ key }) => key === "inseam")?.cells[0].state, "inapplicable");
   assert.equal(mixed.find(({ key }) => key === "pit_zips")?.cells[1].state, "inapplicable");
-  assert.ok(keyMetrics(pants, true).includes("inseam"));
   assert.deepEqual(comparisonIds(" one,one,two,https://bad,three,four,five"), ["one", "two", "three", "four", "five"]);
 });

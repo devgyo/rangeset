@@ -1,8 +1,9 @@
 import {useLocale, useTranslations} from "next-intl";
 import en from "@/messages/en.json";
-import {formatReference, formatValue, parameterStatus, type Fiber, type Parameter} from "@/lib/parameters/model";
-import type {Field} from "@/lib/parameters/registry";
-import {formatMetric, formatPrice, type CatalogSpec, type Gender} from "@/lib/arcteryx-view";
+import {formatParameterNumber, formatReference, formatValue, known, parameterStatus, type Fiber, type Parameter} from "@/lib/parameters/model";
+import {cardFields, fieldsByKey, type Field} from "@/lib/parameters/registry";
+import type {CardParameters} from "@/lib/parameters/card";
+import {formatPrice, type Gender} from "@/lib/arcteryx-view";
 
 export type Translator = ReturnType<typeof useTranslations>;
 export const englishMessage = (key: string) => {
@@ -26,12 +27,6 @@ const constructionKeys: Record<string, string> = {
 const stretchKeys: Record<string, string> = {
   Mechanical: "mechanical", "2-way": "2way", "4-way": "4way", "Contains elastane": "elastane",
 };
-const metricKeys: Record<string, string> = {
-  weight_g: "field.weight", membrane: "field.legacy_membrane", layers: "field.legacy_layers",
-  face_denier: "field.legacy_face", fabric_gsm: "field.fabric_weight", fit: "field.fit", inseam: "field.inseam",
-  insulation: "group.warmth",
-};
-
 const partByEnglish = Object.fromEntries(Object.entries(en.part).map(([key, label]) => [label, key]));
 const noteByEnglish = Object.fromEntries(["note", "ui"].flatMap((namespace) =>
   Object.entries(en[namespace as "note" | "ui"]).map(([key, text]) => [text, namespace + "." + key])));
@@ -40,7 +35,6 @@ export const categoryLabel = (t: Translator, data: string | null) => data && cat
 export const genderDisplay = (t: Translator, data: Gender | null) => data ? t("gender." + data) : t("status.missing");
 export const displayPrice = (t: Translator, amount: number | null, currency?: string | null) =>
   amount === null ? t("status.missing") : formatPrice(amount, currency);
-export const metricName = (t: Translator, key: string) => t(metricKeys[key]);
 export const activityLabel = (t: Translator, value: string) => {
   const key = "activity." + value.toLowerCase().replace(/[^a-z0-9]+/g, "_");
   return t.has(key) ? t(key) : value;
@@ -102,18 +96,25 @@ export function useCopy() {
   return {t, locale};
 }
 
-export function localizedMetric(t: Translator, key: string, data?: CatalogSpec) {
-  if (!data) return t("status.missing");
-  if (typeof data.value === "boolean") return t(data.value ? "status.yes" : "status.no");
-  if (key === "fit" && typeof data.value === "string") return localizedFit(t, data.value);
-  return formatMetric(data);
-}
-
-const fiberNumber = new Intl.NumberFormat("en-US", {maximumFractionDigits: 2});
-
 function fiberLabel(t: Translator, value: string) {
   const key = "fiber." + value.toLowerCase().replace(/\s+/g, "_");
   return t.has(key) ? t(key) : value;
+}
+
+const cardWeightField = fieldsByKey.get("weight")!;
+
+export function displayCardCell(t: Translator, card: CardParameters, key: (typeof cardFields)[number]["key"]) {
+  const composition = card.composition;
+  const fiberShare = ({fiber, pct}: Fiber) => t("card.fiber_share", {fiber: fiberLabel(t, fiber), pct: formatParameterNumber(pct)});
+  if (key === "composition" && composition) {
+    const recycled = composition.recycled === null ? "" : " · " + t("card.recycled_share", {pct: formatParameterNumber(composition.recycled)});
+    return {text: fiberShare(composition.primary) + recycled, title: composition.fibers.map(fiberShare).join(" · ") + recycled};
+  }
+  const text = key === "weight" ? card.weight === null ? "—" : formatValue(cardWeightField, known(card.weight, []))
+    : key === "fit" ? card.fit ? t("value.fit_" + card.fit) : "—"
+    : key === "mainFabric" ? card.mainFabric ? fiberLabel(t, card.mainFabric) : composition ? fiberShare(composition.primary) : "—"
+    : "—";
+  return {text, title: text};
 }
 
 function localizedFit(t: Translator, value: string) {
@@ -143,7 +144,7 @@ export function displayParameter(t: Translator, locale: string, field: Field, pa
   if (field.format === "composition") return (parameter.value as Fiber[]).map(({pct, fiber, recycled}) => {
     const label = fiberLabel(t, fiber);
     const material = recycled === null ? label : t(recycled ? "ui.recycled_fiber" : "ui.virgin_fiber", {fiber: label});
-    return t("ui.fiber_share", {pct: fiberNumber.format(pct), fiber: material});
+    return t("ui.fiber_share", {pct: formatParameterNumber(pct), fiber: material});
   }).join(" · ");
   if (field.key === "fabric_name" && typeof parameter.value === "string") return fiberLabel(t, parameter.value);
   if (field.key === "down_species" && (parameter.value === "goose" || parameter.value === "duck")) return t(`value.${parameter.value}`);

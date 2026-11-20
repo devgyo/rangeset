@@ -512,5 +512,12 @@
     "modal": "莫代尔纤维",
     "aramid": "芳纶",
     "ptfe": "PTFE"
+  },
+  "card": {
+    "weight_help": "各品牌称重时使用的参考尺码不同。Arc’teryx 未公布参考尺码。",
+    "fiber_share": "{fiber} {pct}%",
+    "recycled_share": "再生 {pct}%",
+    "search_placeholder": "搜索商品、参数或款号",
+    "main_fabric": "主面料"
   }
 }

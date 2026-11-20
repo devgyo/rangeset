@@ -53,11 +53,12 @@ export function weightPresentation(parameter: Parameter) {
 }
 
 const number = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+export const formatParameterNumber = (value: number) => number.format(value);
 export function formatMoney(value: number, currency: string | null | undefined) {
-  if (!currency) return number.format(value);
+  if (!currency) return formatParameterNumber(value);
   const amount = /^[A-Z]{3}$/.test(currency)
     ? new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 2, minimumFractionDigits: 0 }).format(value)
-    : number.format(value);
+    : formatParameterNumber(value);
   return `${amount} ${currency}`;
 }
 export function formatValue(field: Field, parameter: Parameter): string {
@@ -67,16 +68,16 @@ export function formatValue(field: Field, parameter: Parameter): string {
   if (parameter.reviewCode) return parameter.reviewCode === "unverified" ? "Unverified" : "Needs review";
   if (parameter.state !== "known" || value === undefined) return parameter.state === "review" && field.reviewLabel ? field.reviewLabel : statusLabels[parameter.state];
   if (field.format === "denier") return (value as number[]).map((item) => item + "D").join(" × ");
-  if (field.format === "composition") return (value as Fiber[]).map(({ pct, fiber, recycled }) => `${number.format(pct)}% ${recycled === true ? "recycled " : recycled === false ? "virgin " : ""}${fiber}`).join(" · ");
+  if (field.format === "composition") return (value as Fiber[]).map(({ pct, fiber, recycled }) => `${formatParameterNumber(pct)}% ${recycled === true ? "recycled " : recycled === false ? "virgin " : ""}${fiber}`).join(" · ");
   if (field.format === "recycled") return (value as RecycledContent[]).map(({ pct, scope }) =>
-    pct === null ? "Recycled material claimed · % not published" : `${number.format(pct)}% (${scope === "claim_only" ? "scope not published" : scope})`).join(" · ");
+    pct === null ? "Recycled material claimed · % not published" : `${formatParameterNumber(pct)}% (${scope === "claim_only" ? "scope not published" : scope})`).join(" · ");
   if (field.format === "money") return formatMoney(Number(value), reference?.unit);
   if (field.options) return field.options[String(value)] ?? String(value);
   if (typeof value === "boolean") return value ? "Yes" : "No";
   if (typeof value === "number") {
-    const amount = [number.format(value), (reference?.unit === null ? null : reference?.unit ?? field.unit)].filter(Boolean).join(" ");
+    const amount = [formatParameterNumber(value), (reference?.unit === null ? null : reference?.unit ?? field.unit)].filter(Boolean).join(" ");
     const suffix = field.key === "weight" ? weightPresentation(parameter).suffix : "";
-    if (parameter.original) return `${amount} (${number.format(parameter.original.value)} ${parameter.original.unit})`;
+    if (parameter.original) return `${amount} (${formatParameterNumber(parameter.original.value)} ${parameter.original.unit})`;
     return suffix ? `${amount} (${suffix})` : amount;
   }
   return Array.isArray(value) ? value.join(" · ") : value;

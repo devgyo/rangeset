@@ -1,12 +1,37 @@
-# Rangeset product parameter standard v1.4.0
+# Rangeset product parameter standard v1.5.0
 
-The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.4.0 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
+The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.5.0 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
 
 ## Catalog scope
 
 Rangeset catalogs apparel. Catalog eligibility requires an allowed clothing category and excludes footwear product types even when they are assigned to an allowed category. Existing non-apparel entries already in the Professional Use category are retained for this release.
 
 The scope change and read-only catalog inventory are recorded in the [v1.4.0 verification report](catalog-scope-v1.4.0.md).
+
+## Catalog cards and search
+
+Every card uses the same 2×2 grid defined by `cardFields` in `lib/parameters/registry.ts`. Its order is Weight, Fit, Main fabric, Composition. A value without confirmed data uses an em dash. The grid never substitutes a different spec and omits waterproofing. Prices and product actions stay outside the grid.
+
+| Cell | Selection and display |
+| --- | --- |
+| Weight | The published normalized item weight in grams, such as `505 g`. The heading explains that weighing sizes can differ by brand and Arc’teryx does not publish a reference size. The card displays the weight value without a size suffix. |
+| Fit | The published fit mapped through the table below. Unrecognized labels use an em dash. The original label and source evidence stay in the detail profile. |
+| Main fabric | The first published Body fabric name in source order. If Body has no name, display its largest published fiber share, such as `Nylon 100%`. If neither exists, display an em dash. |
+| Composition | The largest published share from one Body composition, with a published fabric-scope recycled percentage for that same Body record when available. Use source order to break a tie. The title gives the complete Body composition and any displayed recycled percentage. Lining, panels, unquantified claims, and garment-wide or face-only percentages do not supply a Body value. |
+
+When multiple Body records exist, the composition from the named Body record takes priority. If that record has no published composition, use the first Body record with one. Percentages and units use the standard formatter. Fiber names, fit labels, and the recycled suffix use the glossary.
+
+### Card fit mapping
+
+| Normalized code | Arc’teryx labels | English | 简体中文 | 日本語 |
+| --- | --- | --- | --- | --- |
+| `next_to_skin` | Next to Skin, Next-to-skin | Next to Skin | 贴身版型 | 肌に沿うフィット |
+| `fitted` | Fitted, Fitted Fit | Fitted | 修身版型 | フィット感のあるシルエット |
+| `regular` | Regular, Regular Fit | Regular | 常规版型 | レギュラーフィット |
+| `relaxed` | Relaxed, Relaxed Fit | Relaxed | 宽松版型 | リラックスフィット |
+| `oversized` | Oversized, Oversized Fit | Oversized | 超宽松版型 | オーバーサイズ |
+
+The mapping ignores case and normalizes hyphens and spacing. Search accepts the short or full model number from the Arc’teryx catalog slug, case-insensitively. It first applies the normal token search. When no result matches, it may omit the whole qualifiers `hooded`, `hoodie`, and `hoody`, or normalize the possessive `jacket's` to `jacket`. On retry, an exact product name takes precedence over other token matches. Search does not apply fuzzy matching. See the [card coverage and verification report](catalog-cards-v1.5.0.md).
 
 ## Evidence and review
 

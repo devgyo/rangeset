@@ -137,48 +137,13 @@ export function categorySpecs(
   return specs;
 }
 
-const numberFormat = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
 export const formatPrice = (value: number | null, currency: string | null = "USD") => value === null ? unpublished : formatMoney(value, currency);
-export function formatMetric(spec?: CatalogSpec) {
-  if (!spec) return unpublished;
-  const value = typeof spec.value === "number" ? numberFormat.format(spec.value)
-    : typeof spec.value === "boolean" ? (spec.value ? "Yes" : "No") : spec.value;
-  return spec.unit === "layers" ? `${value}L` : spec.unit ? `${value} ${spec.unit}` : value;
-}
-
-export const metricLabels: Record<string, string> = {
-  weight_g: "Weight", membrane: "Membrane", layers: "Layers", face_denier: "Face denier",
-  fabric_gsm: "Fabric weight", fit: "Fit", helmet_hood: "Helmet-compatible hood", pit_zips: "Pit zips",
-  recco: "RECCO", centre_back_length_cm: "Centre back length", inseam: "Inseam",
-  insulation: "Insulation", waterproof_mm: "Hydrostatic head", breathability: "Breathability",
-  weight_size: "Weight reference size",
-};
-
-export function keyMetrics(product: CatalogCard, detail = false): string[] {
-  switch (product.category) {
-    case "Shell Jackets":
-    case "Professional Use":
-      return detail ? ["weight_g", "membrane", "layers", "face_denier", "fit"] : ["weight_g", "membrane", "layers", "face_denier"];
-    case "Insulated Jackets":
-      return detail ? ["weight_g", "insulation", "membrane", "fit"] : ["weight_g", product.specs.insulation ? "insulation" : "membrane", "fit"];
-    case "Pants":
-    case "Shorts":
-      return detail ? ["weight_g", "inseam", "fit", "fabric_gsm"] : ["weight_g", "inseam", "fit"];
-    default:
-      return detail ? ["weight_g", "fabric_gsm", "fit", "centre_back_length_cm"] : ["weight_g", "fabric_gsm", "fit"];
-  }
-}
 
 export function categoryCounts(products: { category: string | null }[]) {
   const counts = new Map<string, number>();
   for (const { category } of products) if (category) counts.set(category, (counts.get(category) ?? 0) + 1);
   return [...categoryOrder, ...[...counts.keys()].filter((label) => !categoryOrder.includes(label)).sort()]
     .flatMap((label) => counts.has(label) ? [{ label, count: counts.get(label)! }] : []);
-}
-
-export function matchesProduct(product: Pick<CatalogCard, "name" | "family" | "subTags" | "specs" | "gender">, query: string) {
-  const text = [product.name, product.family, product.gender, ...product.subTags, product.specs.membrane?.value].join(" ").toLowerCase();
-  return query.trim().toLowerCase().split(/\s+/).every((token) => text.includes(token));
 }
 
 export function normalizedValue(value: Scalar | readonly string[] | null): string {

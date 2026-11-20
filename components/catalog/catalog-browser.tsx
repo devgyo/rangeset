@@ -1,16 +1,19 @@
 "use client";
 
 import {Link} from "@/i18n/navigation";
-import {categoryLabel, displayParameter, displayPrice, localizedMetric, metricName, optionLabel, useCopy} from "@/i18n/copy";
+import {categoryLabel, displayCardCell, displayParameter, displayPrice, optionLabel, useCopy} from "@/i18n/copy";
 import { useSearchParams } from "next/navigation";
 import { useDeferredValue, useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CompareButton } from "@/components/catalog/compare-selection";
 import { ColorDot, GenderPill, ProductBadges, ProductImage } from "@/components/catalog/product-media";
-import { categoryCounts, keyMetrics, matchesProduct, type CatalogCard } from "@/lib/arcteryx-view";
+import { categoryCounts, type CatalogCard } from "@/lib/arcteryx-view";
 
-import { fieldsByKey } from "@/lib/parameters/registry";
+import {ParameterHelp} from "@/components/catalog/parameter-help";
+import {searchCatalog} from "@/lib/catalog-search";
+import type {CatalogListing} from "@/lib/catalog";
+import { cardFields, fieldsByKey } from "@/lib/parameters/registry";
 import { missing } from "@/lib/parameters/model";
 
 const PAGE_SIZE = 24;
@@ -20,7 +23,7 @@ const sortOptions = [
 const genders = [["", "ui.all"], ["men", "ui.filter_men"], ["women", "ui.filter_women"], ["unisex", "gender.unisex"]];
 const lines = [["", "ui.all"], ["mainline", "ui.mainline"], ["veilance", "keep.veilance"]];
 
-function CatalogCardView({ product, eager }: { product: CatalogCard; eager: boolean }) {
+function CatalogCardView({ product, eager }: { product: CatalogListing; eager: boolean }) {
   const {t} = useCopy();
   return (
     <article className="gear-card min-w-0 overflow-hidden border bg-card">
@@ -48,14 +51,18 @@ function CatalogCardView({ product, eager }: { product: CatalogCard; eager: bool
           </h2>
           <p className="mt-1 font-mono text-sm tabular-nums text-primary">{displayPrice(t, product.msrp, product.currency)}</p>
         </div>
-        <dl className="grid grid-cols-2 gap-px border border-border bg-border">
-          {keyMetrics(product).map((key) => (
-            <div key={key} className="min-w-0 bg-card px-1.5 py-1.5 sm:px-2">
-              <dt className="truncate text-[0.65rem] text-muted-foreground" title={metricName(t, key)}>{metricName(t, key)}</dt>
-              <dd className="truncate font-mono text-[0.65rem] tabular-nums sm:text-xs"
-                  title={localizedMetric(t, key, product.specs[key])}>{localizedMetric(t, key, product.specs[key])}</dd>
-            </div>
-          ))}
+        <dl aria-label={t("ui.key_specs")} data-card-fields className="grid grid-cols-2 gap-px border border-border bg-border">
+          {cardFields.map((field) => {
+            const label = t(field.label);
+            const {text, title} = displayCardCell(t, product.card, field.key);
+            return <div key={field.key} data-card-field={field.key} data-parameter-row className="min-w-0 bg-card px-1.5 py-1.5 sm:px-2">
+              <dt className="flex h-6 min-w-0 items-center gap-0.5 text-[0.65rem] text-muted-foreground">
+                <span className="truncate" title={label}>{label}</span>
+                {"help" in field && <ParameterHelp label={label} text={t(field.help)} />}
+              </dt>
+              <dd data-parameter-value className="truncate font-mono text-[0.65rem] tabular-nums sm:text-xs" title={title}>{text}</dd>
+            </div>;
+          })}
         </dl>
         <CompareButton product={product} compact />
       </div>
@@ -63,7 +70,7 @@ function CatalogCardView({ product, eager }: { product: CatalogCard; eager: bool
   );
 }
 
-export function CatalogBrowser({ products }: { products: CatalogCard[] }) {
+export function CatalogBrowser({ products }: { products: CatalogListing[] }) {
   const {t, locale} = useCopy();
   const params = useSearchParams();
   const category = params.get("category") ?? "";
@@ -111,14 +118,14 @@ export function CatalogBrowser({ products }: { products: CatalogCard[] }) {
   const topFamilies = [...familyCounts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 8).map(([name]) => name);
   const familyFilters = family && !topFamilies.includes(family) ? [...topFamilies, family] : topFamilies;
 
-  const results = categoryProducts.filter((product) =>
+  const filtered = categoryProducts.filter((product) =>
     (!gender || product.gender === gender) && (!family || product.family === family) &&
     (!line || product.veilance === (line === "veilance")) && (!productType || product.productType === productType) &&
-    (!protectionType || product.protectionType === protectionType) &&
-    matchesProduct(product, deferredQuery));
+    (!protectionType || product.protectionType === protectionType));
+  const results = searchCatalog(filtered, deferredQuery);
   if (sort !== "name") results.sort((a, b) => {
-    const first = sort === "weight" ? a.specs.weight_g?.value : a.msrp;
-    const second = sort === "weight" ? b.specs.weight_g?.value : b.msrp;
+    const first = sort === "weight" ? a.card.weight : a.msrp;
+    const second = sort === "weight" ? b.card.weight : b.msrp;
     if (typeof first !== "number") return typeof second === "number" ? 1 : 0;
     if (typeof second !== "number") return -1;
     if (sort !== "weight" && a.currency !== b.currency) {
@@ -144,7 +151,7 @@ export function CatalogBrowser({ products }: { products: CatalogCard[] }) {
             <span className="sr-only">{t("ui.search_catalog")}</span>
             <Search size={16} className="pointer-events-none absolute top-3 left-3 text-muted-foreground" aria-hidden="true" />
             <input ref={searchInput} type="search" defaultValue={query} onChange={(event) => update({ q: event.target.value }, true)}
-              placeholder={t("ui.search_products_or_specs")} className="catalog-input w-full pl-9" />
+              placeholder={t("card.search_placeholder")} className="catalog-input w-full pl-9" />
           </label>
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>{t("ui.sort")}</span>

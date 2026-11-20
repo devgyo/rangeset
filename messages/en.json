@@ -523,5 +523,12 @@
     "modal": "Modal",
     "aramid": "Aramid",
     "ptfe": "PTFE"
+  },
+  "card": {
+    "weight_help": "Brands use different reference sizes for weighing. Arc’teryx does not publish the reference size.",
+    "fiber_share": "{fiber} {pct}%",
+    "recycled_share": "{pct}% recycled",
+    "search_placeholder": "Search products, specs, or model numbers",
+    "main_fabric": "Main fabric"
   }
 }

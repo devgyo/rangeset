@@ -13,8 +13,9 @@ import {
 } from "@/lib/arcteryx-view";
 
 import {isCatalogProduct} from "@/lib/catalog-scope";
-import { classifyArcProduct, classificationFilterValue } from "@/lib/parameters/classification";
-import { normalizeArcProduct, type IndexedSpec } from "@/lib/parameters/arcteryx";
+import {selectCardParameters, type CardParameters} from "@/lib/parameters/card";
+import { classificationFilterValue } from "@/lib/parameters/classification";
+import { normalizeArcProduct, parametersOf, type IndexedSpec } from "@/lib/parameters/arcteryx";
 
 export const catalogEnabled = Boolean(process.env.DATABASE_URL);
 
@@ -39,6 +40,10 @@ const cardPayload = sql<Record<string, unknown>>`jsonb_build_object(
     jsonb_path_query_array(${raw}, '$.materials[*] ? (@ like_regex "down|insulation|coreloft|primaloft|octa|climashield|polartec alpha" flag "i")') end
 ) || ${classificationPayload}`;
 
+const catalogCardPayload = sql<Record<string, unknown>>`${cardPayload} || jsonb_build_object(
+  'materials', ${raw}->'materials', 'fit', ${raw}->'fit'
+)`;
+
 type Scope = { category: string; family: string };
 async function catalogRows(slugs?: string[], mode: "none" | "card" | "detail" = "none", scope?: Scope) {
   if (slugs && !slugs.length) return [];
@@ -59,7 +64,7 @@ async function catalogRows(slugs?: string[], mode: "none" | "card" | "detail" = 
       where override.product_id = ${products.id}
     ), '{}'::jsonb)`,
     payloadFetchedAt: mode === "detail" ? productRaw.fetchedAt : sql<null>`null`,
-    payload: mode === "card" ? cardPayload : mode === "detail" ? raw : classificationPayload,
+    payload: mode === "card" ? (scope ? cardPayload : catalogCardPayload) : mode === "detail" ? raw : classificationPayload,
   }).from(products).innerJoin(brands, eq(products.brandId, brands.id)).leftJoin(productRaw, eq(productRaw.productId, products.id));
   const rows = await query.where(slugs ? inArray(products.slug, slugs) : scoped).orderBy(products.name, products.id);
   return rows.map(({ overrideValues, ...row }) => {
@@ -196,7 +201,7 @@ function byProduct<T extends { productId: number }>(rows: T[]) {
   return groups;
 }
 
-function toView(row: CatalogRow, dbSpecs: SpecRow[], dbPrices: PriceRow[], detail: boolean, withParameters: boolean): ProductDetail {
+function toView(row: CatalogRow, dbSpecs: SpecRow[], dbPrices: PriceRow[], detail: boolean): ProductDetail {
   const payload = record(row.payload);
   const features = featuresOf(payload.features);
   const materials = textList(payload.materials);
@@ -243,13 +248,9 @@ function toView(row: CatalogRow, dbSpecs: SpecRow[], dbPrices: PriceRow[], detai
       .map((option) => plainText(record(option).label)).filter(Boolean),
     colorways: detail ? colorwaysOf(colorOptions) : [],
   };
-  const input = { raw: payload, fetchedAt: row.payloadFetchedAt, indexed: dbSpecs, overrides: row.overrides };
-  if (withParameters) product.parameters = normalizeArcProduct(product, input);
-  const classification = product.parameters ? {
-    productType: product.parameters.values.product_type, protectionType: product.parameters.values.protection_type,
-  } : classifyArcProduct(product, input);
-  product.productType = classificationFilterValue(classification.productType);
-  product.protectionType = classificationFilterValue(classification.protectionType);
+  product.parameters = normalizeArcProduct(product, {raw: payload, fetchedAt: row.payloadFetchedAt, indexed: dbSpecs, overrides: row.overrides});
+  product.productType = classificationFilterValue(product.parameters.values.product_type);
+  product.protectionType = classificationFilterValue(product.parameters.values.protection_type);
   return product;
 }
 
@@ -303,17 +304,19 @@ async function loadProducts(mode: "card" | "detail", slugs?: string[], scope?: S
   ]);
   const specsByProduct = byProduct(specs);
   const pricesByProduct = byProduct(latest);
-  return rows.map((row) => toView(row, specsByProduct.get(row.id) ?? [], pricesByProduct.get(row.id) ?? [], mode === "detail", mode === "detail" || Boolean(scope)));
+  return rows.map((row) => toView(row, specsByProduct.get(row.id) ?? [], pricesByProduct.get(row.id) ?? [], mode === "detail"));
 }
 
-function cardOnly(product: ProductDetail): CatalogCard {
+export type CatalogListing = CatalogCard & {card: CardParameters};
+
+function cardOnly(product: ProductDetail): CatalogListing {
   const { slug, name, brand, category, gender, family, subTags, veilance, isHardshell, status, example,
     image, hero, swatches, activities, summary, msrp, currency, inStock, specs } = product;
-  const exampleClassification = example ? classifyArcProduct(product) : undefined;
+  const profile = parametersOf(product);
   return { slug, name, brand, category, gender, family, subTags, veilance, isHardshell, status, example,
     image, hero, swatches, activities, summary, msrp, currency: example ? "USD" : currency, inStock, specs,
-    productType: exampleClassification ? classificationFilterValue(exampleClassification.productType) : product.productType,
-    protectionType: exampleClassification ? classificationFilterValue(exampleClassification.protectionType) : product.protectionType };
+    productType: classificationFilterValue(profile.values.product_type), protectionType: classificationFilterValue(profile.values.protection_type),
+    card: selectCardParameters(profile) };
 }
 
 export const listProducts = cache(async () => (await loadProducts("card")).map(cardOnly));
