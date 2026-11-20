@@ -11,7 +11,8 @@
     "crawl:arcteryx": "tsx crawler/index.ts",
     "crawl:dry-run": "tsx crawler/dry-run.ts",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "i18n-check": "node scripts/i18n-check"
   },
   "dependencies": {
     "@vercel/functions": "^3.11.3",
@@ -22,6 +23,7 @@
     "html-entities": "^2.6.0",
     "lucide-react": "^1.76.0",
     "next": "16.4.6",
+    "next-intl": "^4.15.3",
     "pg": "^8.23.1",
     "radix-ui": "^1.8.1",
     "react": "19.3.0",
@@ -37,6 +39,7 @@
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "csv-parse": "^7.0.3",
     "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",

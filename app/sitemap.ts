@@ -1,15 +1,19 @@
-import type { MetadataRoute } from "next";
-import { catalogEnabled, indexableProductSlugs } from "@/lib/catalog";
-import { siteUrl } from "@/lib/site";
+import type {MetadataRoute} from "next";
+import {catalogEnabled, indexableProductSlugs} from "@/lib/catalog";
+import {languageAlternates, localizedPath, locales} from "@/i18n/routing";
+import {siteUrl} from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const entries = [{ url: siteUrl.href }];
-  if (!catalogEnabled) return entries;
-  const slugs = await indexableProductSlugs();
-  return [
-    ...entries,
-    { url: new URL("/jackets", siteUrl).href },
-    { url: new URL("/products", siteUrl).href },
-    ...slugs.map((slug) => ({ url: new URL(`/products/${slug}`, siteUrl).href })),
-  ];
+  const paths = ["/"];
+  if (catalogEnabled) {
+    const slugs = await indexableProductSlugs();
+    paths.push("/jackets", "/products", ...slugs.map((slug) => `/products/${slug}`));
+  }
+  return paths.flatMap((path) => {
+    const languages = Object.fromEntries(Object.entries(languageAlternates(path)).map(([locale, href]) => [locale, new URL(href, siteUrl).href]));
+    return locales.map((locale) => ({
+      url: new URL(localizedPath(path, locale), siteUrl).href,
+      alternates: {languages},
+    }));
+  });
 }

@@ -1,13 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import {Link, usePathname} from "@/i18n/navigation";
+import {genderDisplay, useCopy} from "@/i18n/copy";
 import { useMemo, useSyncExternalStore } from "react";
 import { ArrowRight, Check, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductImage } from "@/components/catalog/product-media";
 import { comparisonHref } from "@/lib/comparison";
-import { genderLabel, type CatalogCard } from "@/lib/arcteryx-view";
+import type { CatalogCard } from "@/lib/arcteryx-view";
 
 const storageKey = "rangeset:comparison";
 const listeners = new Set<() => void>();
@@ -53,32 +53,34 @@ export function useCompareSelection() {
 }
 
 export function CompareButton({ product, compact = false }: { product: PickedProduct; compact?: boolean }) {
+  const {t} = useCopy();
   const selection = useCompareSelection();
   const selected = selection.some(({ slug }) => slug === product.slug);
   const atLimit = !selected && selection.length >= 4;
   return (
     <Button type="button" variant={selected ? "secondary" : "outline"}
       className={compact ? "h-9 w-full justify-center" : "h-10 px-4"} disabled={atLimit}
-      aria-label={`${selected ? "Remove" : "Compare"} ${product.name} (${genderLabel(product.gender)})`}
-      aria-pressed={selected} title={atLimit ? "Compare up to four products" : undefined}
+      aria-label={t("ui.compare_action", {action: t(selected ? "ui.remove" : "ui.compare"), name: `${product.name} (${genderDisplay(t, product.gender)})`})}
+      aria-pressed={selected} title={atLimit ? t("ui.compare_up_to_four_products") : undefined}
       onClick={() => {
         const current = decodeSelection(snapshot());
         rememberSelection(current.some(({ slug }) => slug === product.slug)
           ? current.filter(({ slug }) => slug !== product.slug) : [...current, product]);
       }}>
       {selected ? <Check aria-hidden="true" /> : <Plus aria-hidden="true" />}
-      {selected ? "Added" : compact ? "Compare" : "Add to compare"}
+      {t(selected ? "ui.added" : compact ? "ui.compare" : "ui.add_to_compare")}
     </Button>
   );
 }
 
 export function CompareDock() {
+  const {t} = useCopy();
   const selection = useCompareSelection();
   const route = usePathname();
   if (!selection.length || (!route.startsWith("/products") && route !== "/jackets")) return null;
   const mixed = new Set(selection.map(({ category }) => category)).size > 1;
   return (
-    <aside data-compare-dock aria-label="Compare dock" className="compare-dock">
+    <aside data-compare-dock aria-label={t("ui.compare_dock")} className="compare-dock">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex gap-1.5 overflow-x-auto px-0.5 py-1">
@@ -86,9 +88,9 @@ export function CompareDock() {
               <div key={product.slug} className="flex max-w-44 shrink-0 items-center gap-2 border border-border bg-card p-1">
                 <ProductImage src={product.image} sizes="28px" className="size-7 shrink-0" />
                 <Link href={`/products/${product.slug}`} className="truncate text-xs hover:text-primary" title={product.name}>
-                  {product.name} <span className="sr-only">{genderLabel(product.gender)}</span>
+                  {product.name} <span className="sr-only">{genderDisplay(t, product.gender)}</span>
                 </Link>
-                <button type="button" aria-label={`Remove ${product.name} (${genderLabel(product.gender)})`}
+                <button type="button" aria-label={t("ui.compare_action", {action: t("ui.remove"), name: `${product.name} (${genderDisplay(t, product.gender)})`})}
                   className="grid size-7 shrink-0 place-items-center hover:text-primary"
                   onClick={() => rememberSelection(selection.filter(({ slug }) => slug !== product.slug))}>
                   <X size={14} aria-hidden="true" />
@@ -96,12 +98,12 @@ export function CompareDock() {
               </div>
             ))}
           </div>
-          {mixed && <p className="mt-1 text-xs text-muted-foreground">Mixed categories · Some parameters may not apply</p>}
+          {mixed && <p className="mt-1 text-xs text-muted-foreground">{t("ui.mixed_categories_·_some_parameters_may_n")}</p>}
         </div>
         <div className="ml-auto flex shrink-0 gap-1.5">
-          <Button type="button" variant="ghost" className="h-9" onClick={() => rememberSelection([])}>Clear</Button>
-          {selection.length < 2 ? <Button className="h-9" disabled>Compare (1)</Button> :
-            <Button asChild className="h-9"><Link href={comparisonHref(selection.map(({ slug }) => slug))}>Compare ({selection.length}) <ArrowRight aria-hidden="true" /></Link></Button>}
+          <Button type="button" variant="ghost" className="h-9" onClick={() => rememberSelection([])}>{t("ui.clear")}</Button>
+          {selection.length < 2 ? <Button className="h-9" disabled>{t("ui.compare_count", {count: 1})}</Button> :
+            <Button asChild className="h-9"><Link href={comparisonHref(selection.map(({ slug }) => slug))}>{t("ui.compare_count", {count: selection.length})} <ArrowRight aria-hidden="true" /></Link></Button>}
         </div>
       </div>
     </aside>
@@ -109,18 +111,19 @@ export function CompareDock() {
 }
 
 export function CatalogNav() {
+  const {t} = useCopy();
   const selection = useCompareSelection();
   const route = usePathname();
   const links = [
-    { label: "Catalog", href: "/products", active: route.startsWith("/products") },
-    { label: "Compare", href: comparisonHref(selection.map(({ slug }) => slug)), active: route === "/compare" },
-    { label: "Hardshells", href: "/jackets", active: route === "/jackets" },
+    { label: "ui.nav_catalog", href: "/products", active: route.startsWith("/products") },
+    { label: "ui.compare", href: comparisonHref(selection.map(({ slug }) => slug)), active: route === "/compare" },
+    { label: "ui.nav_hardshells", href: "/jackets", active: route === "/jackets" },
   ];
-  return <nav aria-label="Main navigation" className="flex items-center gap-2.5 sm:gap-6">
+  return <nav aria-label={t("ui.navigation")} className="flex items-center gap-2.5 sm:gap-6">
     {links.map(({ label, href, active }) => (
       <Link key={label} className="nav-link" href={href} aria-current={active ? "page" : undefined}>
-        {label}
-        {label === "Compare" && selection.length > 0 &&
+        {t(label)}
+        {label === "ui.compare" && selection.length > 0 &&
           <span className="ml-1 rounded-sm bg-primary px-1 text-[0.625rem] text-primary-foreground">{selection.length}</span>}
       </Link>
     ))}

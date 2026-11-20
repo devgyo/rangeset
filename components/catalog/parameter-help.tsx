@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import {useCopy} from "@/i18n/copy";
 import { CircleHelp } from "lucide-react";
 
 const openEvent = "rangeset:parameter-help";
 const margin = 10;
 
 export function ParameterHelp({ label, text, symbol }: { label: string; text: string; symbol?: string }) {
+  const {t} = useCopy();
   const id = useId();
   const anchor = useRef<HTMLButtonElement>(null);
   const popup = useRef<HTMLSpanElement>(null);
@@ -105,7 +107,7 @@ export function ParameterHelp({ label, text, symbol }: { label: string; text: st
   }, [id, open]);
 
   return <span className="parameter-help">
-    <button ref={anchor} type="button" className="parameter-help-button" aria-label={symbol ? label : `About ${label}`}
+    <button ref={anchor} type="button" className={symbol && symbol.length > 1 ? "parameter-help-button !w-auto whitespace-normal text-left" : "parameter-help-button"} aria-label={symbol ? label : t("ui.about", {label})}
       aria-describedby={id} aria-expanded={open} onPointerEnter={(event) => { if (event.pointerType === "mouse") show(); }}
       onPointerLeave={(event) => { if (event.pointerType === "mouse" && !event.currentTarget.matches(":focus-visible")) delayClose(); }}
       onFocus={(event) => { if (event.currentTarget.matches(":focus-visible")) show(); }}
@@ -118,7 +120,7 @@ export function ParameterHelp({ label, text, symbol }: { label: string; text: st
     <span ref={popup} id={id} role="tooltip" popover="manual" className="parameter-tooltip"
       onPointerEnter={cancelClose} onPointerLeave={() => { if (!anchor.current?.matches(":focus-visible")) delayClose(); }}>
       <strong className="block text-foreground">{label}</strong>
-      <span className="mt-1 block">{text}</span>
+      {text && <span className="mt-1 block">{text}</span>}
     </span>
   </span>;
 }

@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { ImageOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { genderLabel, type CatalogCard, type ColorSwatch } from "@/lib/arcteryx-view";
+import {genderDisplay, useCopy} from "@/i18n/copy";
+import type { CatalogCard, ColorSwatch } from "@/lib/arcteryx-view";
 import { cn } from "@/lib/utils";
 
 export function ProductImage({ src, alt = "", sizes, eager, studio = true, fit = "cover", className }: {
@@ -16,15 +17,17 @@ export function ProductImage({ src, alt = "", sizes, eager, studio = true, fit =
 }
 
 export function GenderPill({ gender }: { gender: CatalogCard["gender"] }) {
-  return <span className="gender-pill">{genderLabel(gender)}</span>;
+  const {t} = useCopy();
+  return <span className="gender-pill">{genderDisplay(t, gender)}</span>;
 }
 
 export function ProductBadges({ product }: { product: Pick<CatalogCard, "veilance" | "example" | "status"> }) {
+  const {t} = useCopy();
   return (
     <>
-      {product.veilance && <Badge variant="outline" className="rounded-sm">Veilance</Badge>}
-      {product.status === "discontinued" && <Badge variant="outline" className="rounded-sm text-[#e8c3a6]">Discontinued</Badge>}
-      {product.example && <Badge variant="outline" className="example-badge">Example data</Badge>}
+      {product.veilance && <Badge variant="outline" className="rounded-sm">{t("keep.veilance")}</Badge>}
+      {product.status === "discontinued" && <Badge variant="outline" className="rounded-sm text-[#e8c3a6]">{t("ui.discontinued")}</Badge>}
+      {product.example && <Badge variant="outline" className="example-badge">{t("ui.example_data")}</Badge>}
     </>
   );
 }

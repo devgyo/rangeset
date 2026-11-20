@@ -1,0 +1,128 @@
+#!/usr/bin/env node
+const {readFileSync, writeFileSync, readdirSync} = require("node:fs");
+const {join} = require("node:path");
+const {parse} = require("csv-parse/sync");
+const ts = require("typescript");
+
+const root = join(__dirname, "..");
+const rows = parse(readFileSync(join(root, "docs/i18n/glossary.csv")), {bom: true, columns: true, skip_empty_lines: true});
+const languages = ["en", "zh", "ja"];
+const writing = process.argv.includes("--write");
+const keys = new Set();
+const errors = [];
+
+const offlineFootwear = new Set([
+  "ui.per_shoe", "ui.pair", "ui.reference_shoe_basis", "group.footwear", "cat.footwear",
+  "field.weight_basis", "field.drop", "field.forefoot_stack", "field.heel_stack", "field.lugs",
+  "field.outsole", "field.midsole", "field.upper", "field.waterproof_lining",
+  "field.legacy_stack", "field.legacy_drop", "field.legacy_outsole",
+  "type.shoe", "type.boot", "type.sandal", "type.mule", "part.upper", "part.midsole", "part.outsole",
+  "help_label.drop", "help_label.stack", "note.published_drop_and_stack_heights_do_not_agree",
+]);
+
+const catalogues = Object.fromEntries(languages.map((locale) => [locale, {}]));
+for (const row of rows) {
+  const {key, en} = row;
+  const match = /^([a-z_]+)\.([\w\p{L}·/²-]+)$/u.exec(key);
+  if (!match || !en || keys.has(key)) {
+    errors.push(`Invalid, empty or duplicate glossary key: ${key}`);
+    continue;
+  }
+  keys.add(key);
+  const [, namespace, name] = match;
+  for (const locale of languages) {
+    const messages = catalogues[locale][namespace] ??= {};
+    if (!row[locale] && namespace !== "help" && !offlineFootwear.has(key)) {
+      errors.push(`Missing active translation: ${locale} ${key}`);
+    }
+    if (row["不翻标记"] && row[locale] !== en) errors.push(`Protected term changed: ${locale} ${key}`);
+    if (row[locale] || namespace !== "help") messages[name] = row[locale] || en;
+  }
+}
+
+const guide = readFileSync(join(root, "docs/i18n/style-guide.md"), "utf8");
+const approvedHelp = new Set(["denier", "3L", "dwr", "fill", "recco"]);
+const approvedRows = new Set();
+for (const line of guide.split(/\r?\n/)) {
+  if (!line.startsWith("|")) continue;
+  const [term, ...copy] = line.slice(1, -1).split("|").map((value) => value.trim());
+  if (!approvedHelp.has(term)) continue;
+  const row = rows.find(({key}) => key === "help." + term.toLowerCase());
+  if (!row || languages.some((locale, index) => row[locale] !== copy[index])) errors.push(`Help text differs from style-guide.md: ${term}`);
+  approvedRows.add(term);
+}
+if (approvedRows.size !== approvedHelp.size) errors.push("The style guide must contain all five approved help translations.");
+
+function checkFile(path, content) {
+  const file = join(root, path);
+  if (writing) writeFileSync(file, content);
+  else if (readFileSync(file, "utf8") !== content) errors.push(`${path} differs from glossary.csv. Run pnpm i18n-check --write.`);
+}
+
+for (const locale of languages) checkFile(`messages/${locale}.json`, JSON.stringify(catalogues[locale], null, 2) + "\n");
+const marked = rows.filter((row) => /needs_review|争议/.test(row["备注/needs_review"]));
+const helpFallback = rows.filter((row) => row.key.startsWith("help.") && (!row.zh || !row.ja));
+const footwearFallback = rows.filter((row) => offlineFootwear.has(row.key) && (!row.zh || !row.ja));
+const table = (items, columns) => items.map((row) => "| " + columns.map((name) => String(row[name] || "—").replaceAll("|", "\\|").replace(/\r?\n/g, " ")).join(" | ") + " |").join("\n");
+checkFile("docs/i18n/review.md", `# Rangeset i18n 人工审校
+
+由 \`pnpm i18n-check --write\` 从术语表生成。
+
+## 待审术语与草译
+
+| Key | English | 简体中文 | 日本語 | 备注 |
+| --- | --- | --- | --- | --- |
+${table(marked, ["key", "en", "zh", "ja", "备注/needs_review"])}
+
+## 已下线的鞋类词条
+
+保留旧英文词条供兼容，本次不补译。
+
+| Key | English | 简体中文 | 日本語 |
+| --- | --- | --- | --- |
+${table(footwearFallback, ["key", "en", "zh", "ja"])}
+
+## 回退到英文的说明
+
+${helpFallback.map(({key}) => "- \`" + key + "\`").join("\n")}
+`);
+
+function inspect(path) {
+  const source = ts.createSourceFile(path, readFileSync(path, "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  function report(node, message) {
+    errors.push(`${path.slice(root.length + 1)}:${source.getLineAndCharacterOfPosition(node.getStart()).line + 1} ${message}`);
+  }
+  function visit(node) {
+    if (ts.isCallExpression(node) && ["t", "englishMessage"].includes(node.expression.getText(source))) {
+      const [key] = node.arguments;
+      if (key && ts.isStringLiteralLike(key) && !keys.has(key.text)) report(key, `Key missing from glossary.csv: ${key.text}`);
+    }
+    if (ts.isJsxText(node) && /[A-Za-z]{2}/.test(node.getText(source).trim())) {
+      report(node, "Use the glossary for JSX copy.");
+    }
+    if (ts.isJsxAttribute(node) && ["aria-label", "placeholder", "title", "scrollLabel"].includes(node.name.getText(source)) &&
+        node.initializer && ts.isStringLiteral(node.initializer) && /[A-Za-z]{2}/.test(node.initializer.text)) {
+      report(node, "Use the glossary for UI attributes.");
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(source);
+}
+
+function walk(dir) {
+  for (const entry of readdirSync(dir, {withFileTypes: true})) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) walk(path);
+    else if (entry.name.endsWith(".tsx")) inspect(path);
+  }
+}
+
+for (const dir of ["app", "components"]) walk(join(root, dir));
+for (const locale of languages) {
+  const untranslated = rows.filter((row) => !row[locale]);
+  console.log(`${locale}: ${keys.size} glossary keys, ${keys.size - untranslated.length} authored, ${untranslated.length} English fallbacks (${untranslated.filter(({key}) => key.startsWith("help.")).length} help)`);
+}
+if (errors.length) {
+  console.error(errors.join("\n"));
+  process.exitCode = 1;
+}

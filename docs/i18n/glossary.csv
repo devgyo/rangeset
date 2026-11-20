@@ -1,0 +1,500 @@
+﻿key,en,zh,ja,分类,不翻标记,依据链接,备注/needs_review
+group.identity,General,基本信息,基本情報,分组,,,通用 UI 词，无需外部依据
+group.sizing,Dimensions & fit,尺寸与版型,サイズ・フィット,分组,,https://arcteryx.jp/products/beta-ar-jacket-m https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062,AZ1 用「版型和尺码」；AJ1 用「フィット & サイズ」
+group.fabric,Main fabric,面料,素材,分组,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/cerium-jacket-m,组内含里衬等多部位，故不用「主面料」；AZ1「材料与保养」，AJ3「素材」
+group.protection,Protection,防护性能,防護性能,分组,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/pages/260618_beta-series,AJ2 用「プロテクション」，普通读者更易懂「防護性能」
+group.warmth,Insulation,保暖,保温,分组,,https://www.montbell.jp/generalpage/disp.php?id=754 https://cdn.shanghai.gov.cn/nw17239/20261118/a7c698df69c1468080cf50944ccd0877.html,
+group.features,Features,功能细节,機能・仕様,分组,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,AZ1「功能和规格」；AJ1「技術的な特徴」
+group.origin,Origin,产地,生産地,分组,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/cerium-jacket-m,
+group.environment,Environment & certifications,环保与认证,環境・認証,分组,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,AZ1「可持续发展」/AJ1「サステナビリティ」；字段含法规与认证，用更中性的说法
+group.supplemental,Supplementary source text,原文补充,補足（原文）,分组,,,
+field.brand,Brand,品牌,ブランド,字段,,,
+field.model,Model,型号,モデル名,字段,,https://arcteryx.jp/pages/260618_beta-series,争议：AZ1 的「型号」指货号 X000011062；我们指款名，备选「款名」
+field.product_line,Product line,产品线,ライン,字段,,,Mainline / Veilance / System_A 这一层
+field.family,Model family,系列,シリーズ,字段,,https://arcteryx.com/us/zh/shop/womens/beta-ar-jacket-9863 https://arcteryx.jp/pages/260618_beta-series,AZ2「Beta 系列」，AJ2「ベータシリーズ」
+field.category,Category,品类,カテゴリー,字段,,,
+field.product_type,Product type,款式,アイテム,字段,,,争议：中文「款式」也可指设计风格；日文「アイテム」为服装零售惯用
+field.gender,Gender,性别,性別,字段,,,
+field.msrp,Official list price,官方定价,希望小売価格,字段,,https://arcteryx.jp/pages/260618_beta-series,AJ2 价格含税标注「(税込)」；中文备选「官方指导价」
+field.activities,Activities,适用运动,アクティビティ,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,AZ1 标签「户外运动」，AJ1「アクティビティ」
+field.release,Release year / season,上市季,発売シーズン,字段,,https://saohuobao.com/deals/arcteryx-fw26-new-arrivals-202609 https://senken.co.jp/posts/goldwin-260213,值见 season.*
+field.weight,Weight,重量,重量,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/pages/260618_beta-series,AJ1 标签为「重さ」，AJ2 对比表为「重量」
+field.weight_size,Weight reference size,称重尺码,重量の基準サイズ,字段,,https://arcteryx.jp/pages/260618_beta-series,AJ2 写作「重量（Men’s M）」
+field.fit,Fit,版型,フィット,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,AZ1 规格栏写「款型」，正文用「版型」；版型更常见
+field.back_length,Centre back length,后中长,着丈（センターバック）,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m https://arcteryx.jp/pages/260618_beta-series,AZ1「衣服后中长」；AJ1「センターバック長さ」，AJ2 对比表「着丈」
+field.inseam,Inseam,内缝长,股下,字段,,https://arcteryx.com/us/zh/help/sizing/mens/bottoms https://store.yamap.com/guide/size,AZ4 官方用「内缝长」；口语「内长」
+field.sizes,Available sizes,尺码,サイズ展開,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,
+field.colors,Colorways,配色数,カラー展開数,字段,,,字段为数量；needs_review: 日文常写「カラー展開」，「数」为我方补
+field.materials,Main fabric,面料,素材,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/cerium-jacket-m,
+field.fabric_name,Fabric name,面料名称,素材名,字段,,,
+field.fiber_content,Composition,成分,組成,字段,,,日文洗标惯用「組成表示」；中文洗标「成分」
+field.fabric_weight,Fabric weight,克重,生地の目付,字段,,https://arcteryx.com/us/zh/shop/womens/beta-ar-jacket-9863 https://ocaci.jp/blog/519/,AZ2「克重126gsm」；日文「目付」是行业词，需配 ? 说明
+field.denier,Yarn denier,旦数,デニール,字段,,https://arcteryx.jp/pages/260618_beta-series https://arcteryx.jp/pages/s24beta-epe https://www.maihuwai.com/shaidan/51660.html https://arcteryx.tw/pages/find-your-shell-jacket-beta,AJ5 表头「デニール数」；中文评测常说「D数」，正文用「旦数」
+field.fabric_recycled_content,Recycled content,再生成分,リサイクル素材比率,字段,,https://arcteryx.com/us/zh/shop/womens/beta-ar-jacket-9863 https://arcteryx.jp/products/beta-ar-jacket-m,Arc'teryx 中文混用「再生/回收」，统一用「再生」
+field.weave,Construction,织法,織り・編み,字段,,,争议：含针织（Jersey/Knit），「织法」在中文可涵盖针织；needs_review
+field.fabric_stretch,Stretch,弹力,ストレッチ,字段,,,
+field.fabric_certifications,Certifications,认证,認証,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,
+field.fabric_treatment,Fabric treatment,面料处理,生地加工,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,AZ1「面料处理」，AJ1「生地加工」——官方原词
+field.garment_recycled_content,Garment recycled content,整件再生成分,製品全体のリサイクル素材比率,字段,,,
+subgroup.whole_garment,Whole garment,整件,製品全体,字段,,,
+field.fabric_issues,Unassigned material,部位未明的材料,部位不明の素材,字段,,,needs_review: 内部审核用语，可再简化
+field.protection_type,Protection type,防护类型,シェルの種類,字段,,,
+field.protection,Protection claims,防护特性,防護性能の表示,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,AZ1「技术特点：防水/防风/透气/耐磨」
+field.membrane,Waterproof membrane,防水膜,防水メンブレン,字段,,https://www.gore-tex.com.cn/support/frequently-asked-questions https://www.montbell.jp/generalpage/disp.php?id=794,GCN1 用「薄膜」；MB1「メンブレン（膜）」
+field.laminate,Laminate layers,面料层数,レイヤー構造,字段,,http://www.cnoutdoor.com/?action-viewnews-itemid-263107= https://www.montbell.jp/generalpage/disp.php?id=794,中文户外常说「两层/三层压胶」；值保留 2L/2.5L/3L
+field.dwr,Water-repellent treatment,防泼水处理,撥水加工,字段,,https://www.gore-tex.com.cn/support/frequently-asked-questions https://arcteryx.jp/products/beta-ar-jacket-m https://support.montbell.jp/material/aboutmaterial/,GCN1「持久防泼水(DWR)」；AJ1「DWR（耐久撥水）加工」
+field.wind,Wind protection,防风性能,防風性,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,
+field.upf,Sun protection,防晒,UVカット,字段,,,needs_review: 日文亦常写「UPF」或「紫外線カット」
+field.hydrostatic_head,Hydrostatic head,静水压,耐水圧,字段,,http://xkt-cert.com/news/s99976.html https://www.montbell.jp/generalpage/disp.php?id=794,争议：中文电商常写「防水指数」；检测标准称「静水压」
+field.breathability,Breathability,透湿性,透湿性,字段,,https://support.montbell.jp/material/aboutmaterial/ http://xkt-cert.com/news/s99976.html,争议：中文口语「透气」，但「透气」也指空气透过；用「透湿」更准
+field.insulation_type,Insulation type,保暖材料,保温材の種類,字段,,https://arcteryx.com/us/zh/shop/mens/cerium-hoody-0521 https://arcteryx.jp/products/cerium-jacket-m,
+field.insulation,Fill by part,各部位填充,部位別の中綿,字段,,https://arcteryx.jp/products/cerium-jacket-m,
+field.fill_power,Down fill power,蓬松度,フィルパワー,字段,,https://cdn.shanghai.gov.cn/nw17239/20261118/a7c698df69c1468080cf50944ccd0877.html https://www.montbell.jp/generalpage/disp.php?id=754,
+field.down_ratio,Down content,含绒量,ダウン率,字段,,https://cdn.shanghai.gov.cn/nw17239/20261118/a7c698df69c1468080cf50944ccd0877.html https://www.kepuchina.cn/article/articleinfo?ar_id=461509&business_type=100&classify=0 https://fjallraven.jp/fjallraven3/guide/material-guides/down https://arcteryx.jp/products/cerium-jacket-m,争议：新国标 GB/T 14272-2021 正式名「绒子含量」；AJ3 用「ダウン含有率」
+field.down_species,Down species,绒种,ダウンの種類,字段,,https://cdn.shanghai.gov.cn/nw17239/20261118/a7c698df69c1468080cf50944ccd0877.html,needs_review: 「绒种」口语化，备选「羽绒种类」
+field.down_mass,Down fill weight,充绒量,ダウン封入量,字段,,https://cdn.shanghai.gov.cn/nw17239/20261118/a7c698df69c1468080cf50944ccd0877.html https://www.kepuchina.cn/article/articleinfo?ar_id=461509&business_type=100&classify=0 https://shop.moonloid.jp/view/page/daun-q-a,
+field.synthetic_fill,Synthetic insulation,合成棉,化繊中綿,字段,,https://arcteryx.com/us/zh/shop/mens/cerium-hoody-0521 https://arcteryx.jp/products/cerium-jacket-m https://ocaci.jp/blog/519/,AZ5「合成保暖材料」；口语「化纤棉/合成棉」
+field.synthetic_density,Synthetic fill weight per area,合成棉克重,中綿の目付,字段,,https://arcteryx.jp/products/cerium-jacket-m https://ocaci.jp/blog/519/,AJ3 写「Coreloft™ 80 (80 g/m²)」
+field.hood,Hood,风帽,フード,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,争议：普通人常说「帽子」；Arc'teryx 中文统一「风帽」
+field.helmet_hood,Helmet-compatible hood,头盔兼容风帽,ヘルメット対応フード,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/pages/260618_beta-series,
+field.pit_zips,Underarm vents,腋下透气拉链,ピットジップ,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://www.maihuwai.com/shaidan/51660.html https://arcteryx.jp/pages/260618_beta-series https://www.funq.jp/peaks/article/763065/,争议：日文另一常见说法「脇下ベンチレーション」(PEAKS)
+field.two_way_zip,Two-way zipper,双向拉链,2WAYジッパー,字段,,https://arcteryx.tw/pages/find-your-shell-jacket-beta https://www.rakuten.co.jp/canpanera/contents/arcteryx/jacket/beta/compare/ https://arcteryx.jp/pages/260618_beta-series,AJ2 用「ダブルジッパー」，RKT 用「2wayジッパー」
+field.powder_skirt,Powder skirt,防雪裙,パウダースカート,字段,,https://www.yiyiso.com/p38281 https://www.funq.jp/peaks/article/763065/,
+field.leg_zips,Leg side zippers,裤腿侧拉链,サイドジッパー,字段,,,needs_review: 未找到官方页面原词
+field.recco,Search-and-rescue reflector,搜救反射器,救助用リフレクター,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,值写「RECCO 反射器」；RECCO 不翻
+field.pockets,Pockets,口袋,ポケット,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,
+field.fabric_origin,Fabric origin,面料产地,生地の原産国,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/cerium-jacket-m,官方原词
+field.dye_origin,Dyeing origin,染色地,染色加工地,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/cerium-jacket-m,官方原词
+field.assembly_origin,Manufacturing origin,制造地,生産国,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/cerium-jacket-m,官方原词
+field.facility,Manufacturing facility,制造工厂,製造施設,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,官方原词
+field.recycled,Recycled material claims,再生材料声明,リサイクル素材の表示,字段,,,
+field.certifications,Certifications & standards,认证与标准,認証・規格,字段,,,
+field.pfas,PFAS statements,PFAS 声明,PFASに関する表示,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,PFAS 不翻
+field.microfibers,Microfiber statements,微纤维脱落说明,マイクロファイバー排出の表示,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/cerium-jacket-m,AZ1「洗涤时可能会将塑料微纤维释放到环境中」
+field.regulatory,Other regulatory statements,其他法规声明,その他の法規関連表示,字段,,,needs_review
+field.source_notes,Supplemental material text,其他材料原文,その他の素材表記（原文）,字段,,,
+field.feature_notes,Other published features,其他功能原文,その他の機能（原文）,字段,,,
+part.body,Body,衣身,ボディ,部位,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/cerium-jacket-m,AJ2 写「ボディ部」
+part.reinforcement,Reinforcement,加固部位,補強部,部位,,https://arcteryx.com/cn/brandActivitiesDetails/1727079560248,needs_review: 日文未找到官方原词
+part.panel,Panel,拼接部位,切り替え部,部位,,https://arcteryx.com/us/zh/shop/womens/beta-ar-jacket-9863,needs_review: AZ2 把 insert 译「嵌料」；「拼接」更普通易懂
+part.lining,Lining,里衬,裏地,部位,,https://arcteryx.com/us/zh/shop/womens/beta-ar-jacket-9863 https://arcteryx.jp/products/cerium-jacket-m,AZ2「100%尼龙里衬」
+part.face,Face,面层,表地,部位,,https://arcteryx.jp/pages/260618_beta-series https://www.gore-tex.com.cn/technology/gore-tex-products/pro,GCN2「外层面料」
+part.backer,Backer,背衬,バッカー,部位,,https://www.gore-tex.com.cn/technology/gore-tex-products/pro https://arcteryx.jp/pages/260618_beta-series,争议：日文「裏地」与 Lining 撞车，故用「バッカー」(AJ2 原文 backer)；needs_review
+part.main,Main fabric,主面料,メイン素材,部位,,,
+part.contrast,Contrast fabric,拼色面料,配色素材,部位,,,needs_review: 避免与 Panel「切り替え部」撞车
+part.down,Down fill,羽绒填充,ダウン,部位,,,
+part.synthetic,Synthetic fill,合成棉填充,化繊中綿,部位,,,
+part.sleeves,Sleeves,袖子,袖,部位,,,
+part.hood,Hood,风帽,フード,部位,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,
+gender.men,Men’s,男装,メンズ,取值,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,
+gender.women,Women’s,女装,ウィメンズ,取值,,https://arcteryx.com/us/zh/shop/womens/beta-ar-jacket-9863 https://arcteryx.jp/products/beta-ar-jacket-m,
+gender.unisex,Unisex,男女同款,ユニセックス,取值,,,
+wind.windproof,Windproof,防风,防風,取值,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,
+wind.wind_resistant,Wind resistant,抗风,耐風,取值,,https://arcteryx.jp/products/beta-ar-jacket-m,needs_review: 中文「抗风」与「防风」区分度弱，备选「部分防风」
+insulation.down,Down,羽绒,ダウン,取值,,,
+insulation.synthetic,Synthetic,合成棉,化繊綿,取值,,https://ocaci.jp/blog/519/,
+insulation.mixed,Down + synthetic,羽绒＋合成棉,ダウン＋化繊綿,取值,,https://arcteryx.jp/products/cerium-jacket-m,
+laminate.2,2L,2L,2L,取值,保留原写法,http://www.cnoutdoor.com/?action-viewnews-itemid-263107= https://www.montbell.jp/generalpage/disp.php?id=794,行话保留
+laminate.2_5,2.5L,2.5L,2.5L,取值,保留原写法,http://www.cnoutdoor.com/?action-viewnews-itemid-263107= https://www.consumer.org.hk/sc/article/542-hard-shell-jackets/542-hard-shell-jackets-samples-and-test-items,行话保留
+laminate.3,3L,3L,3L,取值,保留原写法,https://arcteryx.com/us/zh/shop/womens/beta-ar-jacket-9863 https://arcteryx.jp/pages/260618_beta-series,行话保留
+construction.ripstop,Ripstop,格子防撕裂,リップストップ,织法/弹力,,https://arcteryx.jp/products/cerium-jacket-m,AJ3「マイクロリップ」「リップストップ」
+construction.plain,Plain weave,平纹,平織り,织法/弹力,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062,
+construction.double,Double weave,双层织,二重織り,织法/弹力,,,needs_review
+construction.jersey,Jersey,平纹针织,天竺編み,织法/弹力,,,needs_review: 日文亦作「ジャージー」
+construction.grid_fleece,Grid fleece,网格抓绒,グリッドフリース,织法/弹力,,,needs_review
+construction.twill,Twill,斜纹,綾織り,织法/弹力,,,
+construction.knit,Knit,针织,ニット,织法/弹力,,,
+stretch.mechanical,Mechanical,机械弹力,メカニカルストレッチ,织法/弹力,,,needs_review
+stretch.2way,2-way,双向弹力,2WAYストレッチ,织法/弹力,,,
+stretch.4way,4-way,四向弹力,4WAYストレッチ,织法/弹力,,,中文口语「四面弹」，「四向」与 2-way 对称更清楚
+stretch.elastane,Contains elastane,含氨纶,ポリウレタン混,织法/弹力,,,日本洗标把 elastane 标为「ポリウレタン」
+cat.shell_jackets,Shell Jackets,外层夹克,シェルジャケット,品类,,https://arcteryx.com/us/zh/c/mens/shell-jackets https://arcteryx.jp/pages/260618_beta-series,争议：中文户外常说「冲锋衣」但只指硬壳；AZ3 用「外层夹克」，涵盖硬壳/软壳/风壳
+cat.insulated_jackets,Insulated Jackets,保暖夹克,ダウン・中綿ジャケット,品类,,https://arcteryx.com/us/zh/shop/mens/cerium-hoody-0521,争议：Arc'teryx 中文页标题未翻译 Insulated；日文搜索结果见「インサレーテッド＆ダウンジャケット」，「ダウン・中綿」更好懂；needs_review
+cat.pants,Pants,长裤,パンツ,品类,,https://arcteryx.jp/pages/260618_beta-series,
+cat.shirts_tops,Shirts and Tops,上衣,シャツ・トップス,品类,,repo:lib/parameters + Neon products.category,
+cat.fleece,Fleece,抓绒,フリース,品类,,repo:lib/parameters + Neon products.category,
+cat.base_layer,Base Layer,打底层,ベースレイヤー,品类,,https://arcteryx.jp/collections/base-layer,
+cat.professional,Professional Use,专业用途,プロフェッショナル,品类,,repo:lib/parameters + Neon products.category,needs_review: 指 LEAF 等军警/专业线，名称待定
+cat.shorts,Shorts,短裤,ショーツ,品类,,repo:lib/parameters + Neon products.category,
+cat.dresses_skirts,Dresses and Skirts,连衣裙与半身裙,ワンピース・スカート,品类,,repo:lib/parameters + Neon products.category,日文 dress=「ワンピース」，不用「ドレス」
+protection.hard_shell,Hardshell,硬壳,ハードシェル,防护类型,,https://arcteryx.com/us/zh/c/mens/shell-jackets https://arcteryx.jp/products/beta-ar-jacket-m,
+protection.soft_shell,Softshell,软壳,ソフトシェル,防护类型,,https://arcteryx.com/us/zh/c/mens/shell-jackets https://colorfulrock.com/yamanobori/softshell/,
+protection.wind_shell,Windshell,风壳,ウインドシェル,防护类型,,https://arcteryx.com/us/zh/c/mens/shell-jackets https://colorfulrock.com/yamanobori/softshell/,
+protection.insulated_shell,Insulated shell,保暖壳衣,中綿入りシェル,防护类型,,,needs_review: 两种语言都未找到官方固定说法
+type.jacket,Jacket,夹克,ジャケット,款式,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,
+type.vest,Vest,马甲,ベスト,款式,,,中文不用「背心」，避免与 Tank top 撞车
+type.coat,Coat,大衣,コート,款式,,,
+type.parka,Parka,派克大衣,パーカ,款式,,,needs_review: 日文「パーカ」也指连帽卫衣
+type.hoodie,Hoodie,连帽衣,フーディ,款式,,https://arcteryx.com/us/zh/shop/mens/cerium-hoody-0521 https://arcteryx.jp/collections/base-layer,AZ5「Cerium 连帽衣」；AJ4「フーディ」
+type.anorak,Anorak,套头夹克,アノラック,款式,,,
+type.pants,Pants,长裤,パンツ,款式,,,
+type.bib_pants,Bib pants,背带裤,ビブパンツ,款式,,,
+type.shorts,Shorts,短裤,ショーツ,款式,,,
+type.tights,Tights,紧身裤,タイツ,款式,,,
+type.t_shirt,T-shirt,T恤,Tシャツ,款式,,,
+type.shirt,Shirt,衬衫,シャツ,款式,,,
+type.overshirt,Overshirt,衬衫外套,シャツジャケット,款式,,,
+type.polo,Polo shirt,Polo 衫,ポロシャツ,款式,,,
+type.tank_top,Tank top,背心,タンクトップ,款式,,,
+type.sweatshirt,Sweatshirt,卫衣,スウェット,款式,,,
+type.sweater,Sweater,毛衣,セーター,款式,,,
+type.pullover,Pullover,套头衫,プルオーバー,款式,,,
+type.cardigan,Cardigan,开衫,カーディガン,款式,,,
+type.zip_top,Zip-neck top,半拉链上衣,ジップネック,款式,,https://arcteryx.jp/collections/base-layer,
+type.halter_top,Halter top,挂脖上衣,ホルターネックトップ,款式,,,
+type.crewneck,Crewneck,圆领衫,クルーネック,款式,,https://arcteryx.jp/collections/base-layer,
+type.bomber,Bomber jacket,飞行员夹克,ボンバージャケット,款式,,,
+type.blazer,Blazer,西装外套,ブレザー,款式,,,
+type.base_layer_top,Base layer top,打底上衣,ベースレイヤー（トップ）,款式,,https://arcteryx.jp/collections/base-layer,
+type.base_layer_bottom,Base layer bottom,打底裤,ベースレイヤー（ボトム）,款式,,https://arcteryx.jp/collections/base-layer,
+type.dress,Dress,连衣裙,ワンピース,款式,,,
+type.skirt,Skirt,半身裙,スカート,款式,,,
+type.skort,Skort,裙裤,スコート,款式,,,
+type.suit,Suit,套装,スーツ,款式,,,needs_review: 需先确认数据里 suit 指西装套装还是连体服
+type.mitten,Mitten,连指手套,ミトン,款式,,,配件，暂不收录
+type.glove,Glove,手套,グローブ,款式,,,配件，暂不收录
+type.hat,Hat,帽子,ハット,款式,,,配件，暂不收录
+type.cap,Cap,棒球帽,キャップ,款式,,,配件，暂不收录
+type.beanie,Beanie,毛线帽,ビーニー,款式,,,配件，暂不收录
+type.backpack,Backpack,背包,バックパック,款式,,,非服装，暂不收录
+type.needs_review,Needs review,待核实,要確認,款式,,,
+symbol.yes,● Yes,● 有,● あり,符号/状态,,https://arcteryx.jp/pages/s24beta-epe https://arcteryx.tw/pages/find-your-shell-jacket-beta,AJ5/TW 对比表用 ◯/○ 表示有
+symbol.no,○ No,○ 无,○ なし,符号/状态,,https://arcteryx.jp/pages/s24beta-epe,注意：日本对比表惯用 ◯=有、×=无；我们 ○=无，日文版必须带文字「なし」，不能只显示符号；needs_review
+symbol.unpublished,— Not published,— 未公布,— 未公表,符号/状态,,,日文「非公開」含刻意不公开之意，「未公表」更中性
+symbol.na,N/A Not applicable,不适用,対象外,符号/状态,,,v1 验收用词：対象外。
+status.conflict,Conflicting sources,来源不一致,情報源で相違あり,符号/状态,,,
+status.review,Needs verification,待核实,要確認,符号/状态,,,
+status.unverified,Unverified,未核实,未確認,符号/状态,,,
+status.published,Published,已公布,公表済み,符号/状态,,,
+note.ref_size_unpublished,Reference size not published,称重尺码未公布,基準サイズ未公表,符号/状态,,,
+season.ss,Spring/Summer 2026,2026 春夏,2026年春夏,季节,,https://saohuobao.com/deals/arcteryx-fw26-new-arrivals-202609 https://senken.co.jp/posts/goldwin-260213 https://hypebae.com/jp/2026/11/the-north-face-2026-autam-winter-korea-collection-relese-info,SHB/SENKEN 均用「春夏/秋冬」
+season.fw,Fall/Winter 2026,2026 秋冬,2026年秋冬,季节,,https://saohuobao.com/deals/arcteryx-fw26-new-arrivals-202609 https://senken.co.jp/posts/goldwin-260213 https://hypebae.com/jp/2026/11/the-north-face-2026-autam-winter-korea-collection-relese-info,HB「2026年秋冬」
+season.spring,Spring 2026,2026 春季,2026年春,季节,,https://saohuobao.com/deals/arcteryx-fw26-new-arrivals-202609 https://senken.co.jp/posts/goldwin-260213 https://hypebae.com/jp/2026/11/the-north-face-2026-autam-winter-korea-collection-relese-info,
+season.summer,Summer 2026,2026 夏季,2026年夏,季节,,https://saohuobao.com/deals/arcteryx-fw26-new-arrivals-202609 https://senken.co.jp/posts/goldwin-260213 https://hypebae.com/jp/2026/11/the-north-face-2026-autam-winter-korea-collection-relese-info,
+season.fall,Fall 2026,2026 秋季,2026年秋,季节,,https://saohuobao.com/deals/arcteryx-fw26-new-arrivals-202609 https://senken.co.jp/posts/goldwin-260213 https://hypebae.com/jp/2026/11/the-north-face-2026-autam-winter-korea-collection-relese-info,只写品牌给的季，不扩成秋冬
+season.winter,Winter 2026,2026 冬季,2026年冬,季节,,https://saohuobao.com/deals/arcteryx-fw26-new-arrivals-202609 https://senken.co.jp/posts/goldwin-260213 https://hypebae.com/jp/2026/11/the-north-face-2026-autam-winter-korea-collection-relese-info,
+season.year,2026,2026 年,2026年,季节,,https://saohuobao.com/deals/arcteryx-fw26-new-arrivals-202609 https://senken.co.jp/posts/goldwin-260213 https://hypebae.com/jp/2026/11/the-north-face-2026-autam-winter-korea-collection-relese-info,只知年份时
+season.version,Version,版本,バージョン,季节,,https://saohuobao.com/deals/arcteryx-fw26-new-arrivals-202609 https://senken.co.jp/posts/goldwin-260213 https://hypebae.com/jp/2026/11/the-north-face-2026-autam-winter-korea-collection-relese-info,
+season.release_date,Release date,发售日期,発売日,季节,,https://saohuobao.com/deals/arcteryx-fw26-new-arrivals-202609 https://senken.co.jp/posts/goldwin-260213 https://hypebae.com/jp/2026/11/the-north-face-2026-autam-winter-korea-collection-relese-info,
+ui.browse_catalog,Browse catalog,浏览目录,カタログを見る,界面,,,
+ui.browse_by_category,Browse by category,按品类浏览,カテゴリーから探す,界面,,,
+ui.product_catalog,Product catalog,商品目录,商品カタログ,界面,,,
+ui.search_catalog,Search catalog,搜索目录,カタログを検索,界面,,,
+ui.search_products_or_specs,Search products or specs,搜索商品或参数,商品名・スペックで検索,界面,,,
+ui.search_by_name_category_or_gender,"Search by name, category, or gender",按名称、品类或性别搜索,名前・カテゴリー・性別で検索,界面,,,
+ui.sort,Sort,排序,並び替え,界面,,,
+ui.all,All,全部,すべて,界面,,,
+ui.family,Family,系列,シリーズ,界面,,,
+ui.line,Line,产品线,ライン,界面,,,
+ui.mainline,Mainline,主线,メインライン,界面,,,
+ui.no_products_match_these_filters,No products match these filters.,没有符合筛选条件的商品。,条件に一致する商品はありません。,界面,,,
+ui.reset_filters,Reset filters,重置筛选,絞り込みを解除,界面,,,
+ui.show_more_products,Show more products,显示更多,さらに表示,界面,,,
+ui.loading_catalog_filters,Loading catalog filters…,正在加载筛选…,絞り込みを読み込み中…,界面,,,
+ui.compare_products,Compare products,商品对比,商品を比較,界面,,,
+ui.compare,Compare,对比,比較,界面,,,
+ui.add_to_compare,Add to compare,加入对比,比較に追加,界面,,,
+ui.added,Added,已加入,追加済み,界面,,,
+ui.compare_up_to_four_products,Compare up to four products,最多对比 4 款,最大4点まで比較できます,界面,,,
+ui.remove,Remove,移除,外す,界面,,,日文「削除」语气像删除数据，比较栏用「外す」
+ui.clear,Clear,清空,すべて外す,界面,,,
+ui.add_a_product,Add a product,添加商品,商品を追加,界面,,,
+ui.search_products_to_compare,Search products to compare,搜索要对比的商品,比較する商品を検索,界面,,,
+ui.no_matching_products,No matching products.,没有匹配的商品。,該当する商品はありません。,界面,,,
+ui.select_two_to_four_products_to_compare,Select two to four products to compare.,请选择 2–4 款商品进行对比。,比較する商品を2〜4点選んでください。,界面,,,
+ui.add_one_more_product_to_compare_specs,Add one more product to compare specs.,再加 1 款即可对比参数。,もう1点追加すると比較できます。,界面,,,
+ui.mixed_categories_·_some_parameters_may_n,Mixed categories · Some parameters may not apply,品类不同 · 部分参数可能不适用,カテゴリー混在 · 一部の項目は該当しない場合があります,界面,,,
+ui.differences_only,Differences only,只看差异,違いのみ表示,界面,,,
+ui.highlight_differences,Highlight differences,突出差异,違いを強調,界面,,,
+ui.no_confirmed_differences_among_directly_,No confirmed differences among directly comparable values.,可直接比较的参数中，没有确认的差异。,直接比較できる項目に、確認できた違いはありません。,界面,,,
+ui.no_shared_published_specs,No shared published specs.,没有双方都公布的参数。,共通して公表されているスペックはありません。,界面,,,
+ui.cannot_compare_unpublished_values,Cannot compare unpublished values,未公布的值无法比较,未公表の値は比較できません,界面,,,
+ui.verify_the_source_values_before_comparin,Verify the source values before comparing,比较前请先核对原文数值,比較する前に原文の値を確認してください,界面,,,
+ui.applies_to_different_product_types,Applies to different product types,适用于不同款式,異なるアイテムが対象です,界面,,,
+ui.different_or_unpublished_test_methods,Different or unpublished test methods,测试方法不同或未公布,試験方法が異なるか未公表です,界面,,,
+ui.different_or_unpublished_measurement_ref,Different or unpublished measurement references,测量基准不同或未公布,測定基準が異なるか未公表です,界面,,,
+ui.different_or_unpublished_currencies,Different or unpublished currencies,币种不同或未公布,通貨が異なるか未公表です,界面,,,
+ui.different_down-content_reporting_bases,Different down-content reporting bases,含绒量的统计口径不同,ダウン率の表示基準が異なります,界面,,,
+ui.sizes_refer_to_different_fit_ranges,Sizes refer to different fit ranges,尺码对应的男女款不同,サイズの対象（メンズ・ウィメンズ）が異なります,界面,,,
+ui.specs,Specs,参数,スペック,界面,,,
+ui.specifications,Specifications,参数,スペック,界面,,,
+ui.key_specs,Key specs,主要参数,主なスペック,界面,,,
+ui.full_specifications,Full specifications,全部参数,すべてのスペック,界面,,,
+ui.show_sources,Show sources,显示来源,出典を表示,界面,,,
+ui.read_original_text,Read original text,查看原文,原文を見る,界面,,,
+ui.brand_source,Brand source,品牌官网,ブランド公式,界面,,,
+ui.parsed_brand_text,Parsed brand text,从品牌原文解析,ブランド原文から抽出,界面,,,
+ui.indexed_brand_value,Indexed brand value,品牌数据库字段,ブランド登録値,界面,,,needs_review: 内部来源类型，可考虑不对用户显示
+ui.manual_override,Manual override,人工修正,手動修正,界面,,,
+ui.date_not_published,Date not published,日期未公布,日付未公表,界面,,,
+ui.example_data,Example data,示例数据,サンプルデータ,界面,,,
+ui.example,Example,示例,サンプル,界面,,,
+ui.discontinued,Discontinued,已停产,廃番,界面,,https://www.rakuten.co.jp/canpanera/contents/arcteryx/jacket/beta/compare/,RKT「廃番」
+ui.in_stock,In stock,有货,在庫あり,界面,,https://arcteryx.jp/products/cerium-jacket-m,AJ3「在庫あり」
+ui.out_of_stock,Out of stock,缺货,在庫切れ,界面,,https://arcteryx.jp/products/cerium-jacket-m,
+ui.stock_not_published,Stock not published,库存未公布,在庫情報なし,界面,,,
+ui.official_page,Official page,官网页面,公式ページ,界面,,,
+ui.product_not_found,Product not found,未找到该商品,商品が見つかりません,界面,,,
+ui.skip_to_content,Skip to content,跳到正文,本文へスキップ,界面,,,
+ui.weight_reference,Weight reference,称重尺码,重量の基準サイズ,界面,,,
+keep.arcteryx,Arc'teryx,Arc'teryx,Arc'teryx,不翻,不翻,,技术名/商标，原样
+keep.veilance,Veilance,Veilance,Veilance,不翻,不翻,,技术名/商标，原样
+keep.system_a,System_A,System_A,System_A,不翻,不翻,,技术名/商标，原样
+keep.beta_ar,Beta AR,Beta AR,Beta AR,不翻,不翻,,技术名/商标，原样
+keep.gore-tex,GORE-TEX,GORE-TEX,GORE-TEX,不翻,不翻,,技术名/商标，原样
+keep.gore-tex_pro_epe,GORE-TEX PRO ePE,GORE-TEX PRO ePE,GORE-TEX PRO ePE,不翻,不翻,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,技术名/商标，原样
+keep.epe,ePE,ePE,ePE,不翻,不翻,,技术名/商标，原样
+keep.fortius,Fortius,Fortius,Fortius,不翻,不翻,,技术名/商标，原样
+keep.coreloft,Coreloft,Coreloft,Coreloft,不翻,不翻,,技术名/商标，原样
+keep.arato,Arato,Arato,Arato,不翻,不翻,,技术名/商标，原样
+keep.recco,RECCO,RECCO,RECCO,不翻,不翻,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,技术名/商标，原样
+keep.bluesign,bluesign,bluesign,bluesign,不翻,不翻,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,技术名/商标，原样
+keep.bluepass,bluepass,bluepass,bluepass,不翻,不翻,,技术名/商标，原样
+keep.drop_hood,Drop Hood,Drop Hood,Drop Hood,不翻,不翻,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,技术名/商标，原样
+keep.storm_hood,Storm Hood,Storm Hood,Storm Hood,不翻,不翻,,技术名/商标，原样
+keep.fc0_dwr,FC0 DWR,FC0 DWR,FC0 DWR,不翻,不翻,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,技术名/商标，原样
+keep.micro-grid,Micro-grid,Micro-grid,Micro-grid,不翻,不翻,,技术名/商标，原样
+keep.c-knit,C-KNIT,C-KNIT,C-KNIT,不翻,不翻,,技术名/商标，原样
+keep.pfas,PFAS,PFAS,PFAS,不翻,不翻,,行话/单位，保留原写法
+keep.dwr,DWR,DWR,DWR,不翻,不翻,,行话/单位，保留原写法
+keep.upf,UPF,UPF,UPF,不翻,不翻,,行话/单位，保留原写法
+keep.ret,RET,RET,RET,不翻,不翻,,行话/单位，保留原写法
+keep.100d,100D,100D,100D,不翻,不翻,,行话/单位，保留原写法
+keep.g/m²,g/m²,g/m²,g/m²,不翻,不翻,,行话/单位，保留原写法
+keep.cu_in/oz,cu in/oz,cu in/oz,cu in/oz,不翻,不翻,,行话/单位，保留原写法
+language.en,English,English,English,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+language.zh,简体中文,简体中文,简体中文,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+language.ja,日本語,日本語,日本語,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+ui.language,Language,语言,言語,本地化补充,,,needs_review: v1 补充草译。
+ui.nav_catalog,Catalog,商品目录,商品カタログ,本地化补充,,,本地化复用已有术语 ui.product_catalog，保留既有英文。
+ui.nav_hardshells,Hardshells,硬壳,ハードシェル,本地化补充,,,本地化复用已有术语 protection.hard_shell，保留既有英文。
+ui.navigation,Main navigation,主导航,メインナビゲーション,本地化补充,,,needs_review: v1 补充草译。
+ui.footer,Arc’teryx gear catalog,商品目录,商品カタログ,本地化补充,,,本地化复用已有术语 ui.product_catalog，保留既有英文。
+ui.home_label,Rangeset home,Rangeset,Rangeset,本地化补充,,,本地化复用已有术语 brand.name，保留既有英文。
+ui.hero_first,"Specs,",看参数，,宣伝文句より、,本地化补充,,,needs_review: v1 补充草译。
+ui.hero_second,not hype.,不看噱头。,スペック。,本地化补充,,,needs_review: v1 补充草译。
+ui.hero_description,Browse the Arc’teryx US catalog and compare published specs side by side.,浏览 Arc’teryx 美国目录，并排对比品牌公布的参数。,Arc’teryxの米国向けカタログを見ながら、ブランドが公表したスペックを比較できます。,本地化补充,,,needs_review: v1 补充草译。
+ui.families,Arc’teryx families,Arc’teryx 系列,Arc’teryxのシリーズ,本地化补充,,,needs_review: v1 补充草译。
+ui.catalog_live,US catalog · Published specs and MSRP,美国目录 · 已公布参数及官方定价,米国向けカタログ · 公表スペックと希望小売価格,本地化补充,,,needs_review: v1 补充草译。
+ui.arc_catalog,Arc’teryx catalog,商品目录,商品カタログ,本地化补充,,,本地化复用已有术语 ui.product_catalog，保留既有英文。
+ui.breadcrumb,Breadcrumb,当前位置,パンくずリスト,本地化补充,,,needs_review: v1 补充草译。
+ui.family_variants,Other {family} {category},{family} 系列的其他{category},{family}シリーズのほかの{category},本地化补充,,,needs_review: v1 补充草译。
+ui.family_comparison,Scrollable family comparison,商品对比,商品を比較,本地化补充,,,本地化复用已有术语 ui.compare_products，保留既有英文。
+ui.msrp,MSRP,官方定价,希望小売価格,本地化补充,,,本地化复用已有术语 field.msrp，保留既有英文。
+ui.example_source,Example source,示例数据,サンプルデータ,本地化补充,,,本地化复用已有术语 ui.example_data，保留既有英文。
+ui.official_arc_page,Official Arc’teryx page,官网页面,公式ページ,本地化补充,,,本地化复用已有术语 ui.official_page，保留既有英文。
+ui.parameter_version,Parameter standard v{version},版本 v{version},バージョン v{version},本地化补充,,,复用现有标签或格式。
+ui.legend,Parameter status legend,参数状态图例,スペックの状態を示す凡例,本地化补充,,,needs_review: v1 补充草译。
+ui.about,About {label},{label},{label},本地化补充,,,复用现有标签或格式。
+ui.photo_angles,Photo angles,拍摄角度,撮影アングル,本地化补充,,,needs_review: v1 补充草译。
+ui.colorway,Colorway,配色,カラー,本地化补充,,,needs_review: v1 补充草译。
+ui.colorways,Colorways,配色选项,カラーバリエーション,本地化补充,,,needs_review: v1 补充草译。
+ui.model_height,Model {height},模特身高 {height},モデル身長{height},本地化补充,,,needs_review: v1 补充草译。
+ui.wearing_size,Wearing size {size},试穿尺码 {size},着用サイズ{size},本地化补充,,,needs_review: v1 补充草译。
+ui.view_product,View {name},查看 {name},{name}を見る,本地化补充,,,needs_review: v1 补充草译。
+ui.color_count,{count} colors,{count} 种配色,{count}色,本地化补充,,,needs_review: v1 补充草译。
+ui.catalog_filters,Catalog filters,目录筛选,カタログの絞り込み,本地化补充,,,needs_review: v1 补充草译。
+ui.product_categories,Product categories,品类,カテゴリー,本地化补充,,,本地化复用已有术语 field.category，保留既有英文。
+ui.sort_name,Name A–Z,商品名 A–Z,商品名順（A–Z）,本地化补充,,,needs_review: v1 补充草译。
+ui.sort_price_asc,Price low–high,价格从低到高,価格が安い順,本地化补充,,,needs_review: v1 补充草译。
+ui.sort_price_desc,Price high–low,价格从高到低,価格が高い順,本地化补充,,,needs_review: v1 补充草译。
+ui.sort_weight,Weight low–high,重量从轻到重,重量が軽い順,本地化补充,,,needs_review: v1 补充草译。
+ui.filter_men,Men,男装,メンズ,本地化补充,,,本地化复用已有术语 gender.men，保留既有英文。
+ui.filter_women,Women,女装,ウィメンズ,本地化补充,,,本地化复用已有术语 gender.women，保留既有英文。
+ui.product_count,"{count, plural, one {# product} other {# products}}",{count} 款商品,{count}点,本地化补充,,,needs_review: v1 补充草译。
+ui.jacket_count,"{count, plural, one {# jacket} other {# jackets}}",{count} 款夹克,ジャケット{count}点,本地化补充,,,needs_review: v1 补充草译。
+ui.compare_dock,Compare dock,商品对比,商品を比較,本地化补充,,,本地化复用已有术语 ui.compare_products，保留既有英文。
+ui.compare_action,{action} {name},{action} · {name},{action} · {name},本地化补充,,,复用现有标签或格式。
+ui.compare_count,Compare ({count}),对比 ({count}),比較 ({count}),本地化补充,,,复用已有术语和现有数字或符号格式。
+ui.close_picker,Close product picker,关闭商品选择器,商品選択を閉じる,本地化补充,,,needs_review: v1 补充草译。
+ui.scroll_compare,Scrollable product comparison,商品对比,商品を比較,本地化补充,,,本地化复用已有术语 ui.compare_products，保留既有英文。
+ui.comparison_table,Side-by-side product comparison,商品对比,商品を比較,本地化补充,,,本地化复用已有术语 ui.compare_products，保留既有英文。
+ui.add_product,Add product,添加商品,商品を追加,本地化补充,,,本地化复用已有术语 ui.add_a_product，保留既有英文。
+ui.jacket_index,Jacket index,夹克目录,ジャケット一覧,本地化补充,,,needs_review: v1 补充草译。
+ui.jacket_intro,Browse hardshell specs and select 2–4 jackets to compare.,浏览硬壳参数，选择 2–4 款夹克进行对比。,ハードシェルのスペックを見ながら、ジャケットを2〜4点選んで比較できます。,本地化补充,,,needs_review: v1 补充草译。
+ui.all_brands,All brands,全部 · 品牌,すべて · ブランド,本地化补充,,,复用已有术语和现有数字或符号格式。
+ui.all_membranes,All membranes,全部 · 防水膜,すべて · 防水メンブレン,本地化补充,,,复用已有术语和现有数字或符号格式。
+ui.all_layers,All layers,全部 · 面料层数,すべて · レイヤー構造,本地化补充,,,复用已有术语和现有数字或符号格式。
+ui.catalog_order,Catalog order,目录顺序,カタログ順,本地化补充,,,needs_review: v1 补充草译。
+ui.weight_asc,Weight ↑,重量 ↑,重量 ↑,本地化补充,,,复用已有术语和现有数字或符号格式。
+ui.weight_desc,Weight ↓,重量 ↓,重量 ↓,本地化补充,,,复用已有术语和现有数字或符号格式。
+ui.price_asc,Price ↑,官方定价 ↑,希望小売価格 ↑,本地化补充,,,复用已有术语和现有数字或符号格式。
+ui.price_desc,Price ↓,官方定价 ↓,希望小売価格 ↓,本地化补充,,,复用已有术语和现有数字或符号格式。
+ui.column_groups,Column groups,表格分组,列グループ,本地化补充,,,needs_review: v1 补充草译。
+ui.clear_selection,Clear selection,清空,すべて外す,本地化补充,,,本地化复用已有术语 ui.clear，保留既有英文。
+ui.jackets_selected,{count} of 4 jackets selected.,已选 {count} 款，最多 4 款。,{count}点を選択済みです。最大4点まで選べます。,本地化补充,,,needs_review: v1 补充草译。
+ui.jacket_specs,Jacket specs,参数,スペック,本地化补充,,,本地化复用已有术语 ui.specifications，保留既有英文。
+ui.scroll_jackets,Scrollable jacket table,参数,スペック,本地化补充,,,本地化复用已有术语 ui.specifications，保留既有英文。
+ui.no_jackets_match,No jackets match these filters.,没有符合筛选条件的商品。,条件に一致する商品はありません。,本地化补充,,,本地化复用已有术语 ui.no_products_match_these_filters，保留既有英文。
+ui.no_jackets,No jackets in the index yet.,没有匹配的商品。,該当する商品はありません。,本地化补充,,,本地化复用已有术语 ui.no_matching_products，保留既有英文。
+ui.size,Size {size},尺码 {size},サイズ{size},本地化补充,,,needs_review: v1 补充草译。
+ui.weight_size_missing,Reference size: {status},称重尺码 · {status},重量の基準サイズ · {status},本地化补充,,,复用现有标签或格式。
+ui.test_method_missing,Test method: {status},测试方法：{status},試験方法：{status},本地化补充,,,needs_review: v1 补充草译。
+ui.per_shoe,per shoe,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+ui.pair,pair,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+ui.reference_shoe_basis,Shoe weight basis not published (per shoe or pair),,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+ui.recycled_claim,Recycled material claimed · % not published,标注使用再生材料 · 比例未公布,リサイクル素材を使用 · 比率は未公表,本地化补充,,,needs_review: v1 补充草译。
+ui.scope_unknown,scope not published,未公布,未公表,本地化补充,,,复用已有术语 status.missing。
+ui.scope_fabric,fabric,面料,素材,本地化补充,,,复用已有术语 group.fabric。
+ui.scope_face,face,面层,表地,本地化补充,,,复用已有术语 part.face。
+ui.scope_garment,garment,整件,製品全体,本地化补充,,,复用已有术语 subgroup.whole_garment。
+ui.recycled_fiber,recycled {fiber},再生{fiber},リサイクル{fiber},本地化补充,,,needs_review: v1 补充草译。
+ui.virgin_fiber,virgin {fiber},原生{fiber},バージン{fiber},本地化补充,,,needs_review: v1 补充草译。
+ui.not_found,This page could not be found.,未找到该商品,商品が見つかりません,本地化补充,,,本地化复用已有术语 ui.product_not_found，保留既有英文。
+seo.title,"Rangeset — specs, not hype",Rangeset — 看参数，不看噱头,Rangeset — 宣伝文句よりスペック,本地化补充,,,needs_review: v1 补充草译。
+seo.template,{title} | Rangeset,{title} | Rangeset,{title} | Rangeset,本地化补充,,,复用现有标签或格式。
+seo.description,Browse and compare published Arc’teryx product specifications.,浏览和对比 Arc’teryx 公布的商品参数。,Arc’teryxが公表した製品スペックを閲覧・比較できます。,本地化补充,,,needs_review: v1 补充草译。
+seo.catalog_description,Browse Arc’teryx US gear and compare published specifications across models.,浏览 Arc’teryx 美国目录，对比不同款式的已公布参数。,Arc’teryxの米国向けカタログで、モデルごとの公表スペックを比較できます。,本地化补充,,,needs_review: v1 补充草译。
+seo.compare_description,Compare published specifications for up to four Arc’teryx products.,并排对比最多 4 款 Arc’teryx 商品的已公布参数。,Arc’teryx製品の公表スペックを最大4点まで並べて比較できます。,本地化补充,,,needs_review: v1 补充草译。
+seo.jackets_description,"Browse and compare hardshell jackets by membrane, construction, weight, price, and features.",按防水膜、结构、重量、价格和功能浏览和对比硬壳夹克。,防水メンブレン、構造、重量、価格、機能からハードシェルジャケットを比較できます。,本地化补充,,,needs_review: v1 补充草译。
+seo.product_description,Published configuration and specs for the {brand} {name}.,{brand} {name} 的已公布配置与参数。,{brand} {name}の公表仕様とスペック。,本地化补充,,,needs_review: v1 补充草译。
+group.footwear,Footwear,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+group.numbers,Numbers,数值参数,数値スペック,本地化补充,,,needs_review: v1 补充草译。
+cat.footwear,Footwear,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+field.weight_basis,Weight basis,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+field.drop,Heel-to-toe drop,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+field.forefoot_stack,Forefoot stack height,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+field.heel_stack,Heel stack height,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+field.lugs,Lug depth,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+field.outsole,Outsole rubber,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+field.midsole,Midsole,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+field.upper,Upper,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+field.waterproof_lining,Waterproof lining,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+field.legacy_membrane,Membrane,防水膜,防水メンブレン,本地化补充,,,本地化复用已有术语 field.membrane，保留既有英文。
+field.legacy_layers,Layers,面料层数,レイヤー構造,本地化补充,,,本地化复用已有术语 field.laminate，保留既有英文。
+field.legacy_face_denier,Face fabric denier,旦数,デニール,本地化补充,,,本地化复用已有术语 field.denier，保留既有英文。
+field.legacy_back_length,Center back length,后中长,着丈（センターバック）,本地化补充,,,本地化复用已有术语 field.back_length，保留既有英文。
+field.legacy_waterproof,Waterproof rating,防水等级,防水性能,本地化补充,,,needs_review: v1 补充草译。
+field.legacy_price,Price,官方定价,希望小売価格,本地化补充,,,本地化复用已有术语 field.msrp，保留既有英文。
+field.legacy_pit_zips,Pit zips,腋下透气拉链,ピットジップ,本地化补充,,,本地化复用已有术语 field.pit_zips，保留既有英文。
+field.legacy_helmet_hood,Helmet hood,头盔兼容风帽,ヘルメット対応フード,本地化补充,,,本地化复用已有术语 field.helmet_hood，保留既有英文。
+field.legacy_stack,Stack,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+field.legacy_drop,Drop,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+field.legacy_face,Face denier,旦数,デニール,本地化补充,,,本地化复用已有术语 field.denier，保留既有英文。
+field.legacy_outsole,Outsole,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+type.shoe,Shoe,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+type.boot,Boot,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+type.sandal,Sandal,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+type.mule,Mule,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+part.upper,Upper,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+part.midsole,Midsole,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+part.outsole,Outsole,,,本地化补充,,,沿用项目既有英文。缺少经批准的译文时显示英文。
+status.missing,Not published,未公布,未公表,本地化补充,,,取自 symbol.unpublished 的文字部分。
+status.yes,Yes,有,あり,本地化补充,,,取自 symbol.yes 的文字部分。
+status.no,No,无,なし,本地化补充,,,取自 symbol.no 的文字部分。
+value.waterproof,Waterproof,防水,防水,本地化补充,,,needs_review: v1 补充草译。
+value.water_resistant,Water resistant,耐水,耐水,本地化补充,,,needs_review: v1 补充草译。
+value.fit_regular,Regular,常规版型,レギュラーフィット,本地化补充,,,needs_review: v1 补充草译。
+value.fit_fitted,Fitted,修身版型,フィット感のあるシルエット,本地化补充,,,needs_review: v1 补充草译。
+value.fit_relaxed,Relaxed,宽松版型,リラックスフィット,本地化补充,,,needs_review: v1 补充草译。
+value.fit_next_to_skin,Next to Skin,贴身版型,肌に沿うフィット,本地化补充,,,needs_review: v1 补充草译。
+value.fit_oversized,Oversized,超宽松版型,オーバーサイズ,本地化补充,,,needs_review: v1 补充草译。
+help.ripstop,A woven fabric with a grid of stronger threads that helps stop small tears from spreading.,,,本地化补充,,,说明待审，回退英文。
+help_label.ripstop,Ripstop,格子防撕裂,リップストップ,本地化补充,,,needs_review: v1 补充草译。
+help.stretch,2-way stretch runs along one axis. 4-way stretch runs along both axes. Mechanical stretch comes from the fabric structure.,,,本地化补充,,,说明待审，回退英文。
+help_label.stretch,Stretch,弹力,ストレッチ,本地化补充,,,needs_review: v1 补充草译。
+help.denier,How much a length of yarn weighs. It does not tell you how thick the fabric is or how well it resists wear.,纱线粗细的单位，按一定长度纱线的重量计算。它不能直接说明面料有多厚，也不能单独说明有多耐磨。,糸の太さを表す単位で、一定の長さの糸の重さで決まります。生地の厚さや耐摩耗性をそのまま表すものではありません。,本地化补充,,,术语说明试译见风格指南。
+help_label.denier,Denier,旦数,デニール,本地化补充,,,needs_review: v1 补充草译。
+help.3l,"The outer fabric, waterproof layer, and inner backing are bonded together.",外层面料、防水膜和内层背衬三层压合在一起。,表地・防水メンブレン・裏側のバッカーの3層を貼り合わせた構造です。,本地化补充,,,术语说明试译见风格指南。
+help_label.3l,3L,3L,3L,本地化补充,,,needs_review: v1 补充草译。
+help.2l,The outer fabric and waterproof layer are bonded together. The garment may have a separate lining.,,,本地化补充,,,说明待审，回退英文。
+help_label.2l,2L,2L,2L,本地化补充,,,needs_review: v1 补充草译。
+help.2_5l,The outer fabric and waterproof layer are bonded together. A thin print or coating protects the inside.,,,本地化补充,,,说明待审，回退英文。
+help_label.2_5l,2.5L,2.5L,2.5L,本地化补充,,,needs_review: v1 补充草译。
+help.fill,How much space a set weight of down takes up in a test. Garment warmth also depends on how much down is used and how the garment is made.,一定重量的羽绒在测试中能蓬起多大体积。衣服暖不暖，还要看充绒量和做法。,一定量のダウンが試験でどれだけ膨らむかを示す数値です。暖かさはダウンの封入量や作りによっても変わります。,本地化补充,,,术语说明试译见风格指南。
+help_label.fill,Fill power,蓬松度,フィルパワー,本地化补充,,,needs_review: v1 补充草译。
+help.gsm,How much one square metre of this fabric or insulation weighs.,,,本地化补充,,,说明待审，回退英文。
+help_label.gsm,Grams per square metre,g/m²,g/m²,本地化补充,,,needs_review: v1 补充草译。
+help.membrane,A thin layer that blocks liquid water. Its name alone gives no waterproof rating.,,,本地化补充,,,说明待审，回退英文。
+help_label.membrane,Waterproof membrane,防水膜,防水メンブレン,本地化补充,,,needs_review: v1 补充草译。
+help.dwr,A finish that helps water bead up and roll off the outer fabric.,外层面料表面的处理，让水形成水珠滚落。它不等于防水。,表地の表面に施す加工で、水を玉状にして転がり落ちやすくします。防水性とは別のものです。,本地化补充,,,术语说明试译见风格指南。
+help_label.dwr,DWR,DWR,DWR,本地化补充,,,needs_review: v1 补充草译。
+help.upf,A rating for how much ultraviolet light the fabric blocks. A higher number means less UV gets through in the test.,,,本地化补充,,,说明待审，回退英文。
+help_label.upf,UPF,UPF,UPF,本地化补充,,,needs_review: v1 补充草译。
+help.hydrostatic,The height of a column of water the fabric can hold back in a test. Compare numbers from the same test method.,,,本地化补充,,,说明待审，回退英文。
+help_label.hydrostatic,Hydrostatic head,静水压,耐水圧,本地化补充,,,needs_review: v1 补充草译。
+help.breathability,How readily moisture vapour passes through the fabric in a test. Compare numbers with the same test method and units.,,,本地化补充,,,说明待审，回退英文。
+help_label.breathability,Breathability,透湿性,透湿性,本地化补充,,,needs_review: v1 补充草译。
+help.recco,A small built-in reflector that helps rescue teams locate you with RECCO detectors. No battery needed. It does not replace an avalanche transceiver.,内置的小型反射器，搜救队可用 RECCO 探测器找到你。无需电池。不能代替雪崩信标。,内蔵の小さなリフレクターで、救助隊がRECCO探知機で位置を特定できます。電池は不要です。雪崩ビーコンの代わりにはなりません。,本地化补充,,,术语说明试译见风格指南。
+help_label.recco,RECCO,RECCO,RECCO,本地化补充,,,needs_review: v1 补充草译。
+help.drop,How much higher your heel sits than the front of your foot in the shoe.,,,本地化补充,,,说明待审，回退英文。
+help_label.drop,Heel-to-toe drop,,,本地化补充,,,用于英文标题。其他语言优先使用同概念的术语表字段。
+help.stack,How much material sits between your foot and the ground at the heel or forefoot.,,,本地化补充,,,说明待审，回退英文。
+help_label.stack,Stack height,,,本地化补充,,,用于英文标题。其他语言优先使用同概念的术语表字段。
+help.pfas,A large group of chemicals. A product can meet a PFAS rule and still contain some of these chemicals.,,,本地化补充,,,说明待审，回退英文。
+help_label.pfas,PFAS,PFAS,PFAS,本地化补充,,,needs_review: v1 补充草译。
+help.weight_size,The brand does not state which size was weighed; treat as approximate.,,,本地化补充,,,说明待审，回退英文。
+help.shoe_basis,The brand does not say whether the weight is for one shoe or a pair.,,,本地化补充,,,说明待审，回退英文。
+status_description.yes,The brand explicitly lists this feature.,品牌明确列出了这项功能。,ブランドがこの機能を明記しています。,本地化补充,,,needs_review: v1 补充草译。
+status_description.no,The brand explicitly says this feature is absent.,品牌明确说明没有这项功能。,ブランドがこの機能がないことを明記しています。,本地化补充,,,needs_review: v1 补充草译。
+status_description.unpublished,The brand has not published enough information to confirm this value.,品牌公布的信息不足以确认这项参数。,ブランドの公表情報ではこの値を確認できません。,本地化补充,,,needs_review: v1 补充草译。
+status_description.inapplicable,This parameter does not apply to this product.,这项参数不适用于该商品。,この項目はこの製品には該当しません。,本地化补充,,,needs_review: v1 补充草译。
+note.the_published_measurements_do_not_agree_after_unit_conversion,The published measurements do not agree after unit conversion.,换算单位后，已公布的测量值不一致。,単位を換算すると、公表された測定値が一致しません。,本地化补充,,,needs_review: v1 补充草译。
+note.the_published_measurement_or_unit_could_not_be_read,The published measurement or unit could not be read.,无法识别已公布的测量值或单位。,公表された測定値または単位を読み取れません。,本地化补充,,,needs_review: v1 补充草译。
+note.published_down_proportion_exceeds_100,Published down proportion exceeds 100%.,已公布的绒含量超过 100%。,公表されたダウンの割合が100%を超えています。,本地化补充,,,needs_review: v1 补充草译。
+note.published_test_results_cannot_be_reconciled,Published test results cannot be reconciled.,已公布的测试结果不一致。,公表された試験結果が一致しません。,本地化补充,,,needs_review: v1 补充草译。
+note.a_source_did_not_identify_a_supported_fabric_location,A source did not identify a supported fabric location.,原文没有明确注明面料部位。,出典に素材の部位が明記されていません。,本地化补充,,,needs_review: v1 补充草译。
+note.the_brand_s_statements_disagree,The brand’s statements disagree.,品牌的不同说明不一致。,ブランドの説明に食い違いがあります。,本地化补充,,,needs_review: v1 补充草译。
+note.multiple_reference_sizes_or_measurements_are_published,Multiple reference sizes or measurements are published.,品牌公布了多个参考尺码或测量值。,複数の基準サイズまたは測定値が公表されています。,本地化补充,,,needs_review: v1 补充草译。
+note.sources_name_different_primary_membranes,Sources name different primary membranes.,不同来源标注的主防水膜不一致。,出典によって主な防水メンブレンの記載が異なります。,本地化补充,,,needs_review: v1 补充草译。
+note.more_than_one_laminate_is_listed_for_the_primary_fabric,More than one laminate is listed for the primary fabric.,主要面料标注了多种层压结构。,主素材に複数のラミネート構造が記載されています。,本地化补充,,,needs_review: v1 补充草译。
+note.different_breathability_measures_are_published,Different breathability measures are published.,品牌公布了不同口径的透湿数据。,測定基準の異なる透湿データが公表されています。,本地化补充,,,needs_review: v1 补充草译。
+note.published_drop_and_stack_heights_do_not_agree,Published drop and stack heights do not agree.,,,本地化补充,,,追加键：原术语表未覆盖。译名待审，暂用英文。
+note.the_indexed_value_or_unit_could_not_be_normalized,The indexed value or unit could not be normalized.,无法将录入值或单位转换为统一格式。,登録された値または単位を共通形式に変換できません。,本地化补充,,,needs_review: v1 补充草译。
+note.the_indexed_value_differs_from_the_parsed_source_text,The indexed value differs from the parsed source text.,录入值与从原文提取的值不一致。,登録値と出典の原文から読み取った値が一致しません。,本地化补充,,,needs_review: v1 补充草译。
+note.manual_value_does_not_match_the_field_definition,Manual value does not match the field definition.,手动录入值与字段定义不符。,手動入力値が項目の定義に合っていません。,本地化补充,,,needs_review: v1 补充草译。
+note.a_product_level_override_cannot_be_assigned_to_one_of_multiple_main_fabrics,A product-level override cannot be assigned to one of multiple main fabrics.,有多种主要面料，无法确定商品级更正适用于哪一种。,主素材が複数あるため、製品単位の修正をどの素材に適用するか判断できません。,本地化补充,,,needs_review: v1 补充草译。
+note.manual_parts_are_invalid_or_a_backer_has_no_unambiguous_parent,Manual parts are invalid or a backer has no unambiguous parent.,手动录入的部位无效，或无法确定背衬属于哪个部位。,手動入力した部位が無効か、バッカーが属する部位を特定できません。,本地化补充,,,needs_review: v1 补充草译。
+note.different_or_unpublished_test_methods_for_component_measurements,Different or unpublished test methods for component measurements,部位测量的测试方法不同或未公布,部位別の試験方法が異なるか未公表,本地化补充,,,needs_review: v1 补充草译。
+note.the_source_does_not_specify_a_usable_weight_per_area,The source does not specify a usable weight per area.,原文未提供可用的单位面积重量。,出典に換算できる単位面積あたりの重量が記載されていません。,本地化补充,,,needs_review: v1 补充草译。
+note.published_fiber_percentages_exceed_100,Published fiber percentages exceed 100%.,已公布的纤维比例合计超过 100%。,公表された繊維の組成比率の合計が100%を超えています。,本地化补充,,,needs_review: v1 补充草译。
+note.published_weights_per_area_disagree,Published weights per area disagree.,已公布的单位面积重量不一致。,公表された単位面積あたりの重量が一致しません。,本地化补充,,,needs_review: v1 补充草译。
+activity.hike,Hike,徒步,ハイキング,本地化补充,,,needs_review: v1 补充草译。
+activity.boulder,Boulder,抱石,ボルダリング,本地化补充,,,needs_review: v1 补充草译。
+activity.city,City,城市日常,街での普段使い,本地化补充,,,needs_review: v1 补充草译。
+activity.alpine,Alpine,高山活动,高山での活動,本地化补充,,,needs_review: v1 补充草译。
+activity.mountain_rescue,Mountain Rescue,山地救援,山岳救助,本地化补充,,,needs_review: v1 补充草译。
+activity.ski_guiding,Ski Guiding,滑雪向导,スキーガイド,本地化补充,,,needs_review: v1 补充草译。
+activity.search_and_rescue,Search and Rescue,搜救,捜索・救助,本地化补充,,,needs_review: v1 补充草译。
+activity.rock,Rock,岩壁活动,岩場での活動,本地化补充,,,needs_review: v1 补充草译。
+activity.resort,Resort,雪场滑雪,ゲレンデスキー,本地化补充,,,needs_review: v1 补充草译。
+activity.trail_run,Trail Run,越野跑,トレイルランニング,本地化补充,,,needs_review: v1 补充草译。
+activity.touring,Touring,滑雪巡游,スキーツアー,本地化补充,,,needs_review: v1 补充草译。
+activity.freeride,Freeride,自由滑雪,フリーライド,本地化补充,,,needs_review: v1 补充草译。
+activity.training_fitness,Training/Fitness,训练与健身,トレーニング・フィットネス,本地化补充,,,needs_review: v1 补充草译。
+activity.rock_climbing,Rock Climbing,攀岩,ロッククライミング,本地化补充,,,needs_review: v1 补充草译。
+activity.ice_climbing,Ice Climbing,攀冰,アイスクライミング,本地化补充,,,needs_review: v1 补充草译。
+activity.alpine_climbing,Alpine Climbing,高山攀登,アルパインクライミング,本地化补充,,,needs_review: v1 补充草译。
+activity.backcountry_skiing,Backcountry Skiing,野雪滑雪,バックカントリースキー,本地化补充,,,needs_review: v1 补充草译。
+activity.mountain_bike,Mountain Bike,山地骑行,マウンテンバイク,本地化补充,,,needs_review: v1 补充草译。
+activity.travel_commute,Travel/Commute,旅行与通勤,旅行・通勤,本地化补充,,,needs_review: v1 补充草译。
+activity.ski_patrol,Ski Patrol,雪场巡逻,スキーパトロール,本地化补充,,,needs_review: v1 补充草译。
+brand.name,Rangeset,Rangeset,Rangeset,品牌,yes,,
+brand.wordmark,RANGESET,RANGESET,RANGESET,品牌,yes,,
+fiber.nylon,Nylon,尼龙,ナイロン,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.polyamide,Polyamide,聚酰胺,ポリアミド,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.polyester,Polyester,聚酯纤维,ポリエステル,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.elastane,Elastane,氨纶,ポリウレタン,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.spandex,Spandex,氨纶,ポリウレタン,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.lycra,Lycra,Lycra,Lycra,纤维,yes,,needs_review: v1 补充草译或保护词。
+fiber.cotton,Cotton,棉,綿,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.wool,Wool,羊毛,ウール,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.merino_wool,Merino wool,美利奴羊毛,メリノウール,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.elastomultiester,Elastomultiester,弹性聚酯纤维,エラストマルチエステル,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.polypropylene,Polypropylene,聚丙烯,ポリプロピレン,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.polyethylene,Polyethylene,聚乙烯,ポリエチレン,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.polyurethane,Polyurethane,聚氨酯,ポリウレタン,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.viscose,Viscose,黏胶纤维,ビスコース,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.lyocell,Lyocell,莱赛尔纤维,リヨセル,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.acrylic,Acrylic,腈纶,アクリル,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.linen,Linen,亚麻,リネン,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.hemp,Hemp,大麻纤维,ヘンプ,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.silk,Silk,蚕丝,シルク,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.rayon,Rayon,人造丝,レーヨン,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.modal,Modal,莫代尔纤维,モダール,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.aramid,Aramid,芳纶,アラミド,纤维,,,needs_review: v1 补充草译或保护词。
+fiber.ptfe,PTFE,PTFE,PTFE,纤维,yes,,needs_review: v1 补充草译或保护词。
+ui.fiber_share,{pct}% {fiber},{pct}% {fiber},{pct}%{fiber},参数取值,,,needs_review: v1 补充草译。
+value.goose,goose,鹅,ガチョウ,参数取值,,,needs_review: v1 补充草译。
+value.duck,duck,鸭,アヒル,参数取值,,,needs_review: v1 补充草译。
+value.minimum,Minimum,最低值,最低値,参数取值,,,needs_review: v1 补充草译。

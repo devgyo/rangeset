@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import {Link} from "@/i18n/navigation";
+import {useCopy} from "@/i18n/copy";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,17 +14,17 @@ import { fields, groups } from "@/lib/specs";
 import type { Jacket } from "@/lib/types";
 
 const filters = [
-  { key: "brand", label: "Brand", all: "All brands", read: (jacket: Jacket) => jacket.brand },
-  { key: "membrane", label: "Membrane", all: "All membranes", read: (jacket: Jacket) => jacket.specs.membrane?.value },
-  { key: "layers", label: "Layers", all: "All layers", read: (jacket: Jacket) => jacket.specs.layers?.value?.toString() },
+  { key: "brand", label: "field.brand", all: "ui.all_brands", read: (jacket: Jacket) => jacket.brand },
+  { key: "membrane", label: "field.legacy_membrane", all: "ui.all_membranes", read: (jacket: Jacket) => jacket.specs.membrane?.value },
+  { key: "layers", label: "field.legacy_layers", all: "ui.all_layers", read: (jacket: Jacket) => jacket.specs.layers?.value?.toString() },
 ] as const;
 
 const sorts = {
-  default: { label: "Catalog order" },
-  "weight-asc": { label: "Weight ↑", key: "weight", direction: 1 },
-  "weight-desc": { label: "Weight ↓", key: "weight", direction: -1 },
-  "price-asc": { label: "Price ↑", key: "price", direction: 1 },
-  "price-desc": { label: "Price ↓", key: "price", direction: -1 },
+  default: { label: "ui.catalog_order" },
+  "weight-asc": { label: "ui.weight_asc", key: "weight", direction: 1 },
+  "weight-desc": { label: "ui.weight_desc", key: "weight", direction: -1 },
+  "price-asc": { label: "ui.price_asc", key: "price", direction: 1 },
+  "price-desc": { label: "ui.price_desc", key: "price", direction: -1 },
 } as const;
 
 type Sort = keyof typeof sorts;
@@ -55,6 +56,7 @@ function CatalogSelect({
 }
 
 export function JacketTable({ jackets }: { jackets: Jacket[] }) {
+  const {t} = useCopy();
   const [filterValues, setFilterValues] = useState<Partial<Record<FilterKey, string>>>({});
   const [sort, setSort] = useState<Sort>("default");
   const [visibleGroups, setVisibleGroups] = useState<string[]>([...groups]);
@@ -77,7 +79,7 @@ export function JacketTable({ jackets }: { jackets: Jacket[] }) {
     });
   }
 
-  const compareLabel = selected.length ? `Compare (${selected.length})` : "Compare";
+  const compareLabel = selected.length ? t("ui.compare_count", {count: selected.length}) : t("ui.compare");
 
   function toggleJacket(slug: string) {
     setSelected((current) => {
@@ -95,32 +97,32 @@ export function JacketTable({ jackets }: { jackets: Jacket[] }) {
           return (
             <CatalogSelect
               key={key}
-              label={label}
+              label={t(label)}
               value={filterValues[key] ?? "all"}
               onChange={(value) => setFilterValues((current) => ({ ...current, [key]: value }))}
-              options={[{ value: "all", label: all }, ...values.map((value) => ({ value: `value:${value}`, label: value }))]}
+              options={[{ value: "all", label: t(all) }, ...values.map((value) => ({ value: `value:${value}`, label: value }))]}
             />
           );
         })}
         <CatalogSelect
-          label="Sort"
+          label={t("ui.sort")}
           value={sort}
           onChange={(value) => setSort(value as Sort)}
-          options={Object.entries(sorts).map(([value, { label }]) => ({ value, label }))}
+          options={Object.entries(sorts).map(([value, { label }]) => ({ value, label: t(label) }))}
         />
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3 py-4">
-        <ToggleGroup type="multiple" value={visibleGroups} onValueChange={setVisibleGroups} aria-label="Column groups">
+        <ToggleGroup type="multiple" value={visibleGroups} onValueChange={setVisibleGroups} aria-label={t("ui.column_groups")}>
           {groups.map((group) => (
             <ToggleGroupItem key={group} value={group} variant="outline" className="h-9 px-3 data-[state=on]:border-primary/40 data-[state=on]:bg-primary/10 data-[state=on]:text-primary">
-              {group}
+              {t(group === "Specs" ? "ui.specs" : group === "Numbers" ? "group.numbers" : "group.features")}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
         <div className="flex items-center gap-2.5">
           {selected.length > 0 && (
             <Button variant="ghost" className="h-9 text-muted-foreground" onClick={() => setSelected([])}>
-              Clear selection
+              {t("ui.clear_selection")}
             </Button>
           )}
           {selected.length >= 2 ? (
@@ -132,18 +134,18 @@ export function JacketTable({ jackets }: { jackets: Jacket[] }) {
           ) : (
             <Button disabled className="h-9">{compareLabel} <ArrowRight aria-hidden="true" /></Button>
           )}
-          <span className="sr-only" role="status">{selected.length} of 4 jackets selected.</span>
+          <span className="sr-only" role="status">{t("ui.jackets_selected", {count: selected.length})}</span>
         </div>
       </div>
       <div className="data-panel">
-        <Table aria-label="Jacket specs" scrollLabel="Scrollable jacket table" className="spec-table">
+        <Table aria-label={t("ui.jacket_specs")} scrollLabel={t("ui.scroll_jackets")} className="spec-table">
           <TableHeader>
             <TableRow>
-              <TableHead scope="col" className="sticky-cell">Brand</TableHead>
-              <TableHead scope="col">Model</TableHead>
+              <TableHead scope="col" className="sticky-cell">{t("field.brand")}</TableHead>
+              <TableHead scope="col">{t("field.model")}</TableHead>
               {visibleFields.map(({ key, label }) => (
                 <TableHead key={key} scope="col" aria-sort={("key" in ordering && key === ordering.key) ? (ordering.direction === 1 ? "ascending" : "descending") : undefined}>
-                  {label}
+                  {t(label)}
                 </TableHead>
               ))}
             </TableRow>
@@ -158,7 +160,7 @@ export function JacketTable({ jackets }: { jackets: Jacket[] }) {
                       <input
                         type="checkbox"
                         className="size-4 shrink-0 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-40"
-                        aria-label={`Compare ${jacket.brand} ${jacket.model}`}
+                        aria-label={t("ui.compare_action", {action: t("ui.compare"), name: jacket.brand + " " + jacket.model})}
                         checked={checked}
                         disabled={!checked && selected.length === 4}
                         onChange={() => toggleJacket(jacket.slug)}
@@ -170,8 +172,8 @@ export function JacketTable({ jackets }: { jackets: Jacket[] }) {
                     <Link href={`/jackets/${jacket.slug}`} className="spec-link">
                       {jacket.model}
                     </Link>
-                    {jacket.status === "discontinued" && <Badge variant="outline" className="mt-1.5 flex w-fit">Discontinued</Badge>}
-                    {jacket.example && <Badge variant="outline" className="example-badge mt-1.5 flex w-fit">Example data</Badge>}
+                    {jacket.status === "discontinued" && <Badge variant="outline" className="mt-1.5 flex w-fit">{t("ui.discontinued")}</Badge>}
+                    {jacket.example && <Badge variant="outline" className="example-badge mt-1.5 flex w-fit">{t("ui.example_data")}</Badge>}
                   </TableHead>
                   {visibleFields.map((field) => (
                     <TableCell key={field.key}><JacketSpec specs={jacket.specs} field={field} /></TableCell>
@@ -182,7 +184,7 @@ export function JacketTable({ jackets }: { jackets: Jacket[] }) {
             {visibleJackets.length === 0 && (
               <TableRow>
                 <TableCell colSpan={2 + visibleFields.length} className="sticky left-0 py-8 text-muted-foreground">
-                  {jackets.length ? "No jackets match these filters." : "No jackets in the index yet."}
+                  {t(jackets.length ? "ui.no_jackets_match" : "ui.no_jackets")}
                 </TableCell>
               </TableRow>
             )}
@@ -190,7 +192,7 @@ export function JacketTable({ jackets }: { jackets: Jacket[] }) {
         </Table>
       </div>
       <p className="mt-3 font-mono text-xs text-muted-foreground" role="status">
-        {visibleJackets.length} {visibleJackets.length === 1 ? "jacket" : "jackets"}
+        {t("ui.jacket_count", {count: visibleJackets.length})}
       </p>
     </div>
   );

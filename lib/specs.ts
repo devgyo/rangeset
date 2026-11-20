@@ -14,17 +14,17 @@ export type Field = {
 };
 
 export const fields: Field[] = [
-  { key: "membrane", label: "Membrane", group: "Specs" },
-  { key: "layers", label: "Layers", group: "Specs" },
-  { key: "faceDenier", label: "Face fabric denier", group: "Specs", unit: "D" },
-  { key: "weight", label: "Weight", group: "Numbers", unit: "g" },
-  { key: "backLength", label: "Center back length", group: "Numbers", unit: "cm" },
-  { key: "waterproof", label: "Waterproof rating", group: "Numbers", unit: "mm" },
-  { key: "breathability", label: "Breathability", group: "Numbers" },
-  { key: "fit", label: "Fit", group: "Features" },
-  { key: "price", label: "Price", group: "Numbers", unit: "USD" },
-  { key: "pitZips", label: "Pit zips", group: "Features" },
-  { key: "helmetHood", label: "Helmet hood", group: "Features" },
+  { key: "membrane", label: "field.legacy_membrane", group: "Specs" },
+  { key: "layers", label: "field.legacy_layers", group: "Specs" },
+  { key: "faceDenier", label: "field.legacy_face_denier", group: "Specs", unit: "D" },
+  { key: "weight", label: "field.weight", group: "Numbers", unit: "g" },
+  { key: "backLength", label: "field.legacy_back_length", group: "Numbers", unit: "cm" },
+  { key: "waterproof", label: "field.legacy_waterproof", group: "Numbers", unit: "mm" },
+  { key: "breathability", label: "field.breathability", group: "Numbers" },
+  { key: "fit", label: "field.fit", group: "Features" },
+  { key: "price", label: "field.legacy_price", group: "Numbers", unit: "USD" },
+  { key: "pitZips", label: "field.legacy_pit_zips", group: "Features" },
+  { key: "helmetHood", label: "field.legacy_helmet_hood", group: "Features" },
 ];
 
 const numberFormat = new Intl.NumberFormat("en-US", { maximumFractionDigits: 4 });

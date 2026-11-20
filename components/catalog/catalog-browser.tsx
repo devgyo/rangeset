@@ -1,25 +1,27 @@
 "use client";
 
-import Link from "next/link";
+import {Link} from "@/i18n/navigation";
+import {categoryLabel, displayParameter, displayPrice, localizedMetric, metricName, optionLabel, useCopy} from "@/i18n/copy";
 import { useSearchParams } from "next/navigation";
 import { useDeferredValue, useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CompareButton } from "@/components/catalog/compare-selection";
 import { ColorDot, GenderPill, ProductBadges, ProductImage } from "@/components/catalog/product-media";
-import { categoryCounts, formatMetric, formatPrice, keyMetrics, matchesProduct, metricLabels, type CatalogCard } from "@/lib/arcteryx-view";
+import { categoryCounts, keyMetrics, matchesProduct, type CatalogCard } from "@/lib/arcteryx-view";
 
 import { fieldsByKey } from "@/lib/parameters/registry";
-import { formatValue, missing } from "@/lib/parameters/model";
+import { missing } from "@/lib/parameters/model";
 
 const PAGE_SIZE = 24;
 const sortOptions = [
-  ["name", "Name A–Z"], ["price-asc", "Price low–high"], ["price-desc", "Price high–low"], ["weight", "Weight low–high"],
+  ["name", "ui.sort_name"], ["price-asc", "ui.sort_price_asc"], ["price-desc", "ui.sort_price_desc"], ["weight", "ui.sort_weight"],
 ];
-const genders = [["", "All"], ["men", "Men"], ["women", "Women"], ["unisex", "Unisex"]];
-const lines = [["", "All"], ["mainline", "Mainline"], ["veilance", "Veilance"]];
+const genders = [["", "ui.all"], ["men", "ui.filter_men"], ["women", "ui.filter_women"], ["unisex", "gender.unisex"]];
+const lines = [["", "ui.all"], ["mainline", "ui.mainline"], ["veilance", "keep.veilance"]];
 
 function CatalogCardView({ product, eager }: { product: CatalogCard; eager: boolean }) {
+  const {t} = useCopy();
   return (
     <article className="gear-card min-w-0 overflow-hidden border bg-card">
       <Link href={`/products/${product.slug}`} prefetch={false} className="group relative block">
@@ -27,14 +29,14 @@ function CatalogCardView({ product, eager }: { product: CatalogCard; eager: bool
         <div className="absolute inset-x-2 top-2 flex flex-wrap items-start gap-1">
           <GenderPill gender={product.gender} />
         </div>
-        <span className="sr-only">View {product.name}</span>
+        <span className="sr-only">{t("ui.view_product", {name: product.name})}</span>
         <span className="absolute right-2 bottom-2 hidden size-8 place-items-center bg-background text-foreground sm:grid">
           <ArrowUpRight size={15} aria-hidden="true" />
         </span>
       </Link>
       <div className="grid gap-2.5 p-2.5 sm:p-4">
         {product.swatches.length > 0 && (
-          <div className="flex items-center gap-1.5" aria-label={`${product.swatches.length} colors`}>
+          <div className="flex items-center gap-1.5" aria-label={t("ui.color_count", {count: product.swatches.length})}>
             {product.swatches.slice(0, 5).map((color, index) => <span key={index} title={color.label}><ColorDot color={color} /></span>)}
             {product.swatches.length > 5 && <span className="font-mono text-[0.65rem] text-muted-foreground">+{product.swatches.length - 5}</span>}
           </div>
@@ -44,14 +46,14 @@ function CatalogCardView({ product, eager }: { product: CatalogCard; eager: bool
           <h2 className="text-balance text-[0.95rem] leading-tight font-semibold sm:text-lg">
             <Link href={`/products/${product.slug}`} prefetch={false} className="hover:text-primary">{product.name}</Link>
           </h2>
-          <p className="mt-1 font-mono text-sm tabular-nums text-primary">{formatPrice(product.msrp, product.currency)}</p>
+          <p className="mt-1 font-mono text-sm tabular-nums text-primary">{displayPrice(t, product.msrp, product.currency)}</p>
         </div>
         <dl className="grid grid-cols-2 gap-px border border-border bg-border">
           {keyMetrics(product).map((key) => (
             <div key={key} className="min-w-0 bg-card px-1.5 py-1.5 sm:px-2">
-              <dt className="truncate text-[0.65rem] text-muted-foreground" title={metricLabels[key]}>{metricLabels[key]}</dt>
+              <dt className="truncate text-[0.65rem] text-muted-foreground" title={metricName(t, key)}>{metricName(t, key)}</dt>
               <dd className="truncate font-mono text-[0.65rem] tabular-nums sm:text-xs"
-                  title={formatMetric(product.specs[key])}>{formatMetric(product.specs[key])}</dd>
+                  title={localizedMetric(t, key, product.specs[key])}>{localizedMetric(t, key, product.specs[key])}</dd>
             </div>
           ))}
         </dl>
@@ -62,6 +64,7 @@ function CatalogCardView({ product, eager }: { product: CatalogCard; eager: bool
 }
 
 export function CatalogBrowser({ products }: { products: CatalogCard[] }) {
+  const {t, locale} = useCopy();
   const params = useSearchParams();
   const category = params.get("category") ?? "";
   const query = params.get("q") ?? "";
@@ -89,7 +92,7 @@ export function CatalogBrowser({ products }: { products: CatalogCard[] }) {
       else next.delete(key);
     }
     const search = next.toString();
-    window.history[replace ? "replaceState" : "pushState"](null, "", search ? "/products?" + search : "/products");
+    window.history[replace ? "replaceState" : "pushState"](null, "", location.pathname + (search ? "?" + search : ""));
   }
 
   const categories = categoryCounts(products);
@@ -99,8 +102,8 @@ export function CatalogBrowser({ products }: { products: CatalogCard[] }) {
     { field: fieldsByKey.get("protection_type")!, queryKey: "protection", selected: protectionType, read: (product: CatalogCard) => product.protectionType },
   ].map((filter) => {
     const present = new Set(categoryProducts.map(filter.read));
-    const options = [...Object.entries(filter.field.options ?? {}), ...(["review", "unpublished", "inapplicable"] as const)
-      .map((state) => [state, formatValue(filter.field, missing(state))])].filter(([key]) => present.has(key) || key === filter.selected);
+    const options = [...Object.entries(filter.field.options ?? {}).map(([key, label]) => [key, optionLabel(t, filter.field, key, label)]), ...(["review", "unpublished", "inapplicable"] as const)
+      .map((state) => [state, displayParameter(t, locale, filter.field, missing(state))])].filter(([key]) => present.has(key) || key === filter.selected);
     return { ...filter, options };
   });
   const familyCounts = new Map<string, number>();
@@ -128,71 +131,71 @@ export function CatalogBrowser({ products }: { products: CatalogCard[] }) {
 
   return (
     <>
-      <nav aria-label="Product categories" className="catalog-tabs">
+      <nav aria-label={t("ui.product_categories")} className="catalog-tabs">
         {[{ label: "", count: products.length }, ...categories].map((item) =>
           <button key={item.label} type="button" aria-pressed={category === item.label}
             onClick={() => update({ category: item.label, family: "", hard: "", type: "", protection: "" })} className="catalog-tab">
-            {item.label || "All"} <span>{item.count}</span>
+            {categoryLabel(t, item.label) || t("ui.all")} <span>{item.count}</span>
           </button>)}
       </nav>
-      <section aria-label="Catalog filters" className="catalog-filters">
+      <section aria-label={t("ui.catalog_filters")} className="catalog-filters">
         <div className="flex flex-wrap items-center gap-2.5">
           <label className="relative min-w-[min(100%,16rem)] flex-1">
-            <span className="sr-only">Search catalog</span>
+            <span className="sr-only">{t("ui.search_catalog")}</span>
             <Search size={16} className="pointer-events-none absolute top-3 left-3 text-muted-foreground" aria-hidden="true" />
             <input ref={searchInput} type="search" defaultValue={query} onChange={(event) => update({ q: event.target.value }, true)}
-              placeholder="Search products or specs" className="catalog-input w-full pl-9" />
+              placeholder={t("ui.search_products_or_specs")} className="catalog-input w-full pl-9" />
           </label>
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Sort</span>
+            <span>{t("ui.sort")}</span>
             <select value={sort} onChange={(event) => update({ sort: event.target.value === "name" ? "" : event.target.value })} className="catalog-input">
-              {sortOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+              {sortOptions.map(([value, label]) => <option key={value} value={value}>{t(label)}</option>)}
             </select>
           </label>
         </div>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          <div role="group" aria-label="Gender" className="filter-group">
-            <span className="control-label">Gender</span>
+          <div role="group" aria-label={t("field.gender")} className="filter-group">
+            <span className="control-label">{t("field.gender")}</span>
             {genders.map(([value, label]) => <button key={value} type="button" className="filter-pill" aria-pressed={gender === value}
-              onClick={() => update({ gender: value })}>{label}</button>)}
+              onClick={() => update({ gender: value })}>{t(label)}</button>)}
           </div>
-          <div role="group" aria-label="Sub-line" className="filter-group">
-            <span className="control-label">Line</span>
+          <div role="group" aria-label={t("ui.line")} className="filter-group">
+            <span className="control-label">{t("ui.line")}</span>
             {lines.map(([value, label]) => <button key={value} type="button" className="filter-pill" aria-pressed={line === value}
-              onClick={() => update({ line: value })}>{label}</button>)}
+              onClick={() => update({ line: value })}>{t(label)}</button>)}
           </div>
         </div>
         <div className="flex flex-wrap gap-2.5">
           {typeFilters.map(({ field, queryKey, selected, options }) => (
             <label key={queryKey} className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span>{field.label}</span>
+              <span>{t("field." + field.key)}</span>
               <select value={selected} onChange={(event) => update({ [queryKey]: event.target.value, hard: queryKey === "protection" ? "" : params.get("hard") ?? "" })}
                 className="catalog-input h-8">
-                <option value="">All</option>
+                <option value="">{t("ui.all")}</option>
                 {options.map(([key, label]) => <option key={key} value={key}>{label}</option>)}
               </select>
             </label>
           ))}
         </div>
-        {familyFilters.length > 0 && <div role="group" aria-label="Family" className="filter-group">
-          <span className="control-label">Family</span>
+        {familyFilters.length > 0 && <div role="group" aria-label={t("ui.family")} className="filter-group">
+          <span className="control-label">{t("ui.family")}</span>
           {familyFilters.map((name) => <button key={name} type="button" className="filter-pill" aria-pressed={family === name}
             onClick={() => update({ family: family === name ? "" : name })}>{name}</button>)}
         </div>}
       </section>
       <div className="mb-3 flex min-h-7 items-center justify-between gap-3">
-        <p role="status" className="font-mono text-xs tabular-nums text-muted-foreground">{results.length} {results.length === 1 ? "product" : "products"}</p>
+        <p role="status" className="font-mono text-xs tabular-nums text-muted-foreground">{t("ui.product_count", {count: results.length})}</p>
         {Boolean(category || query || gender || line || family || productType || protectionType || sort !== "name") &&
           <button type="button" className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-            onClick={() => window.history.pushState(null, "", "/products")}>Reset filters</button>}
+            onClick={() => window.history.pushState(null, "", location.pathname)}>{t("ui.reset_filters")}</button>}
       </div>
       {results.length > 0
         ? <div className="grid grid-cols-2 items-stretch gap-2.5 md:grid-cols-3 md:gap-4 xl:grid-cols-4">
           {results.slice(0, count).map((product, index) => <CatalogCardView key={product.slug} product={product} eager={index < 2} />)}
         </div>
-        : <p className="border bg-card p-6 text-muted-foreground">No products match these filters.</p>}
+        : <p className="border bg-card p-6 text-muted-foreground">{t("ui.no_products_match_these_filters")}</p>}
       {results.length > count && <div className="mt-7 flex justify-center">
-        <Button type="button" variant="outline" className="h-10 px-5" onClick={() => setPage({ filters: deferredParams, count: count + PAGE_SIZE })}>Show more products</Button>
+        <Button type="button" variant="outline" className="h-10 px-5" onClick={() => setPage({ filters: deferredParams, count: count + PAGE_SIZE })}>{t("ui.show_more_products")}</Button>
       </div>}
     </>
   );
