@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 
 function summary(product: CatalogCard): ComparisonProduct {
   return { slug: product.slug, name: product.name, image: product.image, gender: product.gender,
-    category: product.category, msrp: product.msrp, example: product.example, discontinued: product.status === "discontinued" };
+    category: product.category, msrp: product.msrp, currency: product.currency, example: product.example, discontinued: product.status === "discontinued" };
 }
 
 function picker(product: CatalogCard): PickerProduct {

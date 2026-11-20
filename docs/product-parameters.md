@@ -1,6 +1,6 @@
-# Rangeset product parameter standard v1.0.0
+# Rangeset product parameter standard v1.1.0
 
-The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
+The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.1 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
 
 ## Evidence and review
 
@@ -28,6 +28,12 @@ Use a JSON null to explicitly keep a field unpublished. A structured override su
 [{"part":"main","label":"Body","fields":{"fabric_name":"Nylon ripstop","denier":[40,70],"fabric_weight":{"value":125,"unit":"g/m²"},"fiber_content":[{"name":"Nylon","percent":100}]}}]
 ```
 
+## Style, shell construction and price
+
+Product type is a concrete style, such as Jacket, T-shirt, Dress or Boot. Unresolved styles are marked Needs review. Protection type describes shell construction where applicable. Product type and Protection type share the same codes and labels across the catalog filters and both parameter pages. A legacy shell code in a Product type override is read as Protection type when applicable.
+
+The official price includes its ISO currency, such as `$650 USD`. The currency remains attached to the normalized price and is used to decide whether two prices can be compared.
+
 ## Comparison policy
 
 Values are normalized before comparison. Lists are compared without source order. Fabric and fill records align by normalized part, and repeated records within a part are compared as a multiset. Prices require the same currency. Length measurements require matching published size and fit range. Shoe weights require a published single-shoe or pair basis. Known differences, unavailable values, inapplicable rows, and incompatible measurement references have separate treatments. An unknown or conflicting value by itself does not count as a confirmed difference.
@@ -54,7 +60,6 @@ The component fields appear within each fabric or fill record.
 | `product_type` | Product type | enum | — | all | exact |
 | `gender` | Gender | enum | — | all | exact |
 | `msrp` | Official list price | number | — | all | method |
-| `currency` | Currency | text | — | all | exact |
 | `activities` | Activities | list | — | all | set |
 | `release` | Release year / season | text | — | all | exact |
 
@@ -86,6 +91,7 @@ The component fields appear within each fabric or fill record.
 
 | Key | Field | Type | Standard unit | Applies to | Compare |
 | --- | --- | --- | --- | --- | --- |
+| `protection_type` | Protection type | enum | — | all | exact |
 | `protection` | Protection claims | list | — | all | set |
 | `membrane` | Waterproof membrane | text | — | technical | exact |
 | `laminate` | Laminate layers | enum | — | technical | exact |

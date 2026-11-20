@@ -9,6 +9,9 @@ import { CompareButton } from "@/components/catalog/compare-selection";
 import { ColorDot, GenderPill, ProductBadges, ProductImage } from "@/components/catalog/product-media";
 import { categoryCounts, formatMetric, formatPrice, keyMetrics, matchesProduct, metricLabels, type CatalogCard } from "@/lib/arcteryx-view";
 
+import { fieldsByKey } from "@/lib/parameters/registry";
+import { formatValue, missing } from "@/lib/parameters/model";
+
 const PAGE_SIZE = 24;
 const sortOptions = [
   ["name", "Name A–Z"], ["price-asc", "Price low–high"], ["price-desc", "Price high–low"], ["weight", "Weight low–high"],
@@ -41,7 +44,7 @@ function CatalogCardView({ product, eager }: { product: CatalogCard; eager: bool
           <h2 className="text-balance text-[0.95rem] leading-tight font-semibold sm:text-lg">
             <Link href={`/products/${product.slug}`} prefetch={false} className="hover:text-primary">{product.name}</Link>
           </h2>
-          <p className="mt-1 font-mono text-sm tabular-nums text-primary">{formatPrice(product.msrp)}</p>
+          <p className="mt-1 font-mono text-sm tabular-nums text-primary">{formatPrice(product.msrp, product.currency)}</p>
         </div>
         <dl className="grid grid-cols-2 gap-px border border-border bg-border">
           {keyMetrics(product).map((key) => (
@@ -66,8 +69,8 @@ export function CatalogBrowser({ products }: { products: CatalogCard[] }) {
   const line = params.get("line") ?? "";
   const family = params.get("family") ?? "";
   const sort = params.get("sort") ?? "name";
-  const canFilterShells = !category || category === "Shell Jackets";
-  const hardshell = canFilterShells && params.get("hard") === "1";
+  const productType = params.get("type") ?? "";
+  const protectionType = params.get("protection") ?? (params.get("hard") === "1" ? "hard_shell" : "");
   const deferredQuery = useDeferredValue(query);
   const deferredParams = useDeferredValue(params.toString());
   const [page, setPage] = useState({ filters: "", count: PAGE_SIZE });
@@ -91,6 +94,15 @@ export function CatalogBrowser({ products }: { products: CatalogCard[] }) {
 
   const categories = categoryCounts(products);
   const categoryProducts = category ? products.filter((product) => product.category === category) : products;
+  const typeFilters = [
+    { field: fieldsByKey.get("product_type")!, queryKey: "type", selected: productType, read: (product: CatalogCard) => product.productType },
+    { field: fieldsByKey.get("protection_type")!, queryKey: "protection", selected: protectionType, read: (product: CatalogCard) => product.protectionType },
+  ].map((filter) => {
+    const present = new Set(categoryProducts.map(filter.read));
+    const options = [...Object.entries(filter.field.options ?? {}), ...(["review", "unpublished", "inapplicable"] as const)
+      .map((state) => [state, formatValue(filter.field, missing(state))])].filter(([key]) => present.has(key) || key === filter.selected);
+    return { ...filter, options };
+  });
   const familyCounts = new Map<string, number>();
   for (const product of categoryProducts) if (product.family) familyCounts.set(product.family, (familyCounts.get(product.family) ?? 0) + 1);
   const topFamilies = [...familyCounts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 8).map(([name]) => name);
@@ -98,13 +110,17 @@ export function CatalogBrowser({ products }: { products: CatalogCard[] }) {
 
   const results = categoryProducts.filter((product) =>
     (!gender || product.gender === gender) && (!family || product.family === family) &&
-    (!line || product.veilance === (line === "veilance")) && (!hardshell || product.isHardshell) &&
+    (!line || product.veilance === (line === "veilance")) && (!productType || product.productType === productType) &&
+    (!protectionType || product.protectionType === protectionType) &&
     matchesProduct(product, deferredQuery));
   if (sort !== "name") results.sort((a, b) => {
     const first = sort === "weight" ? a.specs.weight_g?.value : a.msrp;
     const second = sort === "weight" ? b.specs.weight_g?.value : b.msrp;
     if (typeof first !== "number") return typeof second === "number" ? 1 : 0;
     if (typeof second !== "number") return -1;
+    if (sort !== "weight" && a.currency !== b.currency) {
+      return (a.currency ?? "").localeCompare(b.currency ?? "");
+    }
     return (first - second) * (sort === "price-desc" ? -1 : 1) || a.name.localeCompare(b.name);
   });
   else results.sort((a, b) => a.name.localeCompare(b.name));
@@ -115,7 +131,7 @@ export function CatalogBrowser({ products }: { products: CatalogCard[] }) {
       <nav aria-label="Product categories" className="catalog-tabs">
         {[{ label: "", count: products.length }, ...categories].map((item) =>
           <button key={item.label} type="button" aria-pressed={category === item.label}
-            onClick={() => update({ category: item.label, family: "", hard: "" })} className="catalog-tab">
+            onClick={() => update({ category: item.label, family: "", hard: "", type: "", protection: "" })} className="catalog-tab">
             {item.label || "All"} <span>{item.count}</span>
           </button>)}
       </nav>
@@ -145,8 +161,18 @@ export function CatalogBrowser({ products }: { products: CatalogCard[] }) {
             {lines.map(([value, label]) => <button key={value} type="button" className="filter-pill" aria-pressed={line === value}
               onClick={() => update({ line: value })}>{label}</button>)}
           </div>
-          {canFilterShells && <button type="button" className="filter-pill border border-border" aria-pressed={hardshell}
-            onClick={() => update({ hard: hardshell ? "" : "1" })}>Hardshells only</button>}
+        </div>
+        <div className="flex flex-wrap gap-2.5">
+          {typeFilters.map(({ field, queryKey, selected, options }) => (
+            <label key={queryKey} className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{field.label}</span>
+              <select value={selected} onChange={(event) => update({ [queryKey]: event.target.value, hard: queryKey === "protection" ? "" : params.get("hard") ?? "" })}
+                className="catalog-input h-8">
+                <option value="">All</option>
+                {options.map(([key, label]) => <option key={key} value={key}>{label}</option>)}
+              </select>
+            </label>
+          ))}
         </div>
         {familyFilters.length > 0 && <div role="group" aria-label="Family" className="filter-group">
           <span className="control-label">Family</span>
@@ -156,7 +182,7 @@ export function CatalogBrowser({ products }: { products: CatalogCard[] }) {
       </section>
       <div className="mb-3 flex min-h-7 items-center justify-between gap-3">
         <p role="status" className="font-mono text-xs tabular-nums text-muted-foreground">{results.length} {results.length === 1 ? "product" : "products"}</p>
-        {Boolean(category || query || gender || line || family || hardshell || sort !== "name") &&
+        {Boolean(category || query || gender || line || family || productType || protectionType || sort !== "name") &&
           <button type="button" className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             onClick={() => window.history.pushState(null, "", "/products")}>Reset filters</button>}
       </div>

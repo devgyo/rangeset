@@ -64,7 +64,7 @@ function Trims({ product, siblings }: { product: ProductDetail; siblings: Produc
               <Link href={`/products/${item.slug}`} prefetch={false} className="spec-link">{item.name}</Link>
               {item.status === "discontinued" && <Badge variant="outline" className="ml-2">Discontinued</Badge>}
             </TableHead>
-            <TableCell className="font-mono tabular-nums">{formatValue(price, getParameter(parametersOf(item), price))}{showDelta(item, price, formatPrice)}</TableCell>
+            <TableCell className="font-mono tabular-nums">{formatValue(price, getParameter(parametersOf(item), price))}{showDelta(item, price, (amount) => formatPrice(amount, getParameter(profile, price).reference?.unit))}</TableCell>
             <TableCell className="font-mono tabular-nums">{formatValue(weight, getParameter(parametersOf(item), weight))}{showDelta(item, weight, (number) => `${number} g`)}</TableCell>
             <TableCell>{notes.map((field) => formatValue(field, getParameter(parametersOf(item), field))).join(" · ") || "Not published"}</TableCell>
             <TableCell><Button asChild size="sm" variant="outline"><Link href={comparisonHref([product.slug, item.slug])}>Compare</Link></Button></TableCell>

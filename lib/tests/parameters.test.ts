@@ -233,3 +233,48 @@ test("accepts manual nested and legacy separately labelled backer overrides", ()
   assert.equal(partsOf(legacy)[0].backers?.[0].fields.fiber_content.evidence[0].method, "manual");
   assert.equal(compareValues(field("materials"), [nested.values.materials, legacy.values.materials]).differs, false);
 });
+
+test("classifies garment style independently from protective construction", () => {
+  const cases = [
+    [product({ name: "Beta AR Jacket", isHardshell: true }), "jacket", "hard_shell"],
+    [product({ name: "Gamma Jacket", subTags: ["Softshell"] }), "jacket", "soft_shell"],
+    [product({ name: "Squamish Hoody", subTags: ["Windshell"] }), "hoodie", "wind_shell"],
+    [product({ name: "Fissile SV Down Jacket", category: "Insulated Jackets", subTags: ["Insulated Shell"] }), "jacket", "insulated_shell"],
+    [product({ name: "Cormac Crew Neck Shirt SS", category: "Shirts and Tops" }), "t_shirt", null],
+    [product({ name: "Cila SL Dress", category: "Dresses and Skirts" }), "dress", null],
+    [product({ name: "Konseal GTX Shoe", category: "Footwear", subTags: ["Waterproof"] }), "shoe", null],
+    [product({ name: "Konseal Trek Boot", category: "Footwear", subTags: ["Shoes"] }), "boot", null],
+    [product({ name: "Rho Hoody", category: "Base Layer" }), "base_layer_top", null],
+    [product({ name: "Rho Bottom", category: "Base Layer" }), "base_layer_bottom", null],
+  ] as const;
+  for (const [item, style, shell] of cases) {
+    const { values } = normalizeArcProduct(item);
+    assert.equal(values.product_type.value, style, item.name);
+    if (shell) assert.equal(values.protection_type.value, shell, item.name);
+    else assert.equal(values.protection_type.state, "inapplicable", item.name);
+  }
+  const unknown = normalizeArcProduct(product({ name: "Collection 123", category: "Shirts and Tops" }));
+  assert.equal(formatValue(field("product_type"), unknown.values.product_type), "Needs review");
+  assert.equal(unknown.values.protection_type.state, "inapplicable");
+  assert.ok(parameterGroups([unknown]).some(({ rows }) => rows.some(({ key }) => key === "protection_type")));
+  const declared = normalizeArcProduct(product({ name: "Collection 123", category: "Dresses and Skirts" }), { raw: { productType: "Dress" } });
+  assert.equal(declared.values.product_type.value, "dress");
+  const legacy = normalizeArcProduct(product({ name: "Beta AR Jacket" }), { overrides: new Map([["parameters.product_type", "hard_shell"]]) });
+  assert.equal(legacy.values.product_type.value, "jacket");
+  assert.equal(legacy.values.protection_type.value, "hard_shell");
+});
+
+test("renders ISO currency with price and compares style and currency codes", () => {
+  const beta = normalizeArcProduct(product({ name: "Beta AR Jacket", isHardshell: true }), { raw: { price: 650, currencyCode: "USD" } });
+  const shirt = normalizeArcProduct(product({ name: "Cormac T-shirt", category: "Shirts and Tops" }), { raw: { price: 50, currencyCode: "EUR" } });
+  assert.equal(formatValue(field("msrp"), beta.values.msrp), "$650 USD");
+  assert.equal(formatValue(field("msrp"), shirt.values.msrp), "€50 EUR");
+  assert.equal(beta.values.msrp.reference?.unit, "USD");
+  assert.equal(beta.values.currency, undefined);
+  const rows = parameterGroups([beta, shirt]).flatMap(({ rows }) => rows);
+  assert.ok(!rows.some(({ key }) => key === "currency"));
+  assert.equal(rows.find(({ key }) => key === "product_type")?.differs, true);
+  assert.equal(rows.find(({ key }) => key === "protection_type")?.cells[1].state, "inapplicable");
+  assert.equal(rows.find(({ key }) => key === "msrp")?.differs, false);
+  assert.match(rows.find(({ key }) => key === "msrp")?.note ?? "", /currencies/);
+});

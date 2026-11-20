@@ -24,16 +24,19 @@ export function getParameter(profile: Profile, field: Field): Parameter {
 }
 
 const number = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
+export function formatMoney(value: number, currency: string | null | undefined) {
+  if (!currency) return number.format(value);
+  const amount = /^[A-Z]{3}$/.test(currency)
+    ? new Intl.NumberFormat("en-US", { style: "currency", currency, maximumFractionDigits: 2, minimumFractionDigits: 0 }).format(value)
+    : number.format(value);
+  return `${amount} ${currency}`;
+}
 export function formatValue(field: Field, parameter: Parameter): string {
   const { value, reference } = parameter;
-  if (parameter.state !== "known" || value === undefined) return statusLabels[parameter.state];
+  if (parameter.state !== "known" || value === undefined) return parameter.state === "review" && field.reviewLabel ? field.reviewLabel : statusLabels[parameter.state];
   if (field.format === "denier") return (value as number[]).join(" × ") + " D";
   if (field.format === "composition") return (value as Fiber[]).map(({ percent, name }) => `${number.format(percent)}% ${name}`).join(" · ");
-  if (field.format === "money") {
-    if (!reference?.unit) return number.format(Number(value));
-    if (!/^[A-Z]{3}$/.test(reference.unit)) return `${number.format(Number(value))} ${reference.unit}`;
-    return new Intl.NumberFormat("en-US", { style: "currency", currency: reference.unit, maximumFractionDigits: 2, minimumFractionDigits: 0 }).format(Number(value));
-  }
+  if (field.format === "money") return formatMoney(Number(value), reference?.unit);
   if (field.options) return field.options[String(value)] ?? String(value);
   if (typeof value === "boolean") return value ? "Yes" : "No";
   if (typeof value === "number") return [number.format(value), (reference?.unit === null ? null : reference?.unit ?? field.unit)].filter(Boolean).join(" ");
@@ -128,7 +131,7 @@ export function parameterGroups(profiles: Profile[]): ParameterGroup[] {
     const rows = registry.filter((field) => field.group === key && !field.component).sort((a, b) => a.order - b.order)
       .flatMap((field): ParameterRow[] => {
         const cells = profiles.map((profile) => getParameter(profile, field));
-        if (cells.every((item) => item.state === "inapplicable")) return [];
+        if (field.applies !== "all" && cells.every((item) => item.state === "inapplicable")) return [];
         if (field.optional && cells.every((item) => item.state === "unpublished")) return [];
         const parts = field.type === "parts" ? cells.flatMap((item) => item.state === "known" ? item.value as Part[] : []) : [];
         if (!parts.length || profiles.length === 1) return [{ key: field.key, field, label: field.label, cells, ...compareValues(field, cells) }];

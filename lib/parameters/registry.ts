@@ -1,4 +1,4 @@
-export const parameterVersion = "1.0.0";
+export const parameterVersion = "1.1.0";
 export const groups = {
   identity: "General", sizing: "Dimensions & fit", fabric: "Fabrics", protection: "Protection",
   warmth: "Insulation", features: "Features", footwear: "Footwear", origin: "Origin",
@@ -22,6 +22,20 @@ export const terms = {
   pfas: { label: "PFAS", text: "A family of fluorinated substances. A compliance claim and a claim about intentionally added PFAS have different scopes." },
 } as const;
 export type Term = keyof typeof terms;
+export const productTypes = {
+  jacket: "Jacket", vest: "Vest", coat: "Coat", parka: "Parka", hoodie: "Hoodie", anorak: "Anorak",
+  pants: "Pants", bib_pants: "Bib pants", shorts: "Shorts", tights: "Tights",
+  t_shirt: "T-shirt", shirt: "Shirt", overshirt: "Overshirt", polo: "Polo shirt", tank_top: "Tank top",
+  sweatshirt: "Sweatshirt", sweater: "Sweater", pullover: "Pullover", cardigan: "Cardigan",
+  zip_top: "Zip-neck top", halter_top: "Halter top", crewneck: "Crewneck", bomber: "Bomber jacket", blazer: "Blazer",
+  base_layer_top: "Base layer top", base_layer_bottom: "Base layer bottom",
+  dress: "Dress", skirt: "Skirt", skort: "Skort", suit: "Suit",
+  shoe: "Shoe", boot: "Boot", sandal: "Sandal", mule: "Mule",
+  backpack: "Backpack", mitten: "Mitten", glove: "Glove", hat: "Hat", cap: "Cap", beanie: "Beanie",
+} as const;
+export const protectionTypes = {
+  hard_shell: "Hardshell", soft_shell: "Softshell", wind_shell: "Windshell", insulated_shell: "Insulated shell",
+} as const;
 export type ProductKind = "hard_shell" | "soft_shell" | "wind_shell" | "coat" | "insulated" | "pants" | "top" | "footwear" | "other";
 type Scope = "all" | "apparel" | "upper" | "bottom" | "shoe" | "shell" | "technical" | "warm" | "snow";
 export type Context = { kind: ProductKind; insulated: boolean; snow: boolean; hooded: boolean; membrane: boolean };
@@ -32,7 +46,7 @@ type Group = keyof typeof groups;
 
 type FieldOptions = {
   unit?: string; options?: Record<string, string>; compare?: CompareRule; format?: Format; help?: Term;
-  highlight?: Scope[]; optional?: boolean; component?: "fabric" | "warmth";
+  highlight?: Scope[]; optional?: boolean; component?: "fabric" | "warmth"; reviewLabel?: string;
 };
 
 function field(key: string, label: string, group: Group, order: number, type: ValueType, applies: Scope, description: string, extra: FieldOptions = {}) {
@@ -48,13 +62,11 @@ export const registry: Field[] = [
   field("product_line", "Product line", "identity", 30, "text", "all", "Collection within the brand."),
   field("family", "Model family", "identity", 40, "text", "all", "Related models identified by their shared name."),
   field("category", "Category", "identity", 50, "text", "all", "Catalog category."),
-  field("product_type", "Product type", "identity", 60, "enum", "all", "Type based on the product’s intended construction or use.", { options: {
-    hard_shell: "Hardshell", soft_shell: "Softshell", wind_shell: "Windshell", coat: "Coat", insulated: "Insulated apparel",
-    pants: "Pants or shorts", top: "Top or dress", footwear: "Footwear", other: "Other gear",
-  } }),
+  field("product_type", "Product type", "identity", 60, "enum", "all", "The specific garment, footwear or gear style.", {
+    options: productTypes, reviewLabel: "Needs review",
+  }),
   field("gender", "Gender", "identity", 70, "enum", "all", "Brand’s intended fit range.", { options: { men: "Men’s", women: "Women’s", unisex: "Unisex" } }),
   field("msrp", "Official list price", "identity", 80, "number", "all", "Published list price before temporary discounts.", { format: "money", compare: "method" }),
-  field("currency", "Currency", "identity", 90, "text", "all", "Currency of the official list price."),
   field("activities", "Activities", "identity", 100, "list", "all", "Activities listed by the brand."),
   field("release", "Release year / season", "identity", 110, "text", "all", "Release year or season reported by the brand."),
   field("weight", "Weight", "sizing", 10, "number", "all", "Mass of the item as measured by the brand.", { unit: "g", compare: "measurement", highlight: ["all"] }),
@@ -71,6 +83,7 @@ export const registry: Field[] = [
   field("denier", "Yarn denier", "fabric", 40, "denier", "all", terms.denier.text, { unit: "D", help: "denier", component: "fabric" }),
   field("fabric_weight", "Fabric weight", "fabric", 50, "number", "all", "Mass per unit area of this fabric.", { unit: "g/m²", help: "gsm", component: "fabric" }),
   field("weave", "Fabric construction", "fabric", 60, "text", "all", "Published weave, knit or other textile structure.", { component: "fabric" }),
+  field("protection_type", "Protection type", "protection", 5, "enum", "all", "The published shell construction for protective gear.", { options: protectionTypes }),
   field("protection", "Protection claims", "protection", 10, "list", "all", "Explicit protection claims stated by the brand."),
   field("membrane", "Waterproof membrane", "protection", 20, "text", "technical", terms.membrane.text, { help: "membrane", highlight: ["shell"] }),
   field("laminate", "Laminate layers", "protection", 30, "enum", "technical", "Number of layers bonded in the published laminate.", { options: { "2": "2L", "2.5": "2.5L", "3": "3L" }, format: "layers", highlight: ["shell"] }),

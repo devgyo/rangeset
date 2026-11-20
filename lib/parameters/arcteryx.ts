@@ -1,6 +1,7 @@
+import { classifyArcProduct } from "./classification";
 import { mergeListValues } from "./merge";
 import { plainText, record, type ProductDetail } from "../arcteryx-view";
-import { fieldsByKey, type Context, type Field, type ProductKind } from "./registry";
+import { fieldsByKey, type Context, type Field } from "./registry";
 import { known, missing, type Evidence, type Fiber, type Parameter, type Part, type Profile, type Reference, type Value } from "./model";
 
 export type IndexedSpec = { key: string; value: unknown; unit: string | null; source: string; fetchedAt: string; sourceUrl?: string; rawText?: string | null };
@@ -149,19 +150,6 @@ function insulationPart(label: string, text: string, evidence: Evidence): { part
   return { part: { part, label, fields, evidence: [evidence] }, type };
 }
 
-function kindOf(product: ProductDetail): ProductKind {
-  const tags = product.subTags.join(" ");
-  if (product.category === "Footwear") return "footwear";
-  if (["Pants", "Shorts"].includes(product.category ?? "")) return "pants";
-  if (product.category === "Insulated Jackets") return "insulated";
-  if (product.isHardshell || /\bhard[ -]?shell\b/i.test(tags)) return "hard_shell";
-  if (/\bsoft[ -]?shell\b/i.test(tags)) return "soft_shell";
-  if (/\bwind[ -]?shell\b/i.test(tags)) return "wind_shell";
-  if (/\bcoat\b/i.test(product.name)) return "coat";
-  if (["Shell Jackets", "Shirts and Tops", "Fleece", "Base Layer", "Dresses and Skirts", "Professional Use"].includes(product.category ?? "")) return "top";
-  return "other";
-}
-
 function compatible(key: string, value: unknown): value is Value {
   const field = fieldsByKey.get(key);
   switch (field?.type) {
@@ -180,7 +168,7 @@ function compatible(key: string, value: unknown): value is Value {
 
 export function normalizeArcProduct(product: ProductDetail, input: Input = {}): Profile {
   const raw = input.raw ?? {};
-  const kind = kindOf(product);
+  const { kind, productType, protectionType } = classifyArcProduct(product, input);
   const values: Profile["values"] = {};
   const rawEvidence = (path: string, value: unknown, method: Evidence["method"] = "published"): Evidence => ({
     url: product.url, path, raw: typeof value === "string" ? value : JSON.stringify(value) ?? "", method: product.example ? "example" : method,
@@ -193,8 +181,8 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
   add("product_line", product.example ? null : product.veilance ? "Veilance" : "Mainline", "product.breadcrumbs", raw.breadcrumbs ?? []);
   add("family", product.family, "product.name", raw.name ?? product.name);
   add("category", product.category, "products.category");
-  add("product_type", product.example ? "hard_shell" : kind, "products.category / sub_tags",
-    { category: product.category, tags: product.subTags, hardShell: product.isHardshell });
+  values.product_type = productType;
+  values.protection_type = protectionType;
   add("gender", product.gender, "products.gender", raw.gender ?? product.gender);
   const ratingLines = (key: string, candidates: Line[], pattern: RegExp, unit: string) => {
     const readings = candidates.flatMap((line) => {
@@ -208,10 +196,9 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
       values[key] = { state: "conflict", evidence: readings.flatMap(({ evidence }) => evidence), note: "Published test results cannot be reconciled." };
     } else values[key] = { ...readings[0], evidence: readings.flatMap(({ evidence }) => evidence) };
   };
-  const currency = typeof raw.currencyCode === "string" && /^[A-Z]{3}$/.test(raw.currencyCode) ? raw.currencyCode : product.msrp !== null ? "USD" : null;
+  const currency = typeof raw.currencyCode === "string" && /^[A-Z]{3}$/.test(raw.currencyCode) ? raw.currencyCode : product.currency ?? (product.example && product.msrp !== null ? "USD" : null);
   const listPrice = typeof raw.price === "number" && raw.price > 0 ? raw.price : product.msrp;
   add("msrp", listPrice, "product.price", raw.price ?? product.msrp, { unit: currency ?? undefined });
-  add("currency", currency, "product.currencyCode", raw.currencyCode ?? currency);
   if (product.activities.length) add("activities", product.activities, "product.activities", raw.activities ?? product.activities);
   if (product.sizes.length) add("sizes", product.sizes, "product.sizeOptions", raw.sizeOptions ?? product.sizes);
   if (product.swatches.length) add("colors", product.swatches.length, "product.colourOptions", product.swatches.map(({ label }) => label));
@@ -509,6 +496,7 @@ function applyOverrides(values: Profile["values"], product: ProductDetail, overr
   const keys = [...overrides].filter(([key]) => !key.startsWith("parameters."))
     .concat([...overrides].filter(([key]) => key.startsWith("parameters.")));
   for (const [path, original] of keys) {
+    if (path === "parameters.product_type" || path === "parameters.protection_type") continue;
     const key = path.startsWith("parameters.") ? path.slice(11) : path.startsWith("spec.") ? scalarKeys[path.slice(5)] : metadataKeys[path];
     const field = fieldsByKey.get(key);
     const entry = record(original);

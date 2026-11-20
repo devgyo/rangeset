@@ -12,6 +12,7 @@ import {
   type CatalogCard, type CatalogSpec, type ProductDetail,
 } from "@/lib/arcteryx-view";
 
+import { classifyArcProduct, classificationFilterValue } from "@/lib/parameters/classification";
 import { normalizeArcProduct, type IndexedSpec } from "@/lib/parameters/arcteryx";
 
 export const catalogEnabled = Boolean(process.env.DATABASE_URL);
@@ -24,6 +25,8 @@ const cardPayload = sql<Record<string, unknown>>`jsonb_build_object(
     from jsonb_array_elements(case when jsonb_typeof(${raw}->'colourOptions') = 'array' then ${raw}->'colourOptions' else '[]'::jsonb end)
     with ordinality as colors(colour, position)),
   'activities', ${raw}->'activities',
+  'marketingName', ${raw}->'marketingName', 'productType', ${raw}->'productType',
+  'category', ${raw}->'category', 'subCategory', ${raw}->'subCategory',
   'veilance', jsonb_path_exists(${raw}, '$.breadcrumbs[*] ? (@.label like_regex "^Veilance$" flag "i" || @.url like_regex "(^|/)veilance(/|$)" flag "i")'),
   'shortDescription', left(${raw}->>'shortDescription', 6000),
   'weight', ${raw}->'weight', 'price', ${raw}->'price', 'currencyCode', ${raw}->'currencyCode', 'isUnisex', ${raw}->'isUnisex',
@@ -218,8 +221,9 @@ function toView(row: CatalogRow, dbSpecs: SpecRow[], dbPrices: PriceRow[], detai
   const variantStates = dbPrices.filter(({ variant }) => variant !== "").map(({ inStock }) => inStock);
   const variantStock = variantStates.includes(true) ? true
     : variantStates.length && variantStates.every((state) => state === false) ? false : null;
+  const currency = typeof payload.currencyCode === "string" && /^[A-Z]{3}$/.test(payload.currencyCode) ? payload.currencyCode : null;
   const msrp = priceOverride === null || typeof priceOverride === "number" ? msrpAmount(priceOverride)
-    : payload.currencyCode === "USD" ? msrpAmount(payload.price) : null;
+    : currency ? msrpAmount(payload.price) : null;
   const colorOptions = payload.colourOptions;
   const summary = plainText(payload.shortDescription);
   const veilance = payload.veilance === true || entriesOfBreadcrumbs(payload.breadcrumbs);
@@ -229,7 +233,7 @@ function toView(row: CatalogRow, dbSpecs: SpecRow[], dbPrices: PriceRow[], detai
     family: productFamily(row.name), subTags: row.subTags, veilance, isHardshell: row.isHardshell, status: row.status,
     image: safeImage(payload.image ?? record(record((Array.isArray(colorOptions) ? colorOptions : [])[0]).image).url),
     hero: safeImage(record(payload.mainImage).url), swatches: swatchesOf(colorOptions),
-    summary, msrp, inStock: dbPrices.find(({ variant }) => variant === "")?.inStock ?? variantStock,
+    summary, msrp, currency, inStock: dbPrices.find(({ variant }) => variant === "")?.inStock ?? variantStock,
     activities: textList(payload.activities), specs, verifiedAt,
     description: detail ? plainText(payload.description) : "", materials: detail ? materials : [],
     features: detail ? features : [], facility: plainText(record(payload.manufacturingFacility).label),
@@ -239,9 +243,13 @@ function toView(row: CatalogRow, dbSpecs: SpecRow[], dbPrices: PriceRow[], detai
       .map((option) => plainText(record(option).label)).filter(Boolean),
     colorways: detail ? colorwaysOf(colorOptions) : [],
   };
-  if (withParameters) product.parameters = normalizeArcProduct(product, {
-    raw: payload, fetchedAt: row.payloadFetchedAt, indexed: dbSpecs, overrides: row.overrides,
-  });
+  const input = { raw: payload, fetchedAt: row.payloadFetchedAt, indexed: dbSpecs, overrides: row.overrides };
+  if (withParameters) product.parameters = normalizeArcProduct(product, input);
+  const classification = product.parameters ? {
+    productType: product.parameters.values.product_type, protectionType: product.parameters.values.protection_type,
+  } : classifyArcProduct(product, input);
+  product.productType = classificationFilterValue(classification.productType);
+  product.protectionType = classificationFilterValue(classification.protectionType);
   return product;
 }
 
@@ -300,9 +308,12 @@ async function loadProducts(mode: "card" | "detail", slugs?: string[], scope?: S
 
 function cardOnly(product: ProductDetail): CatalogCard {
   const { slug, name, brand, category, gender, family, subTags, veilance, isHardshell, status, example,
-    image, hero, swatches, activities, summary, msrp, inStock, specs } = product;
+    image, hero, swatches, activities, summary, msrp, currency, inStock, specs } = product;
+  const exampleClassification = example ? classifyArcProduct(product) : undefined;
   return { slug, name, brand, category, gender, family, subTags, veilance, isHardshell, status, example,
-    image, hero, swatches, activities, summary, msrp, inStock, specs };
+    image, hero, swatches, activities, summary, msrp, currency: example ? "USD" : currency, inStock, specs,
+    productType: exampleClassification ? classificationFilterValue(exampleClassification.productType) : product.productType,
+    protectionType: exampleClassification ? classificationFilterValue(exampleClassification.protectionType) : product.protectionType };
 }
 
 export const listProducts = cache(async () => (await loadProducts("card")).map(cardOnly));

@@ -11,7 +11,7 @@ import { formatPrice, genderLabel } from "@/lib/arcteryx-view";
 import { comparisonHref, type ComparisonGroup } from "@/lib/comparison";
 import { ParameterGroupSources, ParameterLabel, ParameterValue, SourcesSwitch } from "./parameter-table";
 
-export type ComparisonProduct = PickedProduct & { msrp: number | null; priceLabel?: string; example?: boolean; discontinued?: boolean };
+export type ComparisonProduct = PickedProduct & { msrp: number | null; currency?: string | null; priceLabel?: string; example?: boolean; discontinued?: boolean };
 export type PickerProduct = ComparisonProduct & { keywords: string };
 
 function ProductPicker({ products, selected, onPick, onClose }: {
@@ -46,7 +46,7 @@ function ProductPicker({ products, selected, onPick, onClose }: {
             <span className="block truncate text-sm font-medium">{product.name}</span>
             <span className="block truncate text-xs text-muted-foreground">{genderLabel(product.gender)}{product.category && ` · ${product.category}`}</span>
           </span>
-          <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">{formatPrice(product.msrp)}</span>
+          <span className="shrink-0 font-mono text-xs tabular-nums text-muted-foreground">{formatPrice(product.msrp, product.currency)}</span>
           <Plus size={14} className="shrink-0 text-primary" aria-hidden="true" />
         </button>
       </li>)}
@@ -80,7 +80,7 @@ function CompareTable({ products, groups, highlight, differencesOnly, remove }: 
               {product.discontinued && <span className="text-xs text-[#efc9ae]">Discontinued</span>}
               {product.example && <span className="text-xs text-muted-foreground">Example</span>}
             </div>
-            <span className="mt-1 block font-mono text-xs tabular-nums text-primary">{product.priceLabel ?? formatPrice(product.msrp)}</span>
+            <span className="mt-1 block font-mono text-xs tabular-nums text-primary">{product.priceLabel ?? formatPrice(product.msrp, product.currency)}</span>
           </th>)}
         </tr></thead>
         {visible.map(({ title, rows }) => <ParameterGroupSources key={title}><tbody>

@@ -1,5 +1,5 @@
 import { decode } from "html-entities";
-import type { Profile } from "./parameters/model";
+import { formatMoney, type Profile } from "./parameters/model";
 
 export const unpublished = "Not published";
 export const categoryOrder = [
@@ -24,6 +24,7 @@ export type CatalogCard = {
   image: string | null; hero: string | null; swatches: ColorSwatch[];
   activities: string[]; summary: string; msrp: number | null; inStock: boolean | null;
   specs: Record<string, CatalogSpec | undefined>;
+  productType?: string; protectionType?: string; currency?: string | null;
 };
 export type Photo = { url: string; label: string; height: string; size: string };
 export type Colorway = ColorSwatch & { photos: Photo[] };
@@ -157,8 +158,7 @@ export function categorySpecs(
 }
 
 const numberFormat = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
-const dollars = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2, minimumFractionDigits: 0 });
-export const formatPrice = (value: number | null) => value === null ? unpublished : dollars.format(value);
+export const formatPrice = (value: number | null, currency: string | null = "USD") => value === null ? unpublished : formatMoney(value, currency);
 export function formatMetric(spec?: CatalogSpec) {
   if (!spec) return unpublished;
   const value = typeof spec.value === "number" ? numberFormat.format(spec.value)
