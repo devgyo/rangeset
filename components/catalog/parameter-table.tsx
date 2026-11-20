@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { ParameterHelp } from "./parameter-help";
 import { fieldsByKey, terms, type Field, type Term } from "@/lib/parameters/registry";
-import { formatReference, formatValue, type Evidence, type Parameter, type ParameterGroup, type Part } from "@/lib/parameters/model";
+import { featureStatuses, formatReference, formatValue, parameterStatus, visibleOnDetail, weightPresentation, type Evidence, type Parameter, type ParameterGroup, type Part } from "@/lib/parameters/model";
 
 const SourcesContext = createContext({ visible: false, toggle: () => {} });
 
@@ -45,10 +45,11 @@ function SourceNotes({ evidence }: { evidence: Evidence[] }) {
   </li>)}</ul>;
 }
 
-function PartFields({ fields, withEvidence }: { fields: Part["fields"]; withEvidence: boolean }) {
+function PartFields({ fields, withEvidence, comparison }: { fields: Part["fields"]; withEvidence: boolean; comparison: boolean }) {
   return <dl className="grid gap-1.5">
     {Object.entries(fields).sort(([a], [b]) => fieldsByKey.get(a)!.order - fieldsByKey.get(b)!.order).map(([key, value]) => {
       const definition = fieldsByKey.get(key)!;
+      if (!comparison && !visibleOnDetail(definition, value)) return null;
       return <div key={key} data-parameter-row>
         <dt className="text-xs text-muted-foreground"><ParameterLabel field={definition} /></dt>
         <dd><ParameterValue field={definition} value={value} withEvidence={withEvidence} /></dd>
@@ -57,17 +58,17 @@ function PartFields({ fields, withEvidence }: { fields: Part["fields"]; withEvid
   </dl>;
 }
 
-function Parts({ parts, field, withEvidence }: { parts: Part[]; field: Field; withEvidence: boolean }) {
+function Parts({ parts, field, withEvidence, comparison }: { parts: Part[]; field: Field; withEvidence: boolean; comparison: boolean }) {
   return <div className="parameter-parts">
     {parts.map((part, index) => <div key={index} className="parameter-part">
       <p className="mb-1 font-medium">{part.label}</p>
-      <PartFields fields={part.fields} withEvidence={withEvidence} />
+      <PartFields fields={part.fields} withEvidence={withEvidence} comparison={comparison} />
       {part.backers && part.backers.length > 0 && <dl className="mt-2 grid grid-cols-[auto_minmax(0,1fr)] gap-2 border-t pt-2">
         <dt className="font-medium">Backer</dt>
         <dd className="min-w-0 space-y-2">
           {part.backers.map((backer, index) => <div key={index}>
             {backer.label !== "Backer" && <p className="text-xs text-muted-foreground">{backer.label}</p>}
-            <PartFields fields={backer.fields} withEvidence={withEvidence} />
+            <PartFields fields={backer.fields} withEvidence={withEvidence} comparison={comparison} />
             {withEvidence && !Object.keys(backer.fields).length && <SourceNotes evidence={backer.evidence} />}
           </div>)}
         </dd>
@@ -78,22 +79,33 @@ function Parts({ parts, field, withEvidence }: { parts: Part[]; field: Field; wi
   </div>;
 }
 
-export function ParameterValue({ field, value, withEvidence = true }: { field: Field; value: Parameter; withEvidence?: boolean }) {
-  if (field.type === "parts" && value.state === "known") return <Parts parts={value.value as Part[]} field={field} withEvidence={withEvidence} />;
+export function ParameterValue({ field, value, withEvidence = true, comparison = false }: { field: Field; value: Parameter; withEvidence?: boolean; comparison?: boolean }) {
+  if (field.type === "parts" && value.state === "known") return <Parts parts={value.value as Part[]} field={field} withEvidence={withEvidence} comparison={comparison} />;
   const text = formatValue(field, value);
   const reference = formatReference(field, value);
+  const status = parameterStatus(field, value);
+  const weightHelp = field.key === "weight" && !comparison ? weightPresentation(value).detailHelp : "";
   const tech = field.format === "layers" && value.state === "known" && Object.hasOwn(terms, text) ? text as Term : undefined;
   const numeric = ["number", "denier", "money", "layers"].includes(field.format);
   return <div className="min-w-0">
-    {field.type === "list" && value.state === "known"
+    {status && value.state !== "inapplicable"
+      ? <span data-parameter-inline><ParameterHelp label={status.label} text={status.description} symbol={status.text} /></span>
+      : field.type === "list" && value.state === "known"
       ? <ul className="grid gap-1" data-parameter-value>{(value.value as string[]).map((item, index) => <li key={index}>{item}</li>)}</ul>
-      : <span data-parameter-inline={tech ? "" : undefined} className={value.state === "known" ? numeric ? "font-mono tabular-nums" : undefined : value.state === "review" || value.state === "conflict" ? "text-[#f3cf92]" : "text-muted-foreground"}>
+      : <span data-parameter-inline={tech || weightHelp ? "" : undefined} className={value.state === "known" ? numeric ? "font-mono tabular-nums" : undefined : value.state === "review" || value.state === "conflict" ? "text-[#f3cf92]" : "text-muted-foreground"}>
         <span data-parameter-value>{text}</span>{tech && <Help term={tech} />}
+        {weightHelp && <ParameterHelp label="Weight reference" text={weightHelp} />}
       </span>}
     {reference && <p className="text-xs text-muted-foreground">{reference}</p>}
     {value.note && <p className="text-xs text-muted-foreground">{value.note}</p>}
     {withEvidence && <SourceNotes evidence={value.evidence} />}
   </div>;
+}
+
+export function ParameterLegend() {
+  return <ul aria-label="Parameter status legend" className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+    {Object.values(featureStatuses).map(({ text, label }) => <li key={label}><span aria-hidden="true">{text}</span> {label}</li>)}
+  </ul>;
 }
 
 export function ParameterSections({ groups }: { groups: ParameterGroup[] }) {

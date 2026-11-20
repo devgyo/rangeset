@@ -6,7 +6,7 @@ import { CircleHelp } from "lucide-react";
 const openEvent = "rangeset:parameter-help";
 const margin = 10;
 
-export function ParameterHelp({ label, text }: { label: string; text: string }) {
+export function ParameterHelp({ label, text, symbol }: { label: string; text: string; symbol?: string }) {
   const id = useId();
   const anchor = useRef<HTMLButtonElement>(null);
   const popup = useRef<HTMLSpanElement>(null);
@@ -105,7 +105,7 @@ export function ParameterHelp({ label, text }: { label: string; text: string }) 
   }, [id, open]);
 
   return <span className="parameter-help">
-    <button ref={anchor} type="button" className="parameter-help-button" aria-label={`About ${label}`}
+    <button ref={anchor} type="button" className="parameter-help-button" aria-label={symbol ? label : `About ${label}`}
       aria-describedby={id} aria-expanded={open} onPointerEnter={(event) => { if (event.pointerType === "mouse") show(); }}
       onPointerLeave={(event) => { if (event.pointerType === "mouse" && !event.currentTarget.matches(":focus-visible")) delayClose(); }}
       onFocus={(event) => { if (event.currentTarget.matches(":focus-visible")) show(); }}
@@ -113,7 +113,7 @@ export function ParameterHelp({ label, text }: { label: string; text: string }) 
         if (clickOpen.current) hide();
         else { clickOpen.current = true; show(); }
       }}>
-      <CircleHelp size={14} aria-hidden="true" />
+      {symbol ? <span data-parameter-value aria-hidden="true">{symbol}</span> : <CircleHelp size={14} aria-hidden="true" />}
     </button>
     <span ref={popup} id={id} role="tooltip" popover="manual" className="parameter-tooltip"
       onPointerEnter={cancelClose} onPointerLeave={() => { if (!anchor.current?.matches(":focus-visible")) delayClose(); }}>

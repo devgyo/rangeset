@@ -9,7 +9,8 @@ import { rememberSelection, useCompareSelection, type PickedProduct } from "@/co
 import { GenderPill, ProductImage } from "@/components/catalog/product-media";
 import { formatPrice, genderLabel } from "@/lib/arcteryx-view";
 import { comparisonHref, type ComparisonGroup } from "@/lib/comparison";
-import { ParameterGroupSources, ParameterLabel, ParameterValue, SourcesSwitch } from "./parameter-table";
+import { visibleInComparison } from "@/lib/parameters/model";
+import { ParameterGroupSources, ParameterLabel, ParameterLegend, ParameterValue, SourcesSwitch } from "./parameter-table";
 
 export type ComparisonProduct = PickedProduct & { msrp: number | null; currency?: string | null; priceLabel?: string; example?: boolean; discontinued?: boolean };
 export type PickerProduct = ComparisonProduct & { keywords: string };
@@ -59,7 +60,7 @@ function CompareTable({ products, groups, highlight, differencesOnly, remove }: 
   remove: (slug: string) => void;
 }) {
   const visible = groups.flatMap(({ title, rows }) => {
-    const filtered = differencesOnly ? rows.filter(({ differs }) => differs) : rows;
+    const filtered = rows.filter((row) => visibleInComparison(row, differencesOnly));
     return filtered.length ? [{ title, rows: filtered }] : [];
   });
   return <div className="comparison-frame" style={{ "--product-count": products.length } as CSSProperties}>
@@ -85,13 +86,14 @@ function CompareTable({ products, groups, highlight, differencesOnly, remove }: 
         </tr></thead>
         {visible.map(({ title, rows }) => <ParameterGroupSources key={title}><tbody>
           <tr className="matrix-group"><th scope="rowgroup" colSpan={products.length + 1}><div className="parameter-group-heading"><span>{title}</span><SourcesSwitch /></div></th></tr>
-          {rows.map(({ key, label, field, cells, differs, note }) => <tr key={key} data-parameter-row data-different={highlight && differs ? "true" : undefined}>
+          {rows.map(({ key, label, field, cells, differs, note, referenceNote }) => <tr key={key} data-parameter-row data-different={highlight && differs ? "true" : undefined}>
             <th scope="row" className="matrix-label">
               <ParameterLabel field={field} label={label} />
+              {referenceNote && <span className="mt-1 block text-[0.625rem] font-normal text-muted-foreground">{referenceNote}</span>}
               {note && <span className="mt-1 block text-[0.625rem] font-normal text-[#f3cf92]">{note}</span>}
             </th>
             {cells.map((value, index) =>
-              <td key={products[index].slug}><ParameterValue field={field} value={value} /></td>)}
+              <td key={products[index].slug}><ParameterValue field={field} value={value} comparison /></td>)}
           </tr>)}
         </tbody></ParameterGroupSources>)}
       </table>
@@ -156,6 +158,7 @@ export function ComparisonGrid({ products, catalog, groups, explicitIds }: {
     {mixed && <p className="border-b px-0 py-3 text-sm text-muted-foreground">Mixed categories · Some parameters may not apply</p>}
     {products.length < 2 && <p className="my-4 text-sm text-muted-foreground">{products.length ? "Add one more product to compare specs." : "Select two to four products to compare."}</p>}
     {products.length > 0 ? <div className="mt-3">
+      {products.length > 1 && <div className="mb-3"><ParameterLegend /></div>}
       <CompareTable products={products} groups={products.length > 1 ? groups : []} highlight={highlight} differencesOnly={differences}
         remove={(slug) => { if (!pending) update(products.filter((product) => product.slug !== slug)); }} />
     </div> : <div className="mt-4 border bg-card p-5"><Button asChild variant="outline" className="h-9"><Link href="/products">Browse catalog</Link></Button></div>}

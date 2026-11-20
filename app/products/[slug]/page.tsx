@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { readProduct, relatedProducts } from "@/lib/catalog";
 import { formatPrice, genderLabel, type ProductDetail } from "@/lib/arcteryx-view";
-import { ParameterLabel, ParameterSections, ParameterValue } from "@/components/catalog/parameter-table";
+import { ParameterLabel, ParameterLegend, ParameterSections, ParameterValue } from "@/components/catalog/parameter-table";
 import { parametersOf } from "@/lib/parameters/arcteryx";
 import { compareValues, formatValue, getParameter, keyParameters, parameterGroups } from "@/lib/parameters/model";
 import { fieldsByKey, parameterVersion } from "@/lib/parameters/registry";
@@ -116,7 +116,7 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
         <ProductGallery name={product.name} colorways={product.colorways} hero={product.hero} cutout={product.image} />
       </div>
     </div>
-    <section className="mt-9" aria-labelledby="key-heading">
+    {core.length > 0 && <section className="mt-9" aria-labelledby="key-heading">
       <h2 id="key-heading" className="section-title mb-4">Key specs</h2>
       <dl className="key-spec-strip grid gap-px border bg-border" style={{ "--metric-count": core.length } as CSSProperties}>
         {core.map((field) => <div data-parameter-row key={field.key} className={`min-w-0 bg-card p-3 sm:p-4 ${core.length % 2 ? "max-sm:last:col-span-2" : ""}`}>
@@ -124,13 +124,14 @@ export default async function ProductPage({ params }: PageProps<"/products/[slug
           <dd className="mt-1 break-words text-sm leading-snug sm:text-base"><ParameterValue field={field} value={getParameter(profile, field)} withEvidence={false} /></dd>
         </div>)}
       </dl>
-    </section>
+    </section>}
     <Trims product={product} siblings={siblings} />
     <section className="mt-10" aria-labelledby="full-heading">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="full-heading" className="section-title">Full specifications</h2>
         <span className="font-mono text-xs text-muted-foreground">Parameter standard v{parameterVersion}</span>
       </div>
+      <div className="mb-4"><ParameterLegend /></div>
       <ParameterSections groups={sections} />
     </section>
   </article>;

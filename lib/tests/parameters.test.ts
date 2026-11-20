@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { ProductDetail } from "../arcteryx-view";
 import { convert, normalizeArcProduct, parseDenier } from "../parameters/arcteryx";
-import { type Fiber, compareValues, formatValue, getParameter, known, parameterGroups, type Part } from "../parameters/model";
+import { type Fiber, compareValues, formatValue, getParameter, known, missing, parameterGroups, parameterStatus, visibleInComparison, weightPresentation, type Part } from "../parameters/model";
 import { fieldsByKey, parameterVersion, registry } from "../parameters/registry";
 
 function product(props: Partial<ProductDetail> = {}): ProductDetail {
@@ -256,7 +256,8 @@ test("classifies garment style independently from protective construction", () =
   const unknown = normalizeArcProduct(product({ name: "Collection 123", category: "Shirts and Tops" }));
   assert.equal(formatValue(field("product_type"), unknown.values.product_type), "Needs review");
   assert.equal(unknown.values.protection_type.state, "inapplicable");
-  assert.ok(parameterGroups([unknown]).some(({ rows }) => rows.some(({ key }) => key === "protection_type")));
+  assert.ok(!parameterGroups([unknown]).some(({ rows }) => rows.some(({ key }) => key === "protection_type")));
+  assert.ok(parameterGroups([unknown]).some(({ rows }) => rows.some(({ key }) => key === "product_type")));
   const declared = normalizeArcProduct(product({ name: "Collection 123", category: "Dresses and Skirts" }), { raw: { productType: "Dress" } });
   assert.equal(declared.values.product_type.value, "dress");
   const legacy = normalizeArcProduct(product({ name: "Beta AR Jacket" }), { overrides: new Map([["parameters.product_type", "hard_shell"]]) });
@@ -277,4 +278,102 @@ test("renders ISO currency with price and compares style and currency codes", ()
   assert.equal(rows.find(({ key }) => key === "protection_type")?.cells[1].state, "inapplicable");
   assert.equal(rows.find(({ key }) => key === "msrp")?.differs, false);
   assert.match(rows.find(({ key }) => key === "msrp")?.note ?? "", /currencies/);
+});
+
+test("feature symbols require explicit brand evidence for No", () => {
+  const jacket = product({ isHardshell: true });
+  const observation = { key: "pit_zips", value: false, unit: null, source: "brand", fetchedAt: "2026-11-20" };
+  const yes = normalizeArcProduct(jacket, { raw: { features: [feature("Zippers", "Pit zips")] } });
+  const no = normalizeArcProduct(jacket, { raw: { features: [feature("Zippers", "No pit zips")] } });
+  const omitted = normalizeArcProduct(jacket, { indexed: [observation] });
+  const indexedNo = normalizeArcProduct(jacket, { indexed: [{ ...observation, rawText: "Zippers: No pit zips" }] });
+  const shirt = normalizeArcProduct(product({ name: "Training T-shirt", category: "Shirts and Tops" }));
+  const vents = field("pit_zips");
+  for (const [profile, symbol, label] of [
+    [yes, "●", "Yes"], [no, "○", "No"], [omitted, "—", "Not published"],
+    [indexedNo, "○", "No"], [shirt, "N/A", "Not applicable"],
+  ] as const) {
+    const value = getParameter(profile, vents);
+    assert.equal(formatValue(vents, value), symbol);
+    assert.equal(parameterStatus(vents, value)?.label, label);
+  }
+  assert.equal(parameterStatus(vents, missing("conflict")), undefined);
+});
+
+test("detail hides unresolved features and inapplicable rows while keeping unpublished core values", () => {
+  const jacket = normalizeArcProduct(product({ isHardshell: true, activities: ["Skiing"] }), { raw: {
+    features: [feature("Zippers", "No pit zips"), feature("Snow", "Powder skirt"), feature("Safety", "RECCO", "No RECCO")],
+  } });
+  const shirt = normalizeArcProduct(product({ name: "Training T-shirt", category: "Shirts and Tops", activities: ["Skiing"] }), { raw: {
+    features: [feature("Other", "Powder skirt", "Pit zips")],
+  } });
+  const rows = (profile: typeof jacket) => parameterGroups([profile], "detail").flatMap(({ rows }) => rows);
+  const detail = rows(jacket);
+  assert.equal(detail.find(({ key }) => key === "pit_zips")?.cells[0].value, false);
+  assert.equal(detail.find(({ key }) => key === "powder_skirt")?.cells[0].value, true);
+  for (const key of ["weight", "msrp", "fit", "back_length"]) {
+    assert.equal(detail.find((row) => row.key === key)?.cells[0].state, "unpublished", key);
+  }
+  for (const key of ["hood", "recco", "drop", "hydrostatic_head"]) assert.ok(!detail.some((row) => row.key === key), key);
+  for (const key of ["pit_zips", "powder_skirt", "drop", "protection_type"]) {
+    assert.equal(getParameter(shirt, field(key)).state, "inapplicable", key);
+    assert.ok(!rows(shirt).some((row) => row.key === key), key);
+  }
+});
+
+test("comparison keeps rows with known values and treats unpublished cells as weak differences", () => {
+  const jacket = product({ isHardshell: true });
+  const yes = normalizeArcProduct(jacket, { raw: { features: [feature("Zippers", "Pit zips")] } });
+  const no = normalizeArcProduct(jacket, { raw: { features: [feature("Zippers", "No pit zips")] } });
+  const unknown = normalizeArcProduct(jacket);
+  const shirt = normalizeArcProduct(product({ name: "Training T-shirt", category: "Shirts and Tops" }));
+  const rows = parameterGroups([yes, no, unknown, shirt]).flatMap(({ rows }) => rows);
+  const row = rows.find(({ key }) => key === "pit_zips")!;
+  assert.deepEqual(row.cells.map((cell) => formatValue(row.field, cell)), ["●", "○", "—", "N/A"]);
+  assert.equal(row.differs, true);
+  assert.equal(row.weakDifference, true);
+  assert.ok(!rows.some(({ key }) => ["recco", "weight", "msrp", "sizes"].includes(key)));
+  const weak = parameterGroups([yes, unknown]).flatMap(({ rows }) => rows).find(({ key }) => key === "pit_zips")!;
+  assert.equal(weak.differs, false);
+  assert.equal(weak.weakDifference, true);
+  assert.match(weak.note!, /cannot compare/i);
+  assert.ok(visibleInComparison(weak, true));
+  const negativeOnly = parameterGroups([no, shirt]).flatMap(({ rows }) => rows).find(({ key }) => key === "pit_zips")!;
+  assert.equal(negativeOnly.cells[0].value, false);
+  assert.ok(!visibleInComparison(negativeOnly, true));
+});
+
+test("weight uses inline sizes and shoe basis with one comparison reference note", () => {
+  const shoe = product({ name: "Konseal Shoe", category: "Footwear" });
+  const unspecified = normalizeArcProduct(product(), { raw: { weight: { value: "460 g" } } });
+  const sized = normalizeArcProduct(product(), { raw: { weight: { value: "500 g (M)" } } });
+  const single = normalizeArcProduct(shoe, { raw: { weight: { value: "365 g (per shoe)" } } });
+  const pair = normalizeArcProduct(shoe, { raw: { weight: { value: "730g/pair" } } });
+  const footwearSize = normalizeArcProduct(shoe, { raw: { weight: { value: "365 g (size US 9.5 per shoe)" } } });
+  const separateSize = normalizeArcProduct(product(), {
+    raw: { weight: { value: "460 g" } },
+    indexed: [{ key: "weight_size", value: "L", unit: null, source: "brand", fetchedAt: "2026-11-20" }],
+  });
+  const shoeUnknown = normalizeArcProduct(shoe, { raw: { weight: { value: "360 g" } } });
+  const weight = field("weight");
+  assert.equal(formatValue(weight, unspecified.values.weight), "460 g");
+  assert.equal(formatValue(weight, sized.values.weight), "500 g (M)");
+  assert.equal(formatValue(weight, single.values.weight), "365 g (per shoe)");
+  assert.equal(formatValue(weight, pair.values.weight), "730 g (pair)");
+  assert.equal(formatValue(weight, footwearSize.values.weight), "365 g (US 9.5, per shoe)");
+  assert.equal(formatValue(weight, separateSize.values.weight), "460 g (L)");
+  assert.equal(sized.values.weight_size.value, "M");
+  assert.match(weightPresentation(unspecified.values.weight).detailHelp, /treat as approximate/);
+  assert.match(weightPresentation(shoeUnknown.values.weight).detailHelp, /one shoe or a pair/);
+  assert.equal(weightPresentation(sized.values.weight).detailHelp, "");
+  const detail = parameterGroups([sized]).flatMap(({ rows }) => rows);
+  assert.ok(!detail.some(({ key }) => key === "weight_size"));
+  const compare = parameterGroups([unspecified, sized]).flatMap(({ rows }) => rows);
+  const row = compare.find(({ key }) => key === "weight")!;
+  assert.equal(row.referenceNote, "Reference size not published");
+  assert.equal(row.differs, true);
+  assert.equal(row.weakDifference, false);
+  const shoes = parameterGroups([shoeUnknown, single]).flatMap(({ rows }) => rows);
+  assert.match(shoes.find(({ key }) => key === "weight")?.referenceNote ?? "", /Shoe weight basis not published/);
+  assert.ok(!shoes.some(({ key }) => key === "weight_basis"));
 });

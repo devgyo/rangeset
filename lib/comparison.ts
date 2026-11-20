@@ -15,5 +15,5 @@ export function comparisonIds(value: string | string[] | undefined) {
 export type ComparisonGroup = ParameterGroup;
 
 export function buildComparison(products: ProductDetail[]): ComparisonGroup[] {
-  return parameterGroups(products.map(parametersOf)).filter(({ title }) => title !== groups.supplemental);
+  return parameterGroups(products.map(parametersOf), "compare").filter(({ title }) => title !== groups.supplemental);
 }

@@ -1,4 +1,4 @@
-# Rangeset product parameter standard v1.1.0
+# Rangeset product parameter standard v1.2.0
 
 The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.1 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
 
@@ -34,9 +34,13 @@ Product type is a concrete style, such as Jacket, T-shirt, Dress or Boot. Unreso
 
 The official price includes its ISO currency, such as `$650 USD`. The currency remains attached to the normalized price and is used to decide whether two prices can be compared.
 
-## Comparison policy
+## Display and comparison
 
-Values are normalized before comparison. Lists are compared without source order. Fabric and fill records align by normalized part, and repeated records within a part are compared as a multiset. Prices require the same currency. Length measurements require matching published size and fit range. Shoe weights require a published single-shoe or pair basis. Known differences, unavailable values, inapplicable rows, and incompatible measurement references have separate treatments. An unknown or conflicting value by itself does not count as a confirmed difference.
+Details show applicable, known values, with a dash for unpublished core measurements, fit, and list price. An unresolved product type remains visible as Needs review. Comparison rows require at least one known value. Feature symbols distinguish explicit yes (●), explicit no (○), and unpublished (—). N/A means the field does not apply. A missing feature mention never establishes a negative.
+
+Differences only includes confirmed differences and rows with a published value alongside an unpublished one. The latter are flagged as unable to compare, without confirmed-difference highlighting. Lists ignore source order, and fabrics and fills align by part. Prices require the same currency. Length measurements require matching published size and fit range.
+
+The Weight row includes the reference size and single-shoe or pair basis when published. The data model still holds both references. Unpublished sizes are flagged once under the comparison row heading. Published sizes must agree when both are known. Comparing shoe weights also requires the same published shoe basis.
 
 ## Coverage limits
 
@@ -68,8 +72,8 @@ The component fields appear within each fabric or fill record.
 | Key | Field | Type | Standard unit | Applies to | Compare |
 | --- | --- | --- | --- | --- | --- |
 | `weight` | Weight | number | g | all | measurement |
-| `weight_size` | Weight reference size | text | — | all | reference |
-| `weight_basis` | Weight basis | enum | — | shoe | exact |
+| `weight_size` | Weight reference size (data only) | text | — | all | reference |
+| `weight_basis` | Weight basis (data only) | enum | — | shoe | exact |
 | `fit` | Fit | text | — | apparel | exact |
 | `back_length` | Centre back length | number | cm | upper | measurement |
 | `inseam` | Inseam | number | cm | bottom | measurement |
@@ -118,13 +122,13 @@ The component fields appear within each fabric or fill record.
 
 | Key | Field | Type | Standard unit | Applies to | Compare |
 | --- | --- | --- | --- | --- | --- |
-| `hood` | Hood | boolean | — | upper | exact |
-| `helmet_hood` | Helmet-compatible hood | boolean | — | upper | exact |
-| `pit_zips` | Underarm vents | boolean | — | upper | exact |
-| `two_way_zip` | Two-way zipper | boolean | — | apparel | exact |
+| `hood` | Hood | boolean | — | hooded style | exact |
+| `helmet_hood` | Helmet-compatible hood | boolean | — | outerwear | exact |
+| `pit_zips` | Underarm vents | boolean | — | outerwear | exact |
+| `two_way_zip` | Two-way zipper | boolean | — | outerwear or pants | exact |
 | `powder_skirt` | Powder skirt | boolean | — | snow | exact |
 | `leg_zips` | Leg side zippers | boolean | — | bottom | exact |
-| `recco` | Search-and-rescue reflector | boolean | — | apparel | exact |
+| `recco` | Search-and-rescue reflector | boolean | — | outerwear or pants | exact |
 | `pockets` | Pockets | list | — | apparel | set |
 
 ### Footwear

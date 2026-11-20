@@ -1,7 +1,7 @@
 import { classifyArcProduct } from "./classification";
 import { mergeListValues } from "./merge";
 import { plainText, record, type ProductDetail } from "../arcteryx-view";
-import { fieldsByKey, type Context, type Field } from "./registry";
+import { fieldsByKey, type Context, type Field, type ProductType, type ProtectionType } from "./registry";
 import { known, missing, type Evidence, type Fiber, type Parameter, type Part, type Profile, type Reference, type Value } from "./model";
 
 export type IndexedSpec = { key: string; value: unknown; unit: string | null; source: string; fetchedAt: string; sourceUrl?: string; rawText?: string | null };
@@ -15,6 +15,22 @@ const scalarKeys: Record<string, string> = {
 };
 const numberPattern = "(\\d+(?:[.,]\\d+)?)";
 const sizePattern = /\bsize\s+([a-z\d]+(?:[-/]\w+)*)(?=\s|[),:]|$)/i;
+const indexedFeatures: Record<string, [RegExp, RegExp]> = Object.fromEntries(Object.entries({
+  pit_zips: "pit[- ]zip\\w*|underarm (?:vent\\w*|zip\\w*)",
+  helmet_hood: "helmet[- ]compatible|hood compatible with (?:a )?helmet",
+  recco: "RECCO",
+}).map(([key, pattern]) => [key, [
+  new RegExp(`\\b(?:${pattern})\\b`, "i"),
+  new RegExp(`\\b(?:no|without|lacks?|not|non)[ -]+(?:(?:a|an|any|built-in|integrated) +)?(?:${pattern})\\b|\\b(?:${pattern})\\s*[:–-]\\s*(?:no|false|none)\\b` +
+    (key === "helmet_hood" ? "|hood not compatible with (?:a )?helmet" : ""), "i"),
+]]));
+const weightSize = (text: string) => text.match(/\bsize\s*[:=]?\s+((?:US|UK|EU)\s+\d+(?:\.\d+)?|[a-z\d]+(?:[-/.]\w+)*)(?=\s|[),;:]|$)/i)?.[1] ??
+  text.match(/\((XX?S|S|M|L|XL|XXL|XXXL|[2-5]XL)\)/i)?.[1];
+function shoeWeightBasis(text: string): Reference["basis"] {
+  if (/\b(?:per pair|pair of shoes|weight (?:for|of) (?:a )?pair)\b|\/\s*pair\b/i.test(text)) return "pair";
+  if (/\b(?:per shoe|single shoe|one shoe|each shoe)\b|\/\s*shoe\b/i.test(text)) return "single";
+  return "unspecified";
+}
 const decimal = (value: string) => Number(value.replace(",", "."));
 const rounded = (value: number) => Math.round(value * 100) / 100;
 const clean = (value: string) => value.replace(/\s+/g, " ").trim();
@@ -281,9 +297,8 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
   };
   const rawWeight = record(raw.weight).value;
   if (typeof rawWeight === "string" && rawWeight.trim()) {
-    const size = rawWeight.match(sizePattern)?.[1] ?? plainText(record(raw.weight).size);
-    const shoeBasis = /\b(?:per (?:pair)|pair of shoes|weight (?:for|of) (?:a )?pair|\/\s*pair\b)/i.test(rawWeight) ? "pair"
-      : /\b(?:per shoe|single shoe|one shoe|each shoe)\b|\/\s*shoe\b/i.test(rawWeight) ? "single" : "unspecified";
+    const size = weightSize(rawWeight) ?? plainText(record(raw.weight).size);
+    const shoeBasis = shoeWeightBasis(rawWeight);
     const ref: Reference = { size: size || undefined, kind, gender: product.gender ?? undefined, basis: kind === "footwear" ? shoeBasis : "item" };
     values.weight = measure({ text: plainText(rawWeight), evidence: rawEvidence("product.weight.value", rawWeight, "parsed") }, "g", ref);
     if (size) add("weight_size", size, "product.weight.value", rawWeight, ref);
@@ -337,12 +352,10 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
 
   const hoodLines = featureLines.filter(({ group }) => /hood configuration/i.test(group ?? ""));
   explicit("hood", /\b(?:stormhood|drophood|hood)\b/i, /\b(?:no|without) (?:a )?hood\b|\bhoodless\b/i, [...hoodLines, { text: product.name, evidence: rawEvidence("product.name", product.name) }]);
-  explicit("helmet_hood", /\bhelmet[- ]compatible\b|\bhood compatible with (?:a )?helmet\b/i, /(?:not |non-)(?:helmet[- ]compatible)|hood not compatible with a helmet/i);
-  explicit("pit_zips", /\b(?:pit[- ]zip\w*|underarm (?:vent\w*|zip\w*))\b/i, /\b(?:no|without) (?:pit[- ]zip\w*|underarm (?:vent\w*|zip\w*))/i);
+  for (const [key, patterns] of Object.entries(indexedFeatures)) explicit(key, ...patterns);
   explicit("two_way_zip", /\b(?:two|2)[- ]way\s+(?:\w+\s+){0,2}zip\w*\b/i, /\b(?:no|without) (?:two|2)[- ]way zip/i);
   explicit("powder_skirt", /\b(?:powder|snow) skirt\b/i, /\b(?:no|without) (?:a )?(?:powder|snow) skirt\b/i);
   explicit("leg_zips", /\b(?:leg side zip\w*|side zip\w* (?:on|at) (?:the )?legs?\b|side (?:leg )?zip\w* for (?:easy )?(?:on|off))/i, /\b(?:no|without) (?:leg )?side zip/i);
-  explicit("recco", /\bRECCO\b/i, /\b(?:no|without) (?:a )?RECCO\b/i);
   collect("pockets", featureLines.filter(({ group }) => /pocket/i.test(group ?? "")));
 
   if (kind === "footwear") {
@@ -402,6 +415,12 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
   for (const observation of fallback) {
     const key = scalarKeys[observation.key];
     if (!key || observation.source === "not_published" || observation.value == null) continue;
+    const feature = indexedFeatures[key];
+    if (feature && !product.example) {
+      if (observation.source !== "brand" && observation.source !== "manual") continue;
+      const explicitNo = feature[1].test(observation.rawText ?? "");
+      if (observation.value === false && !explicitNo || observation.value === true && explicitNo) continue;
+    }
     const field = fieldsByKey.get(key)!;
     let value: unknown = field.type === "enum" ? String(observation.value) : observation.value;
     if (typeof value === "number" && field.unit && observation.unit) value = convert(value, observation.unit, field.unit);
@@ -422,10 +441,10 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
       } else values[key] = { state: "conflict", evidence: [...existing.evidence, evidence], note: "The indexed value differs from the parsed source text." };
     } else if (existing) existing.evidence.push(evidence);
     else {
-      const size = (key === "weight" ? product.specs.weight_size?.value : observation.rawText?.match(sizePattern)?.[1]);
+      const size = key === "weight" ? product.specs.weight_size?.value ?? weightSize(observation.rawText ?? "") : observation.rawText?.match(sizePattern)?.[1];
       const reference = ["weight", "weight_size", "back_length", "inseam"].includes(key) ? {
         kind, size: typeof size === "string" ? size : undefined, gender: product.gender ?? undefined,
-        basis: key === "weight" ? (kind === "footwear" ? "unspecified" : "item") as Reference["basis"] : undefined,
+        basis: key === "weight" ? kind === "footwear" ? shoeWeightBasis(observation.rawText ?? "") : "item" : undefined,
       } : key === "breathability" || key === "hydrostatic_head" ? {
         unit: key === "hydrostatic_head" ? "mm" : observation.unit ?? undefined,
         method: key === "breathability" ? String(product.specs.breathability_method?.value ?? "") || undefined : undefined,
@@ -444,15 +463,14 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
   }
 
   let context: Context = {
-    kind, insulated: kind === "insulated" || insulations.length > 0, snow: values.powder_skirt?.state === "known" ||
-      /\b(?:ski(?:ing)?|snowboard(?:ing)?|snowsports?)\b/i.test([...product.activities, ...product.subTags].join(" ")),
-    hooded: values.hood?.value === true || values.helmet_hood?.value === true,
+    kind, productType: productType.value as ProductType | undefined, protectionType: protectionType.value as ProtectionType | undefined,
+    insulated: kind === "insulated" || insulations.length > 0, snow: values.powder_skirt?.value === true ||
+      /\b(?:ski(?:ing)?|snowboard(?:ing)?|snowsports?)\b/i.test([product.name, ...product.activities, ...product.subTags].join(" ")),
     membrane: Boolean(values.membrane || values.waterproof_lining || values.laminate),
   };
-  if (values.hood?.value === false && !values.helmet_hood) values.helmet_hood = missing("inapplicable");
-  // If an explicit statement exists, its evidence is retained even outside the usual condition.
   const overrides = input.overrides ?? new Map();
   applyOverrides(values, product, overrides);
+  if (values.hood?.value === false && values.helmet_hood?.state !== "known") values.helmet_hood = missing("inapplicable");
   const finalWeight = values.weight;
   if (finalWeight?.state === "known") {
     finalWeight.reference = {
@@ -460,7 +478,7 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
     };
     const size = values.weight_size;
     const basis = values.weight_basis;
-    if (size?.evidence[0]?.method === "manual") {
+    if (size?.evidence[0]?.method === "manual" || (!finalWeight.reference.size && size?.state === "known")) {
       finalWeight.reference = { ...finalWeight.reference, size: typeof size.value === "string" ? size.value : undefined };
     }
     if (basis?.evidence[0]?.method === "manual") {

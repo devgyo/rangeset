@@ -73,16 +73,18 @@ function product(fields: Partial<ProductDetail>): ProductDetail {
 test("compares normalized values and marks category-specific metrics as inapplicable for mixed products", () => {
   const spec = (value: string | number | boolean, unit: string | null = null) => ({ value, unit, source: "brand" as const, date: null });
   const shell = product({
-    activities: ["Hike", "Climb"], specs: { weight_g: spec(250, "g"), membrane: spec(" GORE-TEX® "), pit_zips: spec(false) },
+    name: "Test Jacket", activities: ["Hike", "Climb"], specs: { weight_g: spec(250, "g"), membrane: spec(" GORE-TEX® ") },
+    features: [{ label: "Zippers", values: ["No pit zips"] }],
   });
   const other = product({
-    activities: ["climb", "hike"], gender: "women", specs: { membrane: spec("gore-tex"), weight_g: spec(300, "g") },
+    name: "Other Jacket", activities: ["climb", "hike"], gender: "women", specs: { membrane: spec("gore-tex"), weight_g: spec(300, "g") },
   });
   const rows = buildComparison([shell, other]).flatMap(({ rows }) => rows);
   assert.equal(rows.find(({ key }) => key === "activities")?.differs, false);
   assert.equal(rows.find(({ key }) => key === "membrane")?.differs, false);
   assert.equal(rows.find(({ key }) => key === "weight")?.differs, true);
   assert.equal(rows.find(({ key }) => key === "pit_zips")?.differs, false);
+  assert.equal(rows.find(({ key }) => key === "pit_zips")?.weakDifference, true);
   assert.equal(rows.find(({ key }) => key === "pit_zips")?.cells[0].value, false);
   const shoe = product({ category: "Footwear", specs: { drop: spec(8, "mm") } });
   const mixed = buildComparison([shell, shoe]).flatMap(({ rows }) => rows);
