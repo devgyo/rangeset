@@ -2,9 +2,15 @@
 
 import {keyedItems} from "./list-keys";
 import {useCopy} from "@/i18n/ui-copy";
+import {getImageProps} from "next/image";
 import { useState } from "react";
+import {preload} from "react-dom";
 import { ColorDot, ProductImage } from "@/components/catalog/product-media";
 import type { Colorway, Photo } from "@/lib/product-view";
+import {cn} from "@/lib/utils";
+
+// The gallery uses the full content width below lg, then the left column of the product grid.
+const gallerySizes = "(min-width: 1530px) 43.7rem, (min-width: 1024px) calc(47.37vw - 1.58rem), (min-width: 320px) calc(90vw), calc(100vw - 2rem)";
 
 export function ProductGallery({ name, colorways, hero, cutout }: {
   name: string; colorways: Colorway[]; hero: string | null; cutout: string | null;
@@ -17,11 +23,27 @@ export function ProductGallery({ name, colorways, hero, cutout }: {
   const photos = selected?.photos.length ? selected.photos : fallback;
   const active = photos[angle] ?? photos[0];
   const caption = [active?.height && t("ui.model_height", {height: active.height}), active?.size && t("ui.wearing_size", {size: active.size})].filter(Boolean).join(" · ");
+  const studio = active?.url === cutout || (angle === 0 && Boolean(selected));
+  const firstPhoto = color === 0 && angle === 0;
+  const mainImage = active && getImageProps({
+    src: active.url, alt: active.label, fill: true, sizes: gallerySizes, loading: "eager",
+    fetchPriority: firstPhoto ? "high" : undefined, className: "object-contain",
+  }).props;
+
+  if (mainImage && firstPhoto) {
+    preload(mainImage.src, {
+      as: "image", imageSrcSet: mainImage.srcSet, imageSizes: mainImage.sizes, fetchPriority: "high",
+    });
+  }
 
   return <div className="min-w-0">
     <figure>
-      <ProductImage src={active?.url ?? null} alt={active?.label ?? ""} studio={active?.url === cutout || (angle === 0 && Boolean(selected))} eager
-        fit="contain" className="gallery-stage" />
+      {mainImage ? (
+        <div className={cn("image-stage relative overflow-hidden gallery-stage", studio && "studio-stage")}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- getImageProps supplies Next.js optimization. */}
+          <img {...mainImage} alt={mainImage.alt} />
+        </div>
+      ) : <ProductImage src={null} studio={studio} className="gallery-stage" />}
       {caption && <figcaption className="border-x border-b bg-card px-3 py-2 text-xs text-muted-foreground">{caption}</figcaption>}
     </figure>
     {photos.length > 1 && <div className="gallery-angles" role="group" aria-label={t("ui.photo_angles")}>
