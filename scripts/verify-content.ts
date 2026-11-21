@@ -21,7 +21,7 @@ async function main() {
     if (processed % 25 === 0) console.log(JSON.stringify({event: "progress", processed, selected: selected.length}));
   });
   const report = await writeReport({date, full, catalogSize: inventory.length, products, issues, stopped});
-  console.log(JSON.stringify({event: "finished", stopped, ...report.summary.total, failed: report.failed}));
+  console.log(JSON.stringify({event: "finished", stopped, ...report.summary.total, stockVariants: report.summary.stockVariants, failed: report.failed}));
   if (report.failed) process.exitCode = 1;
 }
 

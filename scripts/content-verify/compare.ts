@@ -14,6 +14,7 @@ export type Fact = {value: unknown; evidence?: string; variantEvidence?: Map<str
 export type Facts = Record<Exclude<Field, "variantStock">, Fact>;
 export type Result = {field: Field; status: "match" | "mismatch" | "unverifiable"; stored?: unknown; official?: unknown;
   evidence?: string; url?: string | null; reason?: string;
+  stockVariants?: {comparable: number; mismatch: number};
   stockWindow?: {officialFetchedAt: string; snapshotCapturedAt: string[]};
 };
 
@@ -168,6 +169,15 @@ export function compare(field: Field, stored: Fact, official: Fact, url: string 
   return {...result, status: "mismatch", stored: stored.value, official: official.value, evidence: official.evidence};
 }
 
+function stockBySku(rows: {variantKey: string; inStock: boolean | null}[]) {
+  const states = new Map<string, boolean | null>();
+  for (const {variantKey, inStock} of rows) {
+    const state = typeof inStock === "boolean" ? inStock : null;
+    states.set(variantKey, !states.has(variantKey) || states.get(variantKey) === state ? state : null);
+  }
+  return states;
+}
+
 export function compareSnapshotStock(snapshots: Snapshot[], fresh: AuditProduct, fetchedAt: string, url: string): Result {
   const unavailable = (reason: string): Result => ({field: "variantStock", status: "unverifiable", url, reason});
   const observed = Date.parse(fetchedAt);
@@ -183,19 +193,27 @@ export function compareSnapshotStock(snapshots: Snapshot[], fresh: AuditProduct,
   });
   if (!timely.length) return unavailable("Stock snapshot is outside the 6-hour comparison window");
   const official = variantsOf(fresh);
-  const storedBySku = new Map(timely.map((row) => [row.variantKey, row]));
-  const shared = official.filter(({variantKey}) => storedBySku.has(variantKey));
+  const storedBySku = stockBySku(timely);
+  const officialBySku = stockBySku(official);
+  const shared = [...officialBySku].filter(([sku]) => storedBySku.has(sku));
   if (!shared.length) return unavailable("No matching stock variant SKUs in the same-day snapshot");
-  const stored = shared.map(({variantKey}) => [variantKey, storedBySku.get(variantKey)!.inStock]);
-  const officialValues = shared.map(({variantKey, inStock}) => [variantKey, inStock]);
-  const evidence = new Map(shared.map(({variantKey, color, size, inStock}) =>
+  const known = shared.flatMap(([sku, current]) => {
+    const previous = storedBySku.get(sku);
+    return typeof previous === "boolean" && typeof current === "boolean" ? [{sku, previous, current}] : [];
+  });
+  if (!known.length) return unavailable("Incomplete or conflicting variant observations");
+  const stockVariants = {comparable: known.length, mismatch: known.filter(({previous, current}) => previous !== current).length};
+  const complete = known.length === officialBySku.size && known.length === new Set(today.map(({variantKey}) => variantKey)).size;
+  if (!stockVariants.mismatch) return complete
+    ? {field: "variantStock", status: "match", stockVariants}
+    : {...unavailable("Stock variants missing, unknown, or outside the 6-hour window"), stockVariants};
+  const evidence = new Map(official.map(({variantKey, color, size, inStock}) =>
     [variantKey, JSON.stringify({variantKey, color, size, inStock})]));
-  const result = compare("variantStock", {value: stored}, {value: officialValues, variantEvidence: evidence}, url);
-  if (result.status === "match" && (shared.length !== official.length || shared.length !== today.length)) {
-    return unavailable("Stock variants missing from one observation or outside the 6-hour window");
-  }
-  return result.status === "mismatch" ? {...result, stockWindow: {
+  const result = compare("variantStock", {value: known.map(({sku, previous}) => [sku, previous])},
+    {value: known.map(({sku, current}) => [sku, current]), variantEvidence: evidence}, url);
+  const comparableSkus = new Set(known.map(({sku}) => sku));
+  return {...result, stockVariants, stockWindow: {
     officialFetchedAt: fetchedAt,
-    snapshotCapturedAt: [...new Set(shared.map(({variantKey}) => storedBySku.get(variantKey)!.capturedAt))],
-  }} : result;
+    snapshotCapturedAt: [...new Set(timely.filter(({variantKey}) => comparableSkus.has(variantKey)).map(({capturedAt}) => capturedAt))],
+  }};
 }

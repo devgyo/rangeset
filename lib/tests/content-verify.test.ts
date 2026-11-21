@@ -78,10 +78,13 @@ test("stock comparison uses same-day price snapshots by SKU and excludes snapsho
   for (const product of [arc, mammut]) {
     const snapshots = variantsOf(product).map((variant) => ({...variant, capturedAt}));
     assert.ok(snapshots.length);
-    assert.equal(compareSnapshotStock(snapshots, product, fetchedAt, product.url!).status, "match");
+    const matched = compareSnapshotStock(snapshots, product, fetchedAt, product.url!);
+    assert.equal(matched.status, "match");
+    assert.deepEqual(matched.stockVariants, {comparable: snapshots.length, mismatch: 0});
     const changed = snapshots.map((variant, index) => index === 0 ? {...variant, inStock: !variant.inStock} : variant);
     const mismatch = compareSnapshotStock(changed, product, fetchedAt, product.url!);
     assert.equal(mismatch.status, "mismatch");
+    assert.deepEqual(mismatch.stockVariants, {comparable: snapshots.length, mismatch: 1});
     assert.deepEqual(mismatch.stockWindow, {snapshotCapturedAt: [capturedAt], officialFetchedAt: fetchedAt});
     assert.match(compareSnapshotStock(changed, product, "2026-11-21T12:10:00.001Z", product.url!).reason!, /6-hour/);
     assert.match(compareSnapshotStock(changed, product, "2026-11-21T16:00:00Z", product.url!).reason!, /observation day/);
@@ -95,6 +98,29 @@ test("stock comparison uses same-day price snapshots by SKU and excludes snapsho
     async series() { throw new Error("Unexpected series request"); },
   });
   assert.equal(products[0].results.find(({field}) => field === "variantStock")?.status, "match");
+});
+
+test("stock counts only unique same-SKU pairs with known states inside the window", () => {
+  const fetchedAt = "2026-11-21T12:10:00Z";
+  const capturedAt = "2026-11-21T06:10:00Z";
+  const [different, matching, unknown, expired, conflicting] = variantsOf(mammut).filter((row) => typeof row.inStock === "boolean");
+  const rows = [
+    {...different, inStock: !different.inStock, capturedAt},
+    {...matching, capturedAt},
+    {...matching, capturedAt},
+    {...unknown, inStock: null, capturedAt},
+    {...expired, capturedAt: "2026-11-21T06:09:59Z"},
+    {...conflicting, capturedAt},
+    {...conflicting, inStock: !conflicting.inStock, capturedAt},
+    {...matching, variantKey: "snapshot-only", capturedAt},
+  ];
+  const result = compareSnapshotStock(rows, mammut, fetchedAt, mammutUrl);
+  assert.equal(result.status, "mismatch");
+  assert.deepEqual(result.stockVariants, {comparable: 2, mismatch: 1});
+  assert.match(result.evidence!, new RegExp(different.variantKey));
+  const partial = compareSnapshotStock([{...matching, capturedAt}], mammut, fetchedAt, mammutUrl);
+  assert.equal(partial.status, "unverifiable");
+  assert.deepEqual(partial.stockVariants, {comparable: 1, mismatch: 0});
 });
 
 test("series verification accepts visible cards with an exact article and the correct series title", () => {
@@ -142,6 +168,20 @@ test("unverifiable rows never affect denominators and four field errors fail eve
   assert.equal(failing(summary, null), true);
   assert.equal(failing(summarize([{brand: "mammut", sku: mammut.sku, name: mammut.name, url: mammutUrl,
     results: [{field: "sku", status: "match"}, {field: "fit", status: "unverifiable"}]}]), null), false);
+});
+
+test("stock uses the aggregate variant rate with a strict 10% boundary and separate non-stock thresholds", () => {
+  const stock = (mismatch: number, comparable: number): ProductAudit["results"][number] => ({
+    field: "variantStock", status: mismatch ? "mismatch" : "match", stockVariants: {comparable, mismatch},
+  });
+  const summary = (...results: ProductAudit["results"]) =>
+    summarize([{brand: "mammut", sku: mammut.sku, name: mammut.name, url: mammutUrl, results}]);
+  const threshold = summary({field: "name", status: "match"}, stock(1, 1), stock(1, 5), stock(1, 10), stock(1, 24));
+  assert.deepEqual(threshold.stockVariants, {comparable: 40, mismatch: 4, mismatchRate: 0.1, threshold: 0.1});
+  assert.equal(failing(threshold, null), false);
+  assert.equal(failing(summary({field: "name", status: "match"}, stock(2, 10)), null), true);
+  assert.equal(failing(summary({field: "sku", status: "mismatch"}, stock(0, 500)), null), true);
+  assert.equal(failing(summary({field: "name", status: "match"}, {field: "variantStock", status: "unverifiable"}), null), false);
 });
 
 test("translated catalog terms agree with the glossary and allow protected names", () => {
