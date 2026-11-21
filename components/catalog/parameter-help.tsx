@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import {useCopy} from "@/i18n/ui-copy";
 import { CircleHelp } from "lucide-react";
+import {cn} from "@/lib/utils";
 
 const openEvent = "rangeset:parameter-help";
 const margin = 10;
@@ -107,7 +108,7 @@ export function ParameterHelp({ label, text, symbol }: { label: string; text: st
   }, [id, open]);
 
   return <span className="parameter-help">
-    <button ref={anchor} type="button" className={symbol && symbol.length > 1 ? "parameter-help-button !w-auto whitespace-normal text-left" : "parameter-help-button"} aria-label={symbol ? label : t("ui.about", {label})}
+    <button ref={anchor} type="button" className={cn("parameter-help-button", symbol && symbol.length > 1 && "!w-auto whitespace-normal text-left")} aria-label={symbol ? label : t("ui.about", {label})}
       aria-describedby={id} aria-expanded={open} onPointerEnter={(event) => { if (event.pointerType === "mouse") show(); }}
       onPointerLeave={(event) => { if (event.pointerType === "mouse" && !event.currentTarget.matches(":focus-visible")) delayClose(); }}
       onFocus={(event) => { if (event.currentTarget.matches(":focus-visible")) show(); }}

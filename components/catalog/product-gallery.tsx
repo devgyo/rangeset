@@ -1,5 +1,6 @@
 "use client";
 
+import {keyedItems} from "./list-keys";
 import {useCopy} from "@/i18n/ui-copy";
 import { useState } from "react";
 import { ColorDot, ProductImage } from "@/components/catalog/product-media";
@@ -34,7 +35,7 @@ export function ProductGallery({ name, colorways, hero, cutout }: {
     {colorways.length > 0 && <div className="mt-3 border bg-card p-3.5">
       <p className="mb-2 text-sm"><span className="control-label mr-2">{t("ui.colorway")}</span>{selected?.label}</p>
       <div role="group" aria-label={t("ui.colorways")} className="flex flex-wrap gap-1.5">
-        {colorways.map((item, index) => <button key={index} type="button" aria-label={item.label} aria-pressed={color === index}
+        {keyedItems(colorways, ({label, hex, photos}) => JSON.stringify([label, hex, photos[0]?.url])).map(([key, item], index) => <button key={key} type="button" aria-label={item.label} aria-pressed={color === index}
           className="color-button" title={item.label} onClick={() => { setColor(index); setAngle(0); }}>
           <ColorDot color={item} />
         </button>)}

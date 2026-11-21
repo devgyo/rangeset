@@ -1,4 +1,5 @@
 import {Link} from "@/i18n/navigation";
+import {keyedItems} from "./list-keys";
 import {displayCardCell, displayPrice} from "@/i18n/copy";
 import {useCopy} from "@/i18n/ui-copy";
 import {ArrowUpRight} from "lucide-react";
@@ -25,7 +26,7 @@ export function CatalogCardView({ product, eager }: { product: CatalogListing; e
       <div className="grid gap-2.5 p-2.5 sm:p-4">
         {product.swatchCount > 0 && (
           <div className="flex items-center gap-1.5" aria-label={t("ui.color_count", {count: product.swatchCount})}>
-            {product.swatches.map((color, index) => <span key={index} title={color.label}><ColorDot color={color} /></span>)}
+            {keyedItems(product.swatches, ({label, hex}) => JSON.stringify([label, hex])).map(([key, color]) => <span key={key} title={color.label}><ColorDot color={color} /></span>)}
             {product.swatchCount > 5 && <span className="font-mono text-[0.65rem] text-muted-foreground">+{product.swatchCount - 5}</span>}
           </div>
         )}
@@ -50,8 +51,8 @@ export function CatalogCardView({ product, eager }: { product: CatalogListing; e
             </div>;
           })}
         </dl>
-        <CompareButton product={{slug: product.slug, name: product.name, image: product.image,
-          category: product.category, gender: product.gender}} compact />
+        <CompareButton slug={product.slug} name={product.name} image={product.image}
+          category={product.category} gender={product.gender} compact />
       </div>
     </article>
   );

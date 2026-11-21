@@ -1,3 +1,4 @@
+import {cn} from "@/lib/utils";
 import {ClientMessages} from "@/i18n/client-messages";
 import {leafSlug, taxonomyLabelKey, taxonomyPath} from "@/lib/taxonomy";
 import type { Metadata } from "next";
@@ -129,7 +130,8 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
           {product.activities.map((activity) => <li key={activity}><Badge variant="outline">{activityLabel(t, activity)}</Badge></li>)}
         </ul>}
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          <CompareButton product={{ slug: product.slug, name: product.name, image: product.image, category: product.category, gender: product.gender }} />
+          <CompareButton slug={product.slug} name={product.name} image={product.image}
+            category={product.category} gender={product.gender} />
           {outbound && <Button variant="outline" asChild><a href={outbound}>{t("ui.view_on_brand_site")}</a></Button>}
         </div>
       </div>
@@ -142,7 +144,7 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
     {core.length > 0 && <section className="mt-9" aria-labelledby="key-heading">
       <h2 id="key-heading" className="section-title mb-4">{t("ui.key_specs")}</h2>
       <dl className="key-spec-strip grid gap-px border bg-border" style={{ "--metric-count": core.length } as CSSProperties}>
-        {core.map((field) => <div data-parameter-row key={field.key} className={`min-w-0 bg-card p-3 sm:p-4 ${core.length % 2 ? "max-sm:last:col-span-2" : ""}`}>
+        {core.map((field) => <div data-parameter-row key={field.key} className={cn("min-w-0 bg-card p-3 sm:p-4", core.length % 2 !== 0 && "max-sm:last:col-span-2")}>
           <dt className="control-label"><ParameterLabel field={field} /></dt>
           <dd className="mt-1 break-words text-sm leading-snug sm:text-base"><ParameterValue field={field} value={withoutParameterEvidence(field, getParameter(profile, field))} /></dd>
         </div>)}

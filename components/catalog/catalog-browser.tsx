@@ -4,7 +4,7 @@ import {Link} from "@/i18n/navigation";
 import {activityLabel, useCopy} from "@/i18n/ui-copy";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useDeferredValue, useEffect, useRef, useState, type ReactNode } from "react";
+import { Suspense, useDeferredValue, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {taxonomy, taxonomyGroup, taxonomyLabelKey, taxonomyPath} from "@/lib/taxonomy";
@@ -26,9 +26,22 @@ const sortLabels: Record<CatalogSort, string> = {
 };
 const genders = [["", "ui.all"], ["men", "ui.filter_men"], ["women", "ui.filter_women"], ["unisex", "gender.unisex"]];
 
-function CatalogQuery({onChange}: {onChange: (query: string) => void}) {
-  const query = useSearchParams().toString();
-  useEffect(() => onChange(query), [onChange, query]);
+const queryChangeEvent = "rangeset:catalog-query";
+
+function subscribeToQuery(listener: () => void) {
+  window.addEventListener(queryChangeEvent, listener);
+  return () => window.removeEventListener(queryChangeEvent, listener);
+}
+
+const currentQuery = () => window.location.search.slice(1);
+const prerenderedQuery = () => "";
+
+function CatalogQueryObserver() {
+  const query = useSearchParams();
+  useEffect(() => {
+    // App Router also changes the URL during Link navigation and history traversal.
+    window.dispatchEvent(new Event(queryChangeEvent));
+  }, [query]);
   return null;
 }
 
@@ -38,7 +51,7 @@ export function CatalogBrowser({previewCards, previewCount, styleFilters, facets
   categoryCounts: Record<string, number>; total: number; matchingCount: number;
 }) {
   const {t} = useCopy();
-  const [queryString, setQueryString] = useState("");
+  const queryString = useSyncExternalStore(subscribeToQuery, currentQuery, prerenderedQuery);
   const params = new URLSearchParams(queryString);
   const query = params.get("q") ?? "";
   const gender = params.get("gender") ?? "";
@@ -139,7 +152,7 @@ export function CatalogBrowser({previewCards, previewCount, styleFilters, facets
 
   return (
     <>
-      <Suspense fallback={null}><CatalogQuery onChange={setQueryString} /></Suspense>
+      <Suspense fallback={null}><CatalogQueryObserver /></Suspense>
       <nav aria-label={t("ui.product_categories")} className="catalog-tabs">
         <Link href={categoryHref("")} aria-current={category ? undefined : "page"} className="catalog-tab">
           {t("ui.all")} <span>{total}</span>

@@ -2,7 +2,7 @@
 
 import {Link, usePathname} from "@/i18n/navigation";
 import {genderDisplay, useCopy} from "@/i18n/ui-copy";
-import { useMemo, useSyncExternalStore } from "react";
+import { memo, useMemo, useSyncExternalStore } from "react";
 import { Check, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
@@ -57,26 +57,27 @@ export function useCompareSelection() {
   return useMemo(() => decodeSelection(raw), [raw]);
 }
 
-export function CompareButton({ product, compact = false }: { product: PickedProduct; compact?: boolean }) {
+export const CompareButton = memo(function CompareButton({ slug, name, image, category, gender, compact = false }:
+  Omit<PickedProduct, "taxonomy"> & { compact?: boolean }) {
   const {t} = useCopy();
   const selection = useCompareSelection();
-  const selected = selection.some(({ slug }) => slug === product.slug);
+  const selected = selection.some((product) => product.slug === slug);
   const atLimit = !selected && selection.length >= 4;
   return (
     <Button type="button" variant={selected ? "secondary" : "outline"}
       className={compact ? "h-9 w-full justify-center" : "h-10 px-4"} disabled={atLimit}
-      aria-label={t("ui.compare_action", {action: t(selected ? "ui.remove" : "ui.compare"), name: `${product.name} (${genderDisplay(t, product.gender)})`})}
+      aria-label={t("ui.compare_action", {action: t(selected ? "ui.remove" : "ui.compare"), name: `${name} (${genderDisplay(t, gender)})`})}
       aria-pressed={selected} title={atLimit ? t("ui.compare_up_to_four_products") : undefined}
       onClick={() => {
         const current = decodeSelection(snapshot());
-        rememberSelection(current.some(({ slug }) => slug === product.slug)
-          ? current.filter(({ slug }) => slug !== product.slug) : [...current, product]);
+        rememberSelection(current.some((product) => product.slug === slug)
+          ? current.filter((product) => product.slug !== slug) : [...current, {slug, name, image, category, gender}]);
       }}>
       {selected ? <Check aria-hidden="true" /> : <Plus aria-hidden="true" />}
       {t(selected ? "ui.added" : compact ? "ui.compare" : "ui.add_to_compare")}
     </Button>
   );
-}
+});
 
 export function CompareDock() {
   const selection = useCompareSelection();

@@ -1,5 +1,3 @@
-"use client";
-
 import {CatalogCardView} from "./catalog-card-view";
 import type {CatalogListing} from "@/lib/catalog";
 

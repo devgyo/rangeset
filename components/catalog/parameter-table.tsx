@@ -1,4 +1,6 @@
+import {cn} from "@/lib/utils";
 import {displayParameter, displayReference, listItem, localNote, partDisplay, useCopy, type Translator} from "@/i18n/copy";
+import {keyedItems} from "./list-keys";
 import { ParameterHelp } from "./parameter-help";
 import { fieldsByKey, groups as groupLabels, terms, type Field, type Term } from "@/lib/parameters/registry";
 import { parameterStatus, visibleOnDetail, weightPresentation, type Parameter, type ParameterGroup, type Part } from "@/lib/parameters/model";
@@ -38,10 +40,14 @@ function PartFields({ fields, comparison }: { fields: Part["fields"]; comparison
   </dl>;
 }
 
+function displayIdentity(value: Part | Parameter) {
+  return JSON.stringify(value, (key, item) => key === "evidence" ? undefined : item);
+}
+
 function Parts({ parts, field, comparison }: { parts: Part[]; field: Field; comparison: boolean }) {
   const {t, locale} = useCopy();
   return <div className="parameter-parts">
-    {parts.map((part, index) => <div key={index} className="parameter-part">
+    {keyedItems(parts, displayIdentity).map(([key, part]) => <div key={key} className="parameter-part">
       <p className="mb-1 font-medium">{locale === "en" ? part.label : partDisplay(t, part.label)}</p>
       <PartFields fields={part.fields} comparison={comparison} />
     </div>)}
@@ -51,8 +57,8 @@ function Parts({ parts, field, comparison }: { parts: Part[]; field: Field; comp
 
 export function ParameterValue({ field, value, comparison = false }: { field: Field; value: Parameter; comparison?: boolean }) {
   const {t, locale} = useCopy();
-  if (value.entries) return <div className="grid gap-2">{value.entries.map((entry, index) =>
-    <ParameterValue key={index} field={field} value={entry} comparison={comparison} />
+  if (value.entries) return <div className="grid gap-2">{keyedItems(value.entries, displayIdentity).map(([key, entry]) =>
+    <ParameterValue key={key} field={field} value={entry} comparison={comparison} />
   )}</div>;
   if (field.type === "parts" && value.state === "known") return <Parts parts={value.value as Part[]} field={field} comparison={comparison} />;
   const text = displayParameter(t, locale, field, value);
@@ -67,7 +73,7 @@ export function ParameterValue({ field, value, comparison = false }: { field: Fi
     {status && value.state !== "inapplicable"
       ? <span data-parameter-inline><ParameterHelp label={locale === "en" ? t("status." + (statusKey === "unpublished" ? "missing" : statusKey)) : text} text={t("status_description." + statusKey)} symbol={text} /></span>
       : field.type === "list" && value.state === "known"
-      ? <ul className="grid gap-1" data-parameter-value>{(value.value as string[]).map((item, index) => <li key={index}>
+      ? <ul className="grid gap-1" data-parameter-value>{keyedItems(value.value as string[], (item) => item).map(([key, item]) => <li key={key}>
         {field.key === "weave" && item === "Ripstop" ? <span data-parameter-inline><span data-parameter-value>{listItem(t, field, item)}</span> <Help term="ripstop" /></span> : listItem(t, field, item)}
       </li>)}</ul>
       : <span data-parameter-inline={tech || weightHelp ? "" : undefined} className={value.state === "known" ? numeric ? "font-mono tabular-nums" : undefined : value.state === "review" || value.state === "conflict" ? "text-[#f3cf92]" : "text-muted-foreground"}>
@@ -90,7 +96,7 @@ export function ParameterSections({ groups }: { groups: ParameterGroup[] }) {
   const {t} = useCopy();
   return <div className="parameter-sections grid gap-5 lg:grid-cols-2 lg:items-start">
     {groups.map(({ title, rows }) => (
-      <section key={title} aria-label={localGroup(t, title)} className={`min-w-0 border bg-card px-3.5 py-4 sm:px-5 ${rows.some(({ field }) => field.type === "parts") ? "lg:col-span-2" : ""}`}>
+      <section key={title} aria-label={localGroup(t, title)} className={cn("min-w-0 border bg-card px-3.5 py-4 sm:px-5", rows.some(({field}) => field.type === "parts") && "lg:col-span-2")}>
         <h3 className="mb-3 font-semibold">{localGroup(t, title)}</h3>
         <SectionRows rows={rows} />
       </section>
