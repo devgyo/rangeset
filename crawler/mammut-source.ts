@@ -2,12 +2,11 @@ import { rename, writeFile } from "node:fs/promises";
 import { CrawlStop, parseXml, PoliteClient } from "./http";
 import { fetchProduct } from "./fetch";
 
-const origin = "https://www.mammut.com";
-const sitemap = origin + "/us/en/sitemap.xml";
+import {mammutOrigin as origin, mammutProductUrl as mammutUrl} from "../lib/brand-urls";
+export {mammutUrl};
 
-export function mammutUrl(value: string) {
-  return /^https:\/\/www\.mammut\.com\/us\/en\/products\/\d{4}-\d{5}\/[a-z0-9-]+$/.test(value) ? value : undefined;
-}
+const sitemap = origin + "/us/en/sitemap.xml";
+export const mammutPolicy = {origin, productUrl: mammutUrl, sitemapAllowed: (url: string) => url === sitemap};
 
 export type MammutFetch = {url: string; file?: string; reason?: string};
 export type MammutManifest = {discovered: number; candidates: number; filtered: string[]; pages: MammutFetch[]; stopped?: string};
@@ -16,7 +15,7 @@ export const manifestPath = ".crawl/mammut-manifest.json";
 export async function fetchMammut(save: (manifest: MammutManifest) => Promise<void>, previous?: MammutManifest) {
   const manifest: MammutManifest = {discovered: 0, candidates: 0, filtered: [], pages: []};
   if (previous?.stopped) throw new CrawlStop("Cached crawl stopped. Review the recorded reason before starting another crawl.");
-  const client = new PoliteClient(undefined, {origin, productUrl: mammutUrl, sitemapAllowed: (url) => url === sitemap});
+  const client = new PoliteClient(undefined, mammutPolicy);
   try {
     await client.loadRobots();
     const entries = parseXml(await client.request(sitemap, "sitemap")).urlset?.url as {loc: unknown}[] | undefined;

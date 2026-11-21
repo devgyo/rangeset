@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import { type AnyPgColumn, boolean, check, index, integer, jsonb, numeric,
-  pgEnum, pgTable, primaryKey, serial, text, timestamp, unique } from "drizzle-orm/pg-core";
+  pgEnum, pgTable, primaryKey, serial, text, timestamp, unique, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 
 export const productStatus = pgEnum("product_status", ["active", "discontinued", "pending_review"]);
 export const specSource = pgEnum("spec_source", ["brand", "not_published"]);
@@ -94,3 +94,32 @@ export const crawlRuns = pgTable("crawl_runs", {
   pagesFailed: integer("pages_failed").notNull().default(0),
   stoppedReason: text("stopped_reason"),
 }, (table) => [index().on(table.brandId, table.started)]);
+
+
+export const priceSnapshotCrawlRuns = pgTable("price_snapshot_crawl_runs", {
+  runId: uuid("run_id").primaryKey(),
+  startedAt: date("started_at").notNull().defaultNow(),
+  finishedAt: date("finished_at"),
+  pagesDone: integer("pages_done").notNull().default(0),
+  stoppedReason: text("stopped_reason"),
+  stoppedAtPage: integer("stopped_at_page"),
+});
+
+export const priceSnapshots = pgTable("price_snapshots", {
+  runId: uuid("run_id").notNull().references(() => priceSnapshotCrawlRuns.runId),
+  productId: integer("product_id").notNull().references(() => products.id),
+  variantKey: text("variant_key").notNull(),
+  color: text(),
+  size: text(),
+  priceCents: integer("price_cents"),
+  salePriceCents: integer("sale_price_cents"),
+  currency: text(),
+  inStock: boolean("in_stock"),
+  status: text().$type<"ok" | "missing_404" | "blocked">().notNull(),
+  sourceUrl: text("source_url").notNull(),
+  capturedAt: date("captured_at").notNull(),
+}, (table) => [
+  uniqueIndex("price_snapshots_run_product_variant_idx").on(table.runId, table.productId, table.variantKey),
+  index("price_snapshots_product_captured_idx").on(table.productId, table.capturedAt),
+  check("price_snapshots_valid_status", sql`${table.status} in ('ok', 'missing_404', 'blocked')`),
+]);

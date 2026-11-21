@@ -4,7 +4,8 @@ import { gunzipSync } from "node:zlib";
 import robotsParser from "robots-parser";
 import { XMLParser, XMLValidator } from "fast-xml-parser";
 
-export const origin = "https://arcteryx.com";
+import {arcOrigin as origin, arcProductUrl as productUrl} from "../lib/brand-urls";
+export {origin, productUrl};
 export const userAgent = "Mozilla/5.0 (compatible; specbot/0.1)";
 export const fixtureUrl = `${origin}/us/en/shop/mens/beta-ar-jacket-1062`;
 const sitemapIndex = `${origin}/sitemap.xml`;
@@ -13,20 +14,16 @@ const maxBytes = 32 * 1024 * 1024;
 
 export class CrawlStop extends Error {}
 
-export function productUrl(value: string) {
-  try {
-    const url = new URL(value);
-    const path = decodeURIComponent(url.pathname);
-    return url.origin === origin && !url.username && !url.password && !url.search && !url.hash &&
-      !path.includes(",") && /^\/us\/en\/shop\/(?:[a-z0-9-]+\/)*[a-z0-9-]+\/?$/i.test(path)
-      ? url.href.replace(/\/$/, "") : undefined;
-  } catch {
-    return undefined;
+export class CrawlPolicyDenied extends CrawlStop {}
+
+export class CrawlBlocked extends CrawlStop {
+  constructor(message: string, readonly url: string, readonly fetchedAt: string) {
+    super(message);
   }
 }
 
 type Kind = "robots" | "sitemap" | "product";
-export type Page = { url: string; finalUrl: string; status: number; fetchedAt: string; body: string; offShop?: boolean };
+export type Page = { url: string; finalUrl: string; status: number; fetchedAt: string; body: string; offShop?: boolean; policyDenied?: boolean };
 
 function isChallenge(headers: Headers, body: string) {
   return headers.get("cf-mitigated") === "challenge" ||
@@ -61,7 +58,7 @@ export type CrawlPolicy = {
   sitemapAllowed: (value: string) => boolean;
 };
 
-const arcPolicy: CrawlPolicy = {
+export const arcPolicy: CrawlPolicy = {
   origin, productUrl, productPath: "/us/en/shop/",
   sitemapAllowed: (url) => url === sitemapIndex || /^https:\/\/arcteryx\.com\/sitemap_[12]\.xml(?:\.gz)?$/.test(url),
 };
@@ -79,7 +76,7 @@ export class PoliteClient {
     const robotsUrl = this.policy.origin + "/robots.txt";
     const page = await this.request(robotsUrl, "robots");
     if (page.status !== 200 || /^\s*</.test(page.body) || !/^\s*user-agent\s*:/im.test(page.body)) {
-      throw new CrawlStop(`Unable to read robots.txt (HTTP ${page.status})`);
+      throw new CrawlPolicyDenied(`Unable to read robots.txt (HTTP ${page.status})`);
     }
     this.robots = robotsParser(robotsUrl, page.body);
     this.interval = Math.max(1500, (this.robots.getCrawlDelay(userAgent) ?? 0) * 1000);
@@ -106,7 +103,7 @@ export class PoliteClient {
         : kind === "product" ? this.policy.productUrl(finalUrl) === finalUrl
         : this.policy.sitemapAllowed(finalUrl);
       if (!allowedUrl || (kind !== "robots" && !this.allows(finalUrl))) {
-        throw new CrawlStop(`URL outside crawl policy or disallowed by robots.txt: ${finalUrl}`);
+        throw new CrawlPolicyDenied(`URL outside crawl policy or disallowed by robots.txt: ${finalUrl}`);
       }
 
       if (kind === "product") {
@@ -128,12 +125,19 @@ export class PoliteClient {
       this.lastRequest = performance.now();
       const response = await fetch(finalUrl, {...options, signal});
       const fetchedAt = new Date().toISOString();
-      if (response.status === 403 || response.status === 429 || response.headers.get("cf-mitigated") === "challenge") {
-        await response.body?.cancel();
-        throw new CrawlStop(`HTTP ${response.status} or challenge at ${finalUrl}`);
+      if (response.status === 403 || response.status === 429) {
+        await response.body?.cancel().catch(() => {});
+        throw new CrawlBlocked(`HTTP ${response.status} at ${finalUrl}`, finalUrl, fetchedAt);
+      }
+      if (response.headers.get("cf-mitigated") === "challenge") {
+        await response.body?.cancel().catch(() => {});
+        throw new CrawlStop(`Challenge page at ${finalUrl}`);
       }
       const status = response.status;
-      const body = await readBody(response);
+      const body = await readBody(response).catch((error: unknown) => {
+        signal.throwIfAborted();
+        throw error;
+      });
       if (isChallenge(response.headers, body)) throw new CrawlStop(`Challenge page at ${finalUrl}`);
       const page = { url, finalUrl, status, fetchedAt, body };
       const location = response.headers.get("location");
@@ -144,7 +148,9 @@ export class PoliteClient {
         const normalized = this.policy.productUrl(next);
         if (!normalized) {
           const target = new URL(next);
-          if (this.policy.productPath && target.origin === this.policy.origin && target.pathname.startsWith(this.policy.productPath)) return page;
+          if (this.policy.productPath && target.origin === this.policy.origin && target.pathname.startsWith(this.policy.productPath)) {
+            return {...page, policyDenied: true};
+          }
           return { ...page, finalUrl: next, offShop: true };
         }
         finalUrl = normalized;

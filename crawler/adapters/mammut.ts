@@ -1,8 +1,9 @@
+import {snapshotVariantKey} from "../snapshot-observation";
 import {entries, plainText, record, safeImage, textList} from "../../lib/product-view";
 
 export type MammutVariant = {
-  id: string; color: string | null; size: string | null; price: number | null; originalPrice: number | null;
-  inStock: boolean | null; image: string | null;
+  id: string; sku?: string | null; color: string | null; size: string | null; price: number | null; originalPrice: number | null;
+  inStock: boolean | null; currency: "USD" | null; image: string | null;
 };
 
 export type MammutPayload = {
@@ -90,13 +91,20 @@ export function parseMammut(html: string, url: string, fetchedAt: string): Mammu
 
   const variants = new Map<string, MammutVariant>();
   for (const match of flight.matchAll(/"variants":(?=\[\{"objectID":)/g)) {
-    for (const item of entries(jsonAt(flight, match.index! + match[0].length)).map(record)) {
-      const id = plainText(item.itemNumber);
-      if (!id.startsWith(article + "-") || typeof item.inStock !== "boolean" && item.currency !== "USD") continue;
+    const items = entries(jsonAt(flight, match.index! + match[0].length)).map(record);
+    const identified = items.map(({itemNumber}) => plainText(itemNumber)).filter(Boolean);
+    const belongsToProduct = identified.length > 0 && identified.every((id) => id.startsWith(article + "-"));
+    for (const item of items) {
+      const sku = plainText(item.itemNumber) || null;
+      if (sku ? !sku.startsWith(article + "-") : !belongsToProduct) continue;
+      const color = textList(item.colors)[0] ?? null;
+      const size = textList(item.sizes)[0] ?? null;
+      const id = snapshotVariantKey(sku, color, size);
       variants.set(id, {
-        id, color: textList(item.colors)[0] ?? null, size: textList(item.sizes)[0] ?? null,
+        id, sku, color, size,
         price: item.currency === "USD" ? money(item.price) : null,
         originalPrice: item.currency === "USD" && item.discounted === true ? money(item.originalPrice) : null,
+        currency: item.currency === "USD" ? "USD" : null,
         inStock: typeof item.inStock === "boolean" ? item.inStock : null,
         image: variantImage(item),
       });

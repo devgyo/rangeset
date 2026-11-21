@@ -13,7 +13,8 @@
     "crawl:mammut:dry-run": "tsx crawler/mammut-dry-run.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "i18n-check": "node scripts/i18n-check"
+    "i18n-check": "node scripts/i18n-check",
+    "crawl:price-snapshots": "tsx crawler/price-snapshots.ts"
   },
   "dependencies": {
     "@vercel/functions": "^3.11.3",

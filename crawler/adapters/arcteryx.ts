@@ -1,3 +1,5 @@
+import {priceCents, snapshotVariantKey} from "../snapshot-observation";
+
 type Json = Record<string, unknown>;
 export type SpecValue = string | number | boolean | null;
 export type Derived = {
@@ -244,4 +246,24 @@ export function parseArcteryx(html: string, url: string, fetchedAt: string): Cat
     specs: deriveSpecs(raw, url, fetchedAt),
     prices, raw, crossCheck: crossCheckVariants(html, raw, prices), fetchedAt,
   };
+}
+
+export function arcSnapshotVariants(raw: Json) {
+  const currency = string(raw.currencyCode);
+  const colors = new Map(array(raw.colourOptions).map(object).map((item) => [string(item.id), string(item.label)]));
+  const sizes = new Map(array(object(raw.sizeOptions).options).map(object).map((item) => [string(item.id), string(item.label)]));
+  return array(raw.variants).map(object).map((item) => {
+    const colorId = string(item.colourId);
+    const sizeId = string(item.sizeId);
+    const color = string(item.colourLabel) ?? colors.get(colorId) ?? colorId;
+    const size = string(item.sizeLabel) ?? sizes.get(sizeId) ?? sizeId;
+    const unit = string(item.currencyCode) ?? currency;
+    const price = priceCents(number(item.price));
+    const discount = priceCents(number(item.discountPrice));
+    return {
+      variantKey: snapshotVariantKey(string(item.id), color, size), color, size, priceCents: price,
+      salePriceCents: discount !== null && (price === null || discount < price) ? discount : null,
+      currency: unit && /^[A-Z]{3}$/.test(unit) ? unit : null, inStock: stock(item.stockStatus),
+    };
+  });
 }

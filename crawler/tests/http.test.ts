@@ -23,9 +23,9 @@ test("honors robots, unions a gzipped sitemap, and stops the crawl on protection
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
     urls.map((url) => `<url><loc>${url}</loc></url>`).join("") + "</urlset>";
   t.mock.method(globalThis, "fetch", async (url: string, options: RequestInit) => {
+    requests.push({ url, started: performance.now() });
     assert.equal(new Headers(options.headers).get("user-agent"), userAgent);
     assert.equal(options.redirect, "manual");
-    requests.push({ url, started: performance.now() });
     if (url.endsWith("/robots.txt")) return new Response(robots);
     if (url.endsWith("/sitemap.xml")) return new Response(
       `<sitemapindex><sitemap><loc>${origin}/sitemap_1.xml.gz</loc></sitemap>` +
