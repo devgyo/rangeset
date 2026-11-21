@@ -3,7 +3,10 @@ import type {IndexedSpec} from "../../lib/brands/types";
 import {catalogSource, sourceIsVisible, type CatalogSource, type PriceRow} from "../../lib/catalog/product";
 
 export type Brand = "arcteryx" | "mammut";
-export type Snapshot = {variantKey: string; priceCents: number | null; salePriceCents: number | null; currency: string | null};
+export type Snapshot = {
+  variantKey: string; priceCents: number | null; salePriceCents: number | null; currency: string | null;
+  inStock: boolean | null; capturedAt: string;
+};
 type Row = CatalogSource & {
   sku: string; brandSlug: Brand; payload: Record<string, unknown> | null;
   specs: IndexedSpec[]; prices: PriceRow[]; snapshots: Snapshot[]; recent: boolean;
@@ -31,7 +34,8 @@ export async function readInventory(connectionString: string) {
           'currency', q.currency, 'inStock', q.in_stock)) FROM prices q WHERE q.product_id = p.id
           AND q.channel = 'brand_us' AND q.fetched_at = r.fetched_at), '[]') AS prices,
         coalesce((SELECT jsonb_agg(jsonb_build_object('variantKey', s.variant_key, 'priceCents', s.price_cents,
-          'salePriceCents', s.sale_price_cents, 'currency', s.currency)) FROM price_snapshots s
+          'salePriceCents', s.sale_price_cents, 'currency', s.currency,
+          'inStock', s.in_stock, 'capturedAt', s.captured_at)) FROM price_snapshots s
           WHERE s.product_id = p.id AND s.status = 'ok' AND s.run_id = (
             SELECT latest.run_id FROM price_snapshots latest WHERE latest.product_id = p.id AND latest.status = 'ok'
             ORDER BY latest.captured_at DESC, latest.run_id DESC LIMIT 1

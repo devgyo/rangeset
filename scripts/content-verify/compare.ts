@@ -5,15 +5,20 @@ import {mammutPayload} from "../../lib/brands/mammut";
 import {cardOnly, toView} from "../../lib/catalog/product";
 import {entries, plainText, record} from "../../lib/product-view";
 import type {Part} from "../../lib/parameters/model";
-import type {AuditProduct} from "./data";
+import type {AuditProduct, Snapshot} from "./data";
 
 export const fields = ["name", "sku", "productLine", "colors", "sizes", "variantStock",
   "price", "salePrice", "currency", "variantPrices", "mainFabric", "materials", "composition", "weight", "fit"] as const;
 export type Field = typeof fields[number];
 export type Fact = {value: unknown; evidence?: string; variantEvidence?: Map<string, string>; reason?: string; confirmedAbsence?: boolean};
-export type Facts = Record<Field, Fact>;
+export type Facts = Record<Exclude<Field, "variantStock">, Fact>;
 export type Result = {field: Field; status: "match" | "mismatch" | "unverifiable"; stored?: unknown; official?: unknown;
-  evidence?: string; url?: string | null; reason?: string};
+  evidence?: string; url?: string | null; reason?: string;
+  stockWindow?: {officialFetchedAt: string; snapshotCapturedAt: string[]};
+};
+
+const day = new Intl.DateTimeFormat("sv-SE", {timeZone: "Asia/Shanghai"});
+const sixHours = 6 * 60 * 60 * 1000;
 
 export function sample(products: AuditProduct[], date: string, full: boolean) {
   if (full) return products;
@@ -57,8 +62,6 @@ export function productFacts(product: AuditProduct) {
     const ids = product.brandSlug === "arcteryx" ? arcIds.get(variantKey) : undefined;
     return JSON.stringify(ids?.every(Boolean) ? ids : [color, size]);
   };
-  const stock = variants.filter((row) => row.color && row.size)
-    .map((row) => [key(row), byId.has(row.variantKey) ? byId.get(row.variantKey)!.inStock : row.inStock] as const);
   const variantPrices = variants.filter((row) => row.color && row.size)
     .map((row) => {
       const indexed = byId.get(row.variantKey);
@@ -108,7 +111,6 @@ export function productFacts(product: AuditProduct) {
     productLine: fact(view.series, mammut?.collection ?? {breadcrumbs: raw.breadcrumbs, isPro: raw.isPro, name: raw.name}),
     colors: fact(view.swatches.map(({label}) => label), mammut ? view.swatches.map(({label}) => label) : arcColors),
     sizes: fact(view.sizes, mammut ? view.sizes : arcSizes),
-    variantStock: {...fact(stock, rawVariants), variantEvidence},
     price: fact(view.msrp, money), salePrice: fact(sale, money), currency: fact(view.currency, money),
     variantPrices: {...fact(variantPrices, rawVariants), variantEvidence},
     mainFabric: fact(card.mainFabric, bodyEvidence("fabric_name")),
@@ -161,4 +163,36 @@ export function compare(field: Field, stored: Fact, official: Fact, url: string 
   }
   if (normalized(stored.value) === normalized(official.value)) return {field, status: "match"};
   return {...result, status: "mismatch", stored: stored.value, official: official.value, evidence: official.evidence};
+}
+
+export function compareSnapshotStock(snapshots: Snapshot[], fresh: AuditProduct, fetchedAt: string, url: string): Result {
+  const unavailable = (reason: string): Result => ({field: "variantStock", status: "unverifiable", url, reason});
+  const observed = Date.parse(fetchedAt);
+  if (!Number.isFinite(observed)) return unavailable("Official stock observation time is missing or invalid");
+  const today = snapshots.filter(({capturedAt}) => {
+    const captured = Date.parse(capturedAt);
+    return Number.isFinite(captured) && day.format(captured) === day.format(observed);
+  });
+  if (!today.length) return unavailable("No successful price snapshot on the official observation day (Asia/Shanghai)");
+  const timely = today.filter(({capturedAt}) => {
+    const age = observed - Date.parse(capturedAt);
+    return age >= 0 && age <= sixHours;
+  });
+  if (!timely.length) return unavailable("Stock snapshot is outside the 6-hour comparison window");
+  const official = variantsOf(fresh);
+  const storedBySku = new Map(timely.map((row) => [row.variantKey, row]));
+  const shared = official.filter(({variantKey}) => storedBySku.has(variantKey));
+  if (!shared.length) return unavailable("No matching stock variant SKUs in the same-day snapshot");
+  const stored = shared.map(({variantKey}) => [variantKey, storedBySku.get(variantKey)!.inStock]);
+  const officialValues = shared.map(({variantKey, inStock}) => [variantKey, inStock]);
+  const evidence = new Map(shared.map(({variantKey, color, size, inStock}) =>
+    [variantKey, JSON.stringify({variantKey, color, size, inStock})]));
+  const result = compare("variantStock", {value: stored}, {value: officialValues, variantEvidence: evidence}, url);
+  if (result.status === "match" && (shared.length !== official.length || shared.length !== today.length)) {
+    return unavailable("Stock variants missing from one observation or outside the 6-hour window");
+  }
+  return result.status === "mismatch" ? {...result, stockWindow: {
+    officialFetchedAt: fetchedAt,
+    snapshotCapturedAt: [...new Set(shared.map(({variantKey}) => storedBySku.get(variantKey)!.capturedAt))],
+  }} : result;
 }

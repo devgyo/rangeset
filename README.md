@@ -84,4 +84,6 @@ The verifier uses the US public product pages and checks mapped Mammut series ag
 
 The offline checks use catalog data and the latest successful per-product snapshot where available. Size conventions use the official [Arc’teryx US sizing guide](https://arcteryx.com/us/en/help/sizing/unisex) and [Mammut US sizing options](https://www.mammut.com/us/en/category/5818/clothing). The translation check uses the versioned glossary and preserves protected names and the approved Japanese help fallback.
 
+Online stock checks match the manufacturer's variant SKU against the latest successful `price_snapshots` records. A snapshot must be from the same Asia/Shanghai calendar day as the official observation and no more than six hours older. Missing, older and unpaired observations are reported as unverifiable.
+
 `Verify catalog content` starts daily at 15:00 China time and waits for the day's latest snapshot workflow to finish. Its reports are uploaded even if it fails the 98% overall accuracy threshold, finds more than three mismatches in any field, or has no verifiable observations. GitHub sends failure mail to the triggering or scheduled-workflow actor when [Actions email notifications](https://docs.github.com/en/subscriptions-and-notifications/how-tos/managing-github-actions-notifications) are enabled for that account.

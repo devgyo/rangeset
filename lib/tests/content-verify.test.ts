@@ -3,7 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {gunzipSync} from "node:zlib";
 import {CrawlBlocked, type Page} from "../../crawler/http";
-import {compare, fields, productFacts, sample} from "../../scripts/content-verify/compare";
+import {compare, compareSnapshotStock, fields, productFacts, sample, variantsOf} from "../../scripts/content-verify/compare";
 import {officialProduct, OfficialReader, parseSeries, seriesEvidence} from "../../scripts/content-verify/official";
 import {failing, summarize, type ProductAudit} from "../../scripts/content-verify/report";
 import {verifyProducts} from "../../scripts/content-verify/run";
@@ -71,6 +71,31 @@ test("Mammut product and evidence requests use separate policies on the same hos
   assert.equal(requests.filter((url) => url === seriesUrl).length, 1);
 });
 
+test("stock comparison uses same-day price snapshots by SKU and excludes snapshots more than six hours old", async () => {
+  const fetchedAt = "2026-11-21T12:10:00Z";
+  const capturedAt = "2026-11-21T06:10:00Z";
+  for (const product of [arc, mammut]) {
+    const snapshots = variantsOf(product).map((variant) => ({...variant, capturedAt}));
+    assert.ok(snapshots.length);
+    assert.equal(compareSnapshotStock(snapshots, product, fetchedAt, product.url!).status, "match");
+    const changed = snapshots.map((variant, index) => index === 0 ? {...variant, inStock: !variant.inStock} : variant);
+    const mismatch = compareSnapshotStock(changed, product, fetchedAt, product.url!);
+    assert.equal(mismatch.status, "mismatch");
+    assert.deepEqual(mismatch.stockWindow, {snapshotCapturedAt: [capturedAt], officialFetchedAt: fetchedAt});
+    assert.match(compareSnapshotStock(changed, product, "2026-11-21T12:10:00.001Z", product.url!).reason!, /6-hour/);
+    assert.match(compareSnapshotStock(changed, product, "2026-11-21T16:00:00Z", product.url!).reason!, /observation day/);
+    assert.match(compareSnapshotStock([], product, fetchedAt, product.url!).reason!, /No successful/);
+  }
+  const snapshots = variantsOf(mammut).map((variant) => ({...variant, capturedAt}));
+  const {products} = await verifyProducts([{
+    ...mammut, snapshots, prices: mammut.prices.map((variant) => ({...variant, inStock: !variant.inStock})),
+  }], {
+    async product() { return {...mammutPage, fetchedAt}; },
+    async series() { throw new Error("Unexpected series request"); },
+  });
+  assert.equal(products[0].results.find(({field}) => field === "variantStock")?.status, "match");
+});
+
 test("series verification accepts visible cards with an exact article and the correct series title", () => {
   const url = "https://www.mammut.com/us/en/featured/5810/featured-eiger-extreme";
   const listing = parseSeries(page(url, '<title>Eiger Extreme | Mammut</title>' +
@@ -127,7 +152,8 @@ test("offline rules flag price, currency, snapshot changes and identical images 
   const issues = checkCatalog([
     {...mammut, prices: [...mammut.prices, {...variant, price: -1, currency: "CAD"}]},
     {...mammut, sku: "1013-02963", prices: [...mammut.prices, {...variant, price: 40, currency: "USD"}],
-      snapshots: [{variantKey: variant.variant, priceCents: 10000, salePriceCents: null, currency: "USD"}]},
+      snapshots: [{variantKey: variant.variant, priceCents: 10000, salePriceCents: null, currency: "USD",
+        inStock: true, capturedAt: publishedAt}]},
   ]);
   for (const rule of ["nonpositive_price", "region_currency", "price_delta_above_50_percent", "identical_image_url"]) {
     assert.ok(issues.some((entry) => entry.rule === rule), rule);
