@@ -1,10 +1,9 @@
 "use client";
 
-import {Link} from "@/i18n/navigation";
+import {Link, useRouter} from "@/i18n/navigation";
 import {activityLabel, useCopy} from "@/i18n/ui-copy";
-import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useDeferredValue, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { Suspense, useDeferredValue, useEffect, useRef, useState, useSyncExternalStore, type MouseEvent, type ReactNode } from "react";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {taxonomy, taxonomyGroup, taxonomyLabelKey, taxonomyPath} from "@/lib/taxonomy";
@@ -14,8 +13,8 @@ import {catalogSort, defaultCatalogSort, type CatalogSort} from "@/lib/catalog/f
 import type {CatalogListing} from "@/lib/catalog";
 
 import {pruneSeries, seriesMatches, seriesSelection, visibleSeries} from "@/lib/catalog/series";
-import {catalogPageSize, type catalogFacets} from "@/lib/catalog/facets";
-const CatalogResultCards = dynamic(() => import("./catalog-result-cards"), {ssr: false});
+import type {catalogFacets} from "@/lib/catalog/facets";
+import {catalogPageSize, catalogPageSlice} from "@/lib/catalog/pagination";
 type StyleFilters = Record<"type" | "protection", {label: string; options: [string, string][]}>;
 
 const sortLabels: Record<CatalogSort, string> = {
@@ -31,11 +30,44 @@ const queryChangeEvent = "rangeset:catalog-query";
 
 function subscribeToQuery(listener: () => void) {
   window.addEventListener(queryChangeEvent, listener);
-  return () => window.removeEventListener(queryChangeEvent, listener);
+  window.addEventListener("popstate", listener);
+  return () => {
+    window.removeEventListener(queryChangeEvent, listener);
+    window.removeEventListener("popstate", listener);
+  };
 }
 
 const currentQuery = () => window.location.search.slice(1);
 const prerenderedQuery = () => "";
+
+type ReturnPosition = {url: string; count: number; top: number};
+
+function readReturnPosition() {
+  const position: ReturnPosition | undefined = window.history.state?.rangesetCatalog;
+  return position?.url === location.pathname + location.search ? JSON.stringify(position) : "";
+}
+
+async function fetchCatalog() {
+  const response = fetch("/api/catalog").then(async (result) => {
+    if (!result.ok) throw new Error("Catalog request failed");
+    return await result.json() as CatalogListing[];
+  });
+  const [products, {filterCatalog}, {default: Cards}] = await Promise.all([
+    response, import("./catalog-filter-results"), import("./catalog-result-cards"),
+  ]);
+  return {products, filterCatalog, Cards};
+}
+
+let catalogRequest: ReturnType<typeof fetchCatalog> | undefined;
+
+function loadCatalog() {
+  return catalogRequest ??= fetchCatalog().catch((error: unknown) => {
+    catalogRequest = undefined;
+    throw error;
+  });
+}
+
+const cardsLayout = "grid grid-cols-2 items-stretch gap-2.5 md:grid-cols-3 md:gap-4 xl:grid-cols-4";
 
 function CatalogQueryObserver() {
   const query = useSearchParams();
@@ -46,13 +78,18 @@ function CatalogQueryObserver() {
   return null;
 }
 
-export function CatalogBrowser({previewCards, previewCount, styleFilters, facets: catalogOptions, category, categoryCounts, total, matchingCount}: {
-  previewCards: ReactNode; previewCount: number; styleFilters: StyleFilters;
+export function CatalogBrowser({previewCards, previewCount, startPage, styleFilters, facets: catalogOptions, category, categoryCounts, total, matchingCount}: {
+  previewCards: ReactNode; previewCount: number; startPage: number; styleFilters: StyleFilters;
   facets: ReturnType<typeof catalogFacets>; category: string;
   categoryCounts: Record<string, number>; total: number; matchingCount: number;
 }) {
   const {t} = useCopy();
+  const router = useRouter();
   const queryString = useSyncExternalStore(subscribeToQuery, currentQuery, prerenderedQuery);
+  const savedPosition = useSyncExternalStore(subscribeToQuery, readReturnPosition, prerenderedQuery);
+  const returnPosition = savedPosition ? JSON.parse(savedPosition) as ReturnPosition : null;
+  const restoredPosition = useRef("");
+  const sentinel = useRef<HTMLDivElement>(null);
   const params = new URLSearchParams(queryString);
   const query = params.get("q") ?? "";
   const gender = params.get("gender") ?? "";
@@ -66,32 +103,26 @@ export function CatalogBrowser({previewCards, previewCount, styleFilters, facets
   const productType = params.get("type") ?? "";
   const protectionType = params.get("protection") ?? (params.get("hard") === "1" ? "hard_shell" : "");
   const deferredQuery = useDeferredValue(query);
-  const deferredParams = useDeferredValue(params.toString());
+
   const [page, setPage] = useState({ filters: "", count: catalogPageSize });
   const searchInput = useRef<HTMLInputElement>(null);
-  const [catalog, setCatalog] = useState<{
-    products: CatalogListing[];
-    filter: typeof import("./catalog-filter-results").filterCatalog;
-  } | null>(null);
+  const [catalog, setCatalog] = useState<Awaited<ReturnType<typeof fetchCatalog>> | null>(null);
   const [failed, setFailed] = useState(false);
   const hasFilters = Boolean(query || gender || legacyLine || brand.length || series.length || activity.length || family ||
     productType || protectionType || sort !== defaultCatalogSort);
-  const count = page.filters === deferredParams ? page.count : catalogPageSize;
-  const needsCatalog = hasFilters || count > previewCount && matchingCount > previewCount;
+  const currentPage = hasFilters ? 1 : startPage;
+  const count = Math.max(page.filters === queryString ? page.count : catalogPageSize, returnPosition?.count ?? 0);
+  const needsCatalog = hasFilters || count > catalogPageSize;
 
   useEffect(() => {
     if (!needsCatalog || catalog || failed) return;
-    const controller = new AbortController();
-    const listings = fetch("/api/catalog", {signal: controller.signal}).then(async (response) => {
-      if (!response.ok) throw new Error("Catalog request failed");
-      return await response.json() as CatalogListing[];
-    });
-    Promise.all([listings, import("./catalog-filter-results")]).then(([products, {filterCatalog}]) => {
-      if (!controller.signal.aborted) setCatalog({products, filter: filterCatalog});
+    let active = true;
+    loadCatalog().then((loaded) => {
+      if (active) setCatalog(loaded);
     }).catch(() => {
-      if (!controller.signal.aborted) setFailed(true);
+      if (active) setFailed(true);
     });
-    return () => controller.abort();
+    return () => { active = false; };
   }, [needsCatalog, catalog, failed]);
 
   useEffect(() => {
@@ -100,14 +131,26 @@ export function CatalogBrowser({previewCards, previewCount, styleFilters, facets
     if (searchInput.current && searchInput.current.value !== current) searchInput.current.value = current;
   }, [query]);
 
+  function writeQuery(next: URLSearchParams, replace = false) {
+    next.delete("page");
+    const search = next.toString();
+    const suffix = search ? "?" + search : "";
+    window.scrollTo(0, 0);
+    if (startPage > 1) {
+      router[replace ? "replace" : "push"](taxonomyPath(category) + suffix);
+      return;
+    }
+    window.history[replace ? "replaceState" : "pushState"](null, "", location.pathname + suffix);
+    window.dispatchEvent(new Event(queryChangeEvent));
+  }
+
   function update(values: Record<string, string>, replace = false) {
     const next = new URLSearchParams(window.location.search);
     for (const [key, value] of Object.entries(values)) {
       if (value) next.set(key, value);
       else next.delete(key);
     }
-    const search = next.toString();
-    window.history[replace ? "replaceState" : "pushState"](null, "", location.pathname + (search ? "?" + search : ""));
+    writeQuery(next, replace);
   }
 
   function toggle(key: string, value: string) {
@@ -116,8 +159,7 @@ export function CatalogBrowser({previewCards, previewCount, styleFilters, facets
     next.delete(key);
     for (const item of prior.includes(value) ? prior.filter((item) => item !== value) : [...prior, value]) next.append(key, item);
     if (key === "brand") pruneSeries(next, catalogOptions.series);
-    const search = next.toString();
-    window.history.pushState(null, "", location.pathname + (search ? "?" + search : ""));
+    writeQuery(next);
   }
 
   const selectedSeries = series.length ? series : legacyLine === "veilance" ? ["Veilance"] : [];
@@ -133,13 +175,12 @@ export function CatalogBrowser({previewCards, previewCount, styleFilters, facets
     next.delete("line");
     next.delete("series");
     for (const value of updated) next.append("series", value);
-    const search = next.toString();
-    window.history.pushState(null, "", location.pathname + (search ? "?" + search : ""));
+    writeQuery(next);
   }
 
   function categoryHref(slug: string) {
     const next = new URLSearchParams(params.toString());
-    for (const key of ["category", "family", "hard", "type", "protection"]) next.delete(key);
+    for (const key of ["category", "family", "hard", "type", "protection", "page"]) next.delete(key);
     const search = next.toString();
     return taxonomyPath(slug) + (search ? "?" + search : "");
   }
@@ -160,13 +201,47 @@ export function CatalogBrowser({previewCards, previewCount, styleFilters, facets
   const topFamilies = catalogOptions.families;
   const familyFilters = family && !topFamilies.includes(family) ? [...topFamilies, family] : topFamilies;
 
-  const filtered = catalog && catalog.filter(catalog.products, {
+  const filtered = catalog && catalog.filterCatalog(catalog.products, {
     category, gender, family, brand, series, legacyLine, activity, productType, protectionType, query: deferredQuery, sort,
   });
   const results = filtered?.results;
   const seriesOptions = visibleSeries(catalogOptions.series, brand, filtered?.counts ?? (hasFilters ? [] : undefined));
   const resultCount = results?.length ?? matchingCount;
   const pending = needsCatalog && !catalog;
+  const shown = catalogPageSlice(results ?? [], currentPage, count);
+  const displayedCount = results ? shown.length : previewCount;
+  const last = (currentPage - 1) * catalogPageSize + displayedCount;
+  const canLoad = !pending && last < resultCount;
+  const Cards = catalog?.Cards;
+
+  useEffect(() => {
+    if (!canLoad || !sentinel.current) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      setPage({filters: queryString, count: count + catalogPageSize});
+    }, {rootMargin: window.innerHeight + "px 0px"});
+    observer.observe(sentinel.current);
+    return () => observer.disconnect();
+  }, [canLoad, count, queryString]);
+
+  useEffect(() => {
+    if (!savedPosition || pending || restoredPosition.current === savedPosition) return;
+    const frame = requestAnimationFrame(() => {
+      restoredPosition.current = savedPosition;
+      window.scrollTo(0, (JSON.parse(savedPosition) as ReturnPosition).top);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [pending, savedPosition]);
+
+  function saveReturnPosition(event: MouseEvent<HTMLDivElement>) {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey ||
+      !(event.target instanceof Element) || !event.target.closest("a[href]")) return;
+    restoredPosition.current = "";
+    window.history.replaceState({...window.history.state, rangesetCatalog: {
+      url: location.pathname + location.search, count: displayedCount, top: window.scrollY,
+    } satisfies ReturnPosition}, "");
+  }
 
   return (
     <>
@@ -249,23 +324,33 @@ export function CatalogBrowser({previewCards, previewCount, styleFilters, facets
         </div>}
       </section>
       <div className="mb-3 flex min-h-7 items-center justify-between gap-3">
-        <p role="status" className="font-mono text-xs tabular-nums text-muted-foreground">{t(pending ? "ui.loading_catalog_filters" : "ui.product_count", {count: resultCount})}</p>
+        <p role="status" className="font-mono text-xs tabular-nums text-muted-foreground">{t(pending && !failed ? "ui.loading_catalog_filters" : "ui.product_count", {count: resultCount})}</p>
         {hasFilters &&
           <button type="button" className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-            onClick={() => window.history.pushState(null, "", location.pathname)}>{t("ui.reset_filters")}</button>}
+            onClick={() => writeQuery(new URLSearchParams())}>{t("ui.reset_filters")}</button>}
       </div>
       {pending && failed && <div className="mb-3 flex items-center gap-3 text-sm text-muted-foreground" role="alert">
         <span>{t("ui.catalog_load_failed")}</span>
         <Button type="button" variant="outline" size="sm" onClick={() => setFailed(false)}>{t("ui.catalog_retry")}</Button>
       </div>}
       {(!pending || !hasFilters) && (resultCount > 0
-        ? <div className="grid grid-cols-2 items-stretch gap-2.5 md:grid-cols-3 md:gap-4 xl:grid-cols-4">
-          {results ? <CatalogResultCards products={results.slice(0, count)} /> : previewCards}
+        ? <div className={cardsLayout} onClickCapture={saveReturnPosition}>
+          {Cards ? <Cards products={shown} /> : previewCards}
         </div>
         : <p className="border bg-card p-6 text-muted-foreground">{t("ui.no_products_match_these_filters")}</p>)}
-      {!pending && resultCount > count && <div className="mt-7 flex justify-center">
-        <Button type="button" variant="outline" className="h-10 px-5" onClick={() => setPage({ filters: deferredParams, count: count + catalogPageSize })}>{t("ui.show_more_products")}</Button>
+      {pending && !failed && <div aria-hidden="true" className={cardsLayout + " mt-3"}>
+        {Array.from({length: 4}, (_, index) => <div key={index} className="min-w-0 border bg-card">
+          <div className="aspect-[4/5] bg-muted motion-safe:animate-pulse" />
+          <div className="grid gap-2 p-3">
+            <div className="h-4 w-3/4 bg-muted motion-safe:animate-pulse" />
+            <div className="h-10 bg-muted motion-safe:animate-pulse" />
+          </div>
+        </div>)}
       </div>}
+      {canLoad && <div ref={sentinel} className="h-px" aria-hidden="true" />}
+      {!pending && !canLoad && resultCount > 0 && <p role="status" className="mt-6 text-center text-sm text-muted-foreground">
+        {t("ui.catalog_all_shown", {count: displayedCount})}
+      </p>}
     </>
   );
 }

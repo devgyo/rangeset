@@ -8,13 +8,14 @@ import {countCardValues, selectCardParameters, type CardParameters} from "../par
 import {releaseSeasonRank, type FeaturedProduct} from "./featured-sort";
 
 export type CatalogSource = {
+  id?: number;
   name: string; slug: string; brand: string; brandSlug: string; category: string | null; gender: string | null; url: string | null;
   status: ProductDetail["status"]; subTags: string[]; isHardshell: boolean; styleFamily: string | null; stockRatio: number | null;
   lastSeen: string; payloadFetchedAt: string | null; payload: unknown; taxonomyPayload?: unknown; overrideValues?: Record<string, unknown>;
 };
 
 export type PriceRow = {variant: string; price: number | null; currency: string | null; inStock: boolean | null};
-export type CatalogView = ProductDetail & Pick<FeaturedProduct, "brandSlug" | "styleFamily" | "stockRatio">;
+export type CatalogView = ProductDetail & Pick<FeaturedProduct, "brandSlug" | "styleFamily" | "stockRatio" | "id">;
 export type CatalogListing = Pick<CatalogCard, "brand" | "category" | "gender" | "family" | "subTags" | "veilance" | "example" |
   "image" | "swatches" | "activities" | "msrp" | "currency" | "taxonomy" | "modelNumbers" | "series" | "productType" | "protectionType">
   & FeaturedProduct & {card: CardParameters; swatchCount: number; membrane?: string | number | boolean};
@@ -101,7 +102,7 @@ export function toView(row: ReturnType<typeof catalogSource>, dbSpecs: IndexedSp
   const product: CatalogView = {
     ...visuals, specs,
     offerRange: offers.length > 1 && lowPrice < highPrice ? {lowPrice, highPrice, offerCount: offers.length} : undefined,
-    name: row.name, slug: row.slug, brand: row.brand, category: row.category, url: row.url,
+    id: row.id, name: row.name, slug: row.slug, brand: row.brand, category: row.category, url: row.url,
     brandSlug: row.brandSlug, styleFamily: row.styleFamily ?? styleFamily ?? null, stockRatio: row.stockRatio,
     gender: productGender(row.gender, row.overrides.has("gender") ? undefined : unisex),
     subTags: row.subTags, isHardshell: row.isHardshell, status: row.status, verifiedAt,
@@ -128,7 +129,7 @@ export function cardOnly(product: CatalogView): CatalogListing {
     image, swatches, activities, msrp, currency, inStock, specs, taxonomy, modelNumbers, series} = product;
   const profile = parametersOf(product);
   const card = selectCardParameters(profile);
-  return {slug, name, brand, category, gender, family, subTags, veilance, status, example, taxonomy, modelNumbers, series,
+  return {id: product.id, slug, name, brand, category, gender, family, subTags, veilance, status, example, taxonomy, modelNumbers, series,
     image, swatches: swatches.slice(0, 5), swatchCount: swatches.length, activities, msrp, currency: example ? "USD" : currency, inStock,
     membrane: specs.membrane?.value,
     productType: classificationFilterValue(profile.values.product_type), protectionType: classificationFilterValue(profile.values.protection_type),

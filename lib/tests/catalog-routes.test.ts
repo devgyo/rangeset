@@ -164,3 +164,22 @@ test("catalog HTML omits full product specs and detail fields", options, async (
   }
   assert.equal((html.match(/<article class="gear-card/g) ?? []).length, 24);
 });
+
+test("catalog exposes crawlable, disjoint server-rendered pages in all three languages", options, async () => {
+  const cardPaths = (html: string) => [...html.matchAll(/<article class="gear-card[^"]*">\s*<a[^>]*href="([^"]+)"/g)]
+    .map(([, href]) => href);
+  for (const prefix of locales) {
+    const first = await rendered(await get(prefix + "/products"));
+    const secondResponse = await get(prefix + "/products?page=2");
+    assert.equal(secondResponse.status, 200);
+    const second = await rendered(secondResponse);
+    assert.match(first, /<noscript>[\s\S]*?href="[^"]*\/products\?page=2"/);
+    assert.equal(cardPaths(first).length, 24);
+    assert.equal(cardPaths(second).length, 24);
+    assert.equal(new Set([...cardPaths(first), ...cardPaths(second)]).size, 48);
+    assert.ok(second.includes(prefix + "/products?page=2"));
+  }
+  const next = await get("/zh/products/category/hardshell-jackets/page/2");
+  assert.equal(next.status, 200);
+  assert.equal(cardPaths(await rendered(next)).length, 24);
+});

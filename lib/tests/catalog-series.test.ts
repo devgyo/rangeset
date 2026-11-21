@@ -45,3 +45,24 @@ test("line counts use other filters without counting the selected line as a cons
   });
   assert.deepEqual(unique.results.map(({slug}) => slug), ["a-jacket"]);
 });
+
+test("all catalog sorts keep equal-valued products in stable ID order across page boundaries", async () => {
+  const {catalogPageSlice, catalogPageSize} = await import("../catalog/pagination");
+  const {catalogSorts} = await import("../catalog/featured-sort");
+  const items = Array.from({length: 53}, (_, index) => ({
+    ...listing("item-" + (53 - index), "mammut", ["Eiger"]), name: "Same name", id: index + 1, currency: "USD",
+    msrp: 200, card: {weight: 400, fit: null, mainFabric: null, composition: null},
+  }));
+  for (const sort of catalogSorts) {
+    for (const priced of [items, items.map((item) => ({...item, msrp: null, card: {...item.card, weight: null}}))]) {
+      const {results} = filterCatalog([...priced].reverse(), {
+        category: "", gender: "", family: "", brand: [], series: [], legacyLine: null,
+        activity: [], productType: "", protectionType: "", query: "", sort,
+      });
+      const pages = [1, 2, 3].flatMap((page) => catalogPageSlice(results, page));
+      assert.equal(new Set(pages.map(({slug}) => slug)).size, priced.length);
+      assert.deepEqual(pages.map(({id}) => id), items.map(({id}) => id));
+      assert.equal(catalogPageSlice(results, 1, catalogPageSize * 2).length, 48);
+    }
+  }
+});

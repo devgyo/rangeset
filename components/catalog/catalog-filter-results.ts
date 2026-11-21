@@ -1,6 +1,6 @@
 import {activityCode} from "@/i18n/ui-copy";
 import type {CatalogListing} from "@/lib/catalog";
-import {defaultCatalogSort, rankFeatured, type CatalogSort} from "@/lib/catalog/featured-sort";
+import {compareCatalogIdentity, defaultCatalogSort, rankFeatured, type CatalogSort} from "@/lib/catalog/featured-sort";
 import {searchCatalog} from "@/lib/catalog-search";
 import {seriesGroups, seriesMatches} from "@/lib/catalog/series";
 import {matchesTaxonomy} from "@/lib/taxonomy";
@@ -24,15 +24,16 @@ export function filterCatalog(catalog: CatalogListing[], {
   const counts = seriesGroups(selected === filtered ? matches : searchCatalog(filtered, query));
   const results = sort === defaultCatalogSort ? rankFeatured(matches).map(({product}) => product)
     : [...matches].sort((a, b) => {
-      if (sort === "name") return a.name.localeCompare(b.name);
+      const byName = a.name.localeCompare(b.name, "en") || compareCatalogIdentity(a, b);
+      if (sort === "name") return byName;
       const first = sort === "weight" ? a.card.weight : a.msrp;
       const second = sort === "weight" ? b.card.weight : b.msrp;
-      if (typeof first !== "number") return typeof second === "number" ? 1 : 0;
+      if (typeof first !== "number") return typeof second === "number" ? 1 : byName;
       if (typeof second !== "number") return -1;
       if (sort !== "weight" && a.currency !== b.currency) {
-        return (a.currency ?? "").localeCompare(b.currency ?? "");
+        return (a.currency ?? "").localeCompare(b.currency ?? "", "en") || byName;
       }
-      return (first - second) * (sort === "price-desc" ? -1 : 1) || a.name.localeCompare(b.name);
+      return (first - second) * (sort === "price-desc" ? -1 : 1) || byName;
     });
   return {results, counts};
 }

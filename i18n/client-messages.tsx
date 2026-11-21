@@ -23,7 +23,7 @@ const scopes = {
     "ui.sort_weight", "ui.all", "ui.filter_men", "ui.filter_women", "ui.line", "ui.product_categories",
     "ui.subcategories", "ui.catalog_filters", "ui.search_catalog", "ui.family", "ui.loading_catalog_filters",
     "ui.product_count", "ui.reset_filters", "ui.catalog_load_failed", "ui.catalog_retry",
-    "ui.no_products_match_these_filters", "ui.show_more_products",
+    "ui.no_products_match_these_filters", "ui.catalog_all_shown",
   ],
   gallery: ["ui.model_height", "ui.wearing_size", "ui.photo_angles", "ui.colorway", "ui.colorways"],
   compare: [

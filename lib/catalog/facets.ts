@@ -2,8 +2,6 @@ import type {CatalogListing} from "./product";
 import {activityCode} from "@/i18n/ui-copy";
 import {seriesGroups} from "./series";
 
-export const catalogPageSize = 24;
-
 export function catalogFacets(products: CatalogListing[]) {
   const families = new Map<string, number>();
   for (const {family} of products) if (family) families.set(family, (families.get(family) ?? 0) + 1);

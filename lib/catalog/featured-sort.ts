@@ -10,6 +10,7 @@ type Tier = "A" | "C" | "D";
 const tiers: readonly Tier[] = ["A", "C", "D"];
 
 export type FeaturedProduct = {
+  id?: number;
   slug: string;
   name: string;
   brandSlug: string;
@@ -47,9 +48,15 @@ function groupBy<T, K>(products: readonly T[], keyOf: (product: T) => K): Map<K,
 
 const nameOrder = new Intl.Collator("en");
 
+export function compareCatalogIdentity(a: Pick<FeaturedProduct, "id" | "slug">, b: Pick<FeaturedProduct, "id" | "slug">) {
+  if (a.id !== undefined && b.id !== undefined) return a.id - b.id;
+  if (a.id !== b.id) return a.id === undefined ? 1 : -1;
+  return a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0;
+}
+
 function brandQueue<T extends FeaturedProduct>(products: T[]): T[] {
   const ordered = [...products].sort((a, b) => (b.releaseSeason ?? -1) - (a.releaseSeason ?? -1)
-    || nameOrder.compare(a.name, b.name) || nameOrder.compare(a.slug, b.slug));
+    || nameOrder.compare(a.name, b.name) || compareCatalogIdentity(a, b));
   const families = groupBy(ordered, (product) =>
     JSON.stringify([product.releaseSeason, product.styleFamily, product.styleFamily ? null : product.slug]));
   return [...families.values()].flat();
