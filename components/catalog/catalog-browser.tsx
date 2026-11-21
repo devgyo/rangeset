@@ -13,6 +13,7 @@ import {ParameterHelp} from "@/components/catalog/parameter-help";
 import {catalogSort, defaultCatalogSort, type CatalogSort} from "@/lib/catalog/featured-sort";
 import type {CatalogListing} from "@/lib/catalog";
 
+import {pruneSeries, seriesMatches, seriesSelection, visibleSeries} from "@/lib/catalog/series";
 import {catalogPageSize, type catalogFacets} from "@/lib/catalog/facets";
 const CatalogResultCards = dynamic(() => import("./catalog-result-cards"), {ssr: false});
 type StyleFilters = Record<"type" | "protection", {label: string; options: [string, string][]}>;
@@ -114,7 +115,24 @@ export function CatalogBrowser({previewCards, previewCount, styleFilters, facets
     const prior = next.getAll(key);
     next.delete(key);
     for (const item of prior.includes(value) ? prior.filter((item) => item !== value) : [...prior, value]) next.append(key, item);
-    if (key === "series") next.delete("line");
+    if (key === "brand") pruneSeries(next, catalogOptions.series);
+    const search = next.toString();
+    window.history.pushState(null, "", location.pathname + (search ? "?" + search : ""));
+  }
+
+  const selectedSeries = series.length ? series : legacyLine === "veilance" ? ["Veilance"] : [];
+
+  function toggleSeries(brandScope: string, line: string) {
+    const next = new URLSearchParams(window.location.search);
+    const existing = next.getAll("series");
+    const selections = existing.length ? existing : next.get("line") === "veilance" ? ["Veilance"] : [];
+    const matches = brandScope ? (value: string) => seriesMatches(value, brandScope, line) :
+      (value: string) => seriesSelection(value).line === line;
+    const updated = selections.some(matches) ? selections.filter((value) => !matches(value)) :
+      [...selections, brandScope ? brandScope + ":" + line : line];
+    next.delete("line");
+    next.delete("series");
+    for (const value of updated) next.append("series", value);
     const search = next.toString();
     window.history.pushState(null, "", location.pathname + (search ? "?" + search : ""));
   }
@@ -129,8 +147,6 @@ export function CatalogBrowser({previewCards, previewCount, styleFilters, facets
   const group = taxonomyGroup(category);
   const facets = [
     {key: "brand", label: "field.brand", selected: brand, options: catalogOptions.brands},
-    {key: "series", label: "ui.line", selected: series.length ? series : legacyLine === "veilance" ? ["Veilance"] : [],
-      options: catalogOptions.series},
     {key: "activity", label: "field.activities", selected: activity, options: catalogOptions.activities},
   ];
   const typeFilters = [
@@ -144,9 +160,11 @@ export function CatalogBrowser({previewCards, previewCount, styleFilters, facets
   const topFamilies = catalogOptions.families;
   const familyFilters = family && !topFamilies.includes(family) ? [...topFamilies, family] : topFamilies;
 
-  const results = catalog && catalog.filter(catalog.products, {
+  const filtered = catalog && catalog.filter(catalog.products, {
     category, gender, family, brand, series, legacyLine, activity, productType, protectionType, query: deferredQuery, sort,
   });
+  const results = filtered?.results;
+  const seriesOptions = visibleSeries(catalogOptions.series, brand, filtered?.counts ?? (hasFilters ? [] : undefined));
   const resultCount = results?.length ?? matchingCount;
   const pending = needsCatalog && !catalog;
 
@@ -201,6 +219,16 @@ export function CatalogBrowser({previewCards, previewCount, styleFilters, facets
                 onClick={() => toggle(key, value)}>{key === "activity" ? activityLabel(t, name) : name}</button>)}
             </div>
           ))}
+          {seriesOptions.length > 0 && <div role="group" aria-label={t("ui.line")} className="filter-group min-w-0">
+            <span className="control-label">{t("ui.line")}</span>
+            {seriesOptions.map(({brand: scope, name, options}) => <div key={scope} className="filter-group"
+              role={scope ? "group" : undefined} aria-label={scope ? name : undefined}>
+              {scope && <span className="control-label">{name}</span>}
+              {options.map(([line, amount]) => <button key={line} type="button" className="filter-pill"
+                aria-pressed={selectedSeries.some((value) => scope ? seriesMatches(value, scope, line) : seriesSelection(value).line === line)}
+                onClick={() => toggleSeries(scope, line)}>{line} <span className="font-mono tabular-nums">{amount}</span></button>)}
+            </div>)}
+          </div>}
         </div>
         <div className="flex flex-wrap gap-2.5">
           {typeFilters.map(({ label, queryKey, selected, options }) => (

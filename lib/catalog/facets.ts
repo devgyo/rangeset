@@ -1,5 +1,6 @@
 import type {CatalogListing} from "./product";
-import {activityCode} from "@/i18n/copy";
+import {activityCode} from "@/i18n/ui-copy";
+import {seriesGroups} from "./series";
 
 export const catalogPageSize = 24;
 
@@ -8,7 +9,7 @@ export function catalogFacets(products: CatalogListing[]) {
   for (const {family} of products) if (family) families.set(family, (families.get(family) ?? 0) + 1);
   return {
     brands: [...new Map(products.map(({brandSlug, brand}) => [brandSlug, brand]))],
-    series: [...new Set(products.flatMap(({series}) => series ?? []))].sort().map((value) => [value, value]),
+    series: seriesGroups(products),
     activities: [...new Map(products.flatMap(({activities}) => activities.map((value) => [activityCode(value), value] as const)))]
       .sort((a, b) => a[1].localeCompare(b[1])),
     productTypes: [...new Set(products.flatMap(({productType}) => productType ?? []))],

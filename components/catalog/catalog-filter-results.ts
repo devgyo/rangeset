@@ -2,6 +2,7 @@ import {activityCode} from "@/i18n/ui-copy";
 import type {CatalogListing} from "@/lib/catalog";
 import {defaultCatalogSort, rankFeatured, type CatalogSort} from "@/lib/catalog/featured-sort";
 import {searchCatalog} from "@/lib/catalog-search";
+import {seriesGroups, seriesMatches} from "@/lib/catalog/series";
 import {matchesTaxonomy} from "@/lib/taxonomy";
 
 export function filterCatalog(catalog: CatalogListing[], {
@@ -14,11 +15,14 @@ export function filterCatalog(catalog: CatalogListing[], {
   const filtered = products.filter((product) =>
     (!gender || product.gender === gender) && (!family || product.family === family) &&
     (!brand.length || brand.includes(product.brandSlug)) &&
-    (!series.length ? !legacyLine || product.veilance === (legacyLine === "veilance") : series.some((value) => product.series?.includes(value))) &&
     (!activity.length || activity.some((value) => product.activities.some((label) => activityCode(label) === value))) && (!productType || product.productType === productType) &&
     (!protectionType || product.protectionType === protectionType));
-  const matches = searchCatalog(filtered, query);
-  return sort === defaultCatalogSort ? rankFeatured(matches).map(({product}) => product)
+  const selected = series.length || legacyLine ? filtered.filter((product) =>
+    series.length ? series.some((value) => product.series?.some((line) => seriesMatches(value, product.brandSlug, line))) :
+      product.veilance === (legacyLine === "veilance")) : filtered;
+  const matches = searchCatalog(selected, query);
+  const counts = seriesGroups(selected === filtered ? matches : searchCatalog(filtered, query));
+  const results = sort === defaultCatalogSort ? rankFeatured(matches).map(({product}) => product)
     : [...matches].sort((a, b) => {
       if (sort === "name") return a.name.localeCompare(b.name);
       const first = sort === "weight" ? a.card.weight : a.msrp;
@@ -30,4 +34,5 @@ export function filterCatalog(catalog: CatalogListing[], {
       }
       return (first - second) * (sort === "price-desc" ? -1 : 1) || a.name.localeCompare(b.name);
     });
+  return {results, counts};
 }
