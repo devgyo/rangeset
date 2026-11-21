@@ -14,7 +14,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "i18n-check": "node scripts/i18n-check",
-    "crawl:price-snapshots": "tsx crawler/price-snapshots.ts"
+    "crawl:price-snapshots": "tsx crawler/price-snapshots.ts",
+    "verify:content": "tsx scripts/verify-content.ts"
   },
   "dependencies": {
     "@vercel/functions": "^3.11.3",

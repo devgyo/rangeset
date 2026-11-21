@@ -49,3 +49,7 @@ next-env.d.ts
 # Large local catalog fixtures (regenerate with export and dry-run scripts)
 /data/arcteryx-local.json
 /data/mammut-dry-run.json
+
+# Generated content audit reports
+/reports/content-verify-*.json
+/reports/content-verify-*.md
