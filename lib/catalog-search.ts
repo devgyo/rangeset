@@ -1,6 +1,6 @@
 import type {CatalogCard} from "./product-view";
 
-type SearchableProduct = Pick<CatalogCard, "slug" | "name" | "family" | "subTags" | "specs" | "gender" | "modelNumbers"> & {brand?: string};
+type SearchableProduct = Pick<CatalogCard, "slug" | "name" | "family" | "subTags" | "gender" | "modelNumbers"> & {brand?: string; membrane?: string | number | boolean};
 const optionalQualifiers = new Set(["hooded", "hoodie", "hoody"]);
 
 function tokenize(query: string) {
@@ -9,7 +9,7 @@ function tokenize(query: string) {
 
 function matches(product: SearchableProduct, tokens: string[]) {
   const numbers = product.modelNumbers ?? product.slug.toLowerCase().match(/-(\d{4})-(x\d+)$/)?.slice(1) ?? [];
-  const text = [product.name, product.brand, product.family, product.gender, ...product.subTags, product.specs.membrane?.value]
+  const text = [product.name, product.brand, product.family, product.gender, ...product.subTags, product.membrane]
     .join(" ").normalize("NFKC").toLowerCase().replaceAll("’", "'");
   return tokens.every((token) => /^(?:\d{4}(?:-\d{5})?|x\d+)$/.test(token) ? numbers.some((number) => number.toLowerCase() === token) : text.includes(token));
 }

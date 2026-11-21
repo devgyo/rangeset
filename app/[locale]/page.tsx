@@ -8,16 +8,15 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductImage } from "@/components/catalog/product-media";
 import {matchesTaxonomy, taxonomy, taxonomyLabelKey, taxonomyPath} from "@/lib/taxonomy";
-import { listProducts } from "@/lib/catalog";
+import { homeFeature, listProducts } from "@/lib/catalog";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {alternates: pageAlternates("/", await currentLocale())};
 }
 
 export default async function Home() {
-  const [products, t] = await Promise.all([listProducts(), getTranslations()]);
+  const [products, feature, t] = await Promise.all([listProducts(), homeFeature(), getTranslations()]);
   const categories = taxonomy.map(({slug}) => ({slug, count: products.filter((product) => matchesTaxonomy(product, slug)).length}));
-  const feature = products.find((item) => item.hero && item.status === "active");
   const familyCounts = new Map<string, number>();
   for (const {family} of products) if (family) familyCounts.set(family, (familyCounts.get(family) ?? 0) + 1);
   const families = [...familyCounts].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name]) => name);

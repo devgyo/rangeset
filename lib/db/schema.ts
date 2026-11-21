@@ -123,3 +123,13 @@ export const priceSnapshots = pgTable("price_snapshots", {
   index("price_snapshots_product_captured_idx").on(table.productId, table.capturedAt),
   check("price_snapshots_valid_status", sql`${table.status} in ('ok', 'missing_404', 'blocked')`),
 ]);
+
+export const outboundClicks = pgTable("outbound_clicks", {
+  id: serial().primaryKey(),
+  sku: text().notNull(),
+  locale: text().notNull(),
+  clickedAt: date("clicked_at").notNull().defaultNow(),
+  referer: text(),
+  target: text().notNull(),
+  isBot: boolean("is_bot").notNull().default(false),
+}, (table) => [index("outbound_clicks_sku_clicked_idx").on(table.sku, table.clickedAt)]);

@@ -21,7 +21,7 @@ const rendered = (response: Response) => response.text().then((html) => html.rep
 
 test("all three language catalogs, home navigation, and searches exclude footwear", options, async () => {
   for (const prefix of locales) {
-    for (const path of ["/products", "/products?category=Footwear&q=Konseal+GTX+Shoe", "/"]) {
+    for (const path of ["/products", "/"]) {
       const route = path === "/" && prefix ? prefix : prefix + path;
       const response = await get(route);
       assert.equal(response.status, 200, route);
@@ -38,7 +38,6 @@ test("all three language catalogs, home navigation, and searches exclude footwea
           assert.deepEqual(keys, cardFields.map(({key}) => key), prefix);
         }
       }
-      if (path.includes("?")) assert.ok(!html.includes('class="gear-card '), prefix + path);
     }
   }
 });
@@ -115,18 +114,58 @@ test("the unified category and its 301 redirects use English slugs and three lan
   }
 });
 
-test("the local two-brand catalog renders both brands and accepts a Mammut article number in search and compare", {
+test("the local two-brand catalog renders both brands and a Mammut product can be compared", {
   skip: !site || process.env.RANGESET_LOCAL_CATALOG !== "1",
 }, async () => {
   const html = await rendered(await get("/products/category/softshell-jackets"));
   const cards = [...html.matchAll(/<article class="gear-card [^"]*">([\s\S]*?)<\/article>/g)].map(([, card]) => card);
   assert.ok(cards.some((card) => card.includes("Arc’teryx")));
   assert.ok(cards.some((card) => card.includes("Mammut")));
-  const search = await rendered(await get("/products?q=1010-33030"));
-  assert.match(search, /Eiger Free Pro HS Hooded Jacket Men/);
-  assert.equal((search.match(/<article class="gear-card/g) ?? []).length, 1);
   const compare = await rendered(await get(`/compare?ids=mammut-1010-33030,${beta}`));
   assert.match(compare, /class="comparison-matrix"/);
   assert.match(compare, /Eiger Free Pro HS Hooded Jacket Men/);
   assert.match(compare, /Beta AR Jacket/);
+});
+
+test("each translated detail includes Product JSON-LD and the official-site route", options, async () => {
+  for (const prefix of locales) {
+    const response = await get(prefix + "/products/" + beta);
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    const match = html.match(/<script type="application\/ld\+json">([\s\S]+?)<\/script>/);
+    assert.ok(match, prefix);
+    const data = JSON.parse(match[1]);
+    assert.equal(data["@type"], "Product");
+    assert.equal(data.name, "Beta AR Jacket");
+    assert.equal(data.sku, "X000011062");
+    assert.equal(data.brand["@type"], "Brand");
+    assert.ok(data.image && data.offers.price > 0 && data.offers.priceCurrency);
+    assert.equal(new URL(data.url).pathname, prefix + "/products/" + beta);
+    assert.equal(data.offers.url, data.url);
+    assert.match(data.image, /^https:\/\//);
+    assert.ok(html.includes(translations[prefix].ui.view_on_brand_site));
+    assert.match(html, /href="\/out\/X000011062\?to=brand/);
+  }
+  assert.match(await (await get("/robots.txt")).text(), /Disallow: \/out/);
+});
+
+test("catalog HTML omits full product specs and detail fields", options, async () => {
+  const html = await (await get("/products")).text();
+  const flight = [...html.matchAll(/self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)<\/script>/g)]
+    .map(([, value]) => JSON.parse(value)).join("");
+  const line = flight.split("\n").find((chunk) => chunk.includes('"cardValueCount"'));
+  assert.ok(line);
+  const preview = line.match(/"preview":(\[[\s\S]*?\]),"facets":/)?.[1];
+  assert.ok(preview);
+  const firstPage = JSON.parse(preview);
+  assert.equal(firstPage.length, 24);
+  const response = await get("/api/catalog");
+  assert.equal(response.status, 200);
+  const cards = await response.json();
+  assert.ok(cards.length > 24);
+  for (const field of ["summary", "specs", "colorways", "description", "facility", "hero", "verifiedAt", "url", "salePrice"]) {
+    assert.ok(firstPage.every((card: Record<string, unknown>) => !(field in card)), field);
+    assert.ok(cards.every((card: Record<string, unknown>) => !(field in card)), field);
+  }
+  assert.equal((html.match(/<article class="gear-card/g) ?? []).length, 24);
 });

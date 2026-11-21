@@ -186,6 +186,8 @@ ui.mainline,Mainline,主线,メインライン,界面,,,
 ui.no_products_match_these_filters,No products match these filters.,没有符合筛选条件的商品。,条件に一致する商品はありません。,界面,,,
 ui.reset_filters,Reset filters,重置筛选,絞り込みを解除,界面,,,
 ui.show_more_products,Show more products,显示更多,さらに表示,界面,,,
+ui.catalog_load_failed,The catalog could not load.,目录加载失败。,カタログを読み込めませんでした。,界面,,,
+ui.catalog_retry,Try again,重试,再試行,界面,,,
 ui.loading_catalog_filters,Loading catalog filters…,正在加载筛选…,絞り込みを読み込み中…,界面,,,
 ui.compare_products,Compare products,商品对比,商品を比較,界面,,,
 ui.compare,Compare,对比,比較,界面,,,
@@ -262,7 +264,8 @@ ui.home_label,Rangeset home,Rangeset,Rangeset,本地化补充,,,本地化复用�
 ui.hero_first,"Specs,",看参数，,宣伝文句より、,本地化补充,,,needs_review: v1 补充草译。
 ui.hero_second,not hype.,不看噱头。,スペック。,本地化补充,,,needs_review: v1 补充草译。
 ui.hero_description,Browse US outdoor catalogs and compare published specs side by side.,浏览美国户外品牌目录，并排对比已公布的参数。,米国向けアウトドアカタログで、公表スペックを比較できます。,本地化补充,,,needs_review: v1 补充草译。
-ui.families,Arc’teryx families,Arc’teryx 系列,Arc’teryxのシリーズ,本地化补充,,,needs_review: v1 补充草译。
+ui.families,Product families,商品系列,製品シリーズ,本地化补充,,,needs_review: v1 补充草译。
+ui.view_on_brand_site,View on brand site,去官网查看,公式サイトで見る,界面,,,
 ui.catalog_live,US catalog · Published specs and MSRP,美国目录 · 已公布参数及官方定价,米国向けカタログ · 公表スペックと希望小売価格,本地化补充,,,needs_review: v1 补充草译。
 ui.arc_catalog,Arc’teryx catalog,商品目录,商品カタログ,本地化补充,,,本地化复用已有术语 ui.product_catalog，保留既有英文。
 ui.breadcrumb,Breadcrumb,当前位置,パンくずリスト,本地化补充,,,needs_review: v1 补充草译。
@@ -282,7 +285,7 @@ ui.color_count,{count} colors,{count} 种配色,{count}色,本地化补充,,,nee
 ui.catalog_filters,Catalog filters,目录筛选,カタログの絞り込み,本地化补充,,,needs_review: v1 补充草译。
 ui.product_categories,Product categories,品类,カテゴリー,本地化补充,,,本地化复用已有术语 field.category，保留既有英文。
 ui.sort_featured,Featured,综合排序,おすすめ順,界面,,,
-ui.sort_featured_help,"Featured: in stock on the brand site, complete card specs, and released in the latest two seasons come first; brands are interleaved by share within each group. No paid placement, no scores, no brand favoritism.",综合排序：官网有货、卡片参数齐全、近两季发布的优先；同组内各品牌按占比穿插。不收费、不打分、不看品牌。,おすすめ順：公式サイトで在庫あり・カード項目がそろっている・直近2シーズン発売の商品を優先し、各グループ内ではブランドを掲載数の比率で交互に並べます。掲載料・スコア付け・ブランドによる優遇はありません。,界面,,,
+ui.sort_featured_help,Featured: available items with at least three card specs come first. Newer release seasons lead within each brand and group. Brands are interleaved by share. No paid placement or scores.,综合排序：可购买且至少有三项卡片参数的商品优先。同组内各品牌按占比穿插，品牌内新季在前。不收费、不打分。,おすすめ順：購入可能でカードの項目が3つ以上ある商品を優先します。同じグループではブランドごとの掲載数に応じて交互に並べ、各ブランド内では新しいシーズンを先に表示します。掲載料やスコア付けはありません。,界面,,,
 ui.sort_name,Name A–Z,商品名 A–Z,商品名順（A–Z）,本地化补充,,,needs_review: v1 补充草译。
 ui.sort_price_asc,Price low–high,价格从低到高,価格が安い順,本地化补充,,,needs_review: v1 补充草译。
 ui.sort_price_desc,Price high–low,价格从高到低,価格が高い順,本地化补充,,,needs_review: v1 补充草译。
@@ -353,37 +356,37 @@ value.fit_fitted,Fitted,修身版型,フィット感のあるシルエット,本
 value.fit_relaxed,Relaxed,宽松版型,リラックスフィット,本地化补充,,,needs_review: v1 补充草译。
 value.fit_next_to_skin,Next to Skin,贴身版型,肌に沿うフィット,本地化补充,,,needs_review: v1 补充草译。
 value.fit_oversized,Oversized,超宽松版型,オーバーサイズ,本地化补充,,,needs_review: v1 补充草译。
-help.ripstop,A woven fabric with a grid of stronger threads that helps stop small tears from spreading.,,,本地化补充,,,说明待审，回退英文。
+help.ripstop,A woven fabric with a grid of stronger threads that helps stop small tears from spreading.,在织布中加入更结实的网格纱线，帮助防止小裂口继续扩大。,,本地化补充,,,简中说明已补。日文沿用英文回退。
 help_label.ripstop,Ripstop,格子防撕裂,リップストップ,本地化补充,,,needs_review: v1 补充草译。
-help.stretch,2-way stretch runs along one axis. 4-way stretch runs along both axes. Mechanical stretch comes from the fabric structure.,,,本地化补充,,,说明待审，回退英文。
+help.stretch,2-way stretch runs along one axis. 4-way stretch runs along both axes. Mechanical stretch comes from the fabric structure.,双向弹力沿一个轴向伸展，四向弹力沿两个轴向伸展。机械弹力来自面料结构。,,本地化补充,,,简中说明已补。日文沿用英文回退。
 help_label.stretch,Stretch,弹力,ストレッチ,本地化补充,,,needs_review: v1 补充草译。
 help.denier,How much a length of yarn weighs. It does not tell you how thick the fabric is or how well it resists wear.,纱线粗细的单位，按一定长度纱线的重量计算。它不能直接说明面料有多厚，也不能单独说明有多耐磨。,糸の太さを表す単位で、一定の長さの糸の重さで決まります。生地の厚さや耐摩耗性をそのまま表すものではありません。,本地化补充,,,术语说明试译见风格指南。
 help_label.denier,Denier,旦数,デニール,本地化补充,,,needs_review: v1 补充草译。
 help.3l,"The outer fabric, waterproof layer, and inner backing are bonded together.",外层面料、防水膜和内层背衬三层压合在一起。,表地・防水メンブレン・裏側のバッカーの3層を貼り合わせた構造です。,本地化补充,,,术语说明试译见风格指南。
 help_label.3l,3L,3L,3L,本地化补充,,,needs_review: v1 补充草译。
-help.2l,The outer fabric and waterproof layer are bonded together. The garment may have a separate lining.,,,本地化补充,,,说明待审，回退英文。
+help.2l,The outer fabric and waterproof layer are bonded together. The garment may have a separate lining.,外层面料和防水层粘合为两层。成衣可以另有独立里布。,,本地化补充,,,简中说明已补。日文沿用英文回退。
 help_label.2l,2L,2L,2L,本地化补充,,,needs_review: v1 补充草译。
-help.2_5l,The outer fabric and waterproof layer are bonded together. A thin print or coating protects the inside.,,,本地化补充,,,说明待审，回退英文。
+help.2_5l,The outer fabric and waterproof layer are bonded together. A thin print or coating protects the inside.,外层面料与防水层粘合，内侧再用一层薄印花或涂层保护。,,本地化补充,,,简中说明已补。日文沿用英文回退。
 help_label.2_5l,2.5L,2.5L,2.5L,本地化补充,,,needs_review: v1 补充草译。
 help.fill,How much space a set weight of down takes up in a test. Garment warmth also depends on how much down is used and how the garment is made.,一定重量的羽绒在测试中能蓬起多大体积。衣服暖不暖，还要看充绒量和做法。,一定量のダウンが試験でどれだけ膨らむかを示す数値です。暖かさはダウンの封入量や作りによっても変わります。,本地化补充,,,术语说明试译见风格指南。
 help_label.fill,Fill power,蓬松度,フィルパワー,本地化补充,,,needs_review: v1 补充草译。
-help.gsm,How much one square metre of this fabric or insulation weighs.,,,本地化补充,,,说明待审，回退英文。
+help.gsm,How much one square metre of this fabric or insulation weighs.,一平方米这种面料或保温材料的重量。,,本地化补充,,,简中说明已补。日文沿用英文回退。
 help_label.gsm,Grams per square metre,g/m²,g/m²,本地化补充,,,needs_review: v1 补充草译。
-help.membrane,A thin layer that blocks liquid water. Its name alone gives no waterproof rating.,,,本地化补充,,,说明待审，回退英文。
+help.membrane,A thin layer that blocks liquid water. Its name alone gives no waterproof rating.,阻挡液态水通过的一层薄膜。薄膜的名称本身不能说明防水等级。,,本地化补充,,,简中说明已补。日文沿用英文回退。
 help_label.membrane,Waterproof membrane,防水膜,防水メンブレン,本地化补充,,,needs_review: v1 补充草译。
 help.dwr,A finish that helps water bead up and roll off the outer fabric.,外层面料表面的处理，让水形成水珠滚落。它不等于防水。,表地の表面に施す加工で、水を玉状にして転がり落ちやすくします。防水性とは別のものです。,本地化补充,,,术语说明试译见风格指南。
 help_label.dwr,DWR,DWR,DWR,本地化补充,,,needs_review: v1 补充草译。
-help.upf,A rating for how much ultraviolet light the fabric blocks. A higher number means less UV gets through in the test.,,,本地化补充,,,说明待审，回退英文。
+help.upf,A rating for how much ultraviolet light the fabric blocks. A higher number means less UV gets through in the test.,面料阻挡紫外线的等级。测试中数值越高，透过面料的紫外线越少。,,本地化补充,,,简中说明已补。日文沿用英文回退。
 help_label.upf,UPF,UPF,UPF,本地化补充,,,needs_review: v1 补充草译。
-help.hydrostatic,The height of a column of water the fabric can hold back in a test. Compare numbers from the same test method.,,,本地化补充,,,说明待审，回退英文。
+help.hydrostatic,The height of a column of water the fabric can hold back in a test. Compare numbers from the same test method.,在试验中，面料能承受的水柱高度。请在同一测试方法下比较数值。,,本地化补充,,,简中说明已补。日文沿用英文回退。
 help_label.hydrostatic,Hydrostatic head,静水压,耐水圧,本地化补充,,,needs_review: v1 补充草译。
-help.breathability,How readily moisture vapour passes through the fabric in a test. Compare numbers with the same test method and units.,,,本地化补充,,,说明待审，回退英文。
+help.breathability,How readily moisture vapour passes through the fabric in a test. Compare numbers with the same test method and units.,在试验中，水蒸气通过面料的难易程度。数值应在测试方法和单位相同时比较。,,本地化补充,,,简中说明已补。日文沿用英文回退。
 help_label.breathability,Breathability,透湿性,透湿性,本地化补充,,,needs_review: v1 补充草译。
 help.recco,A small built-in reflector that helps rescue teams locate you with RECCO detectors. No battery needed. It does not replace an avalanche transceiver.,内置的小型反射器，搜救队可用 RECCO 探测器找到你。无需电池。不能代替雪崩信标。,内蔵の小さなリフレクターで、救助隊がRECCO探知機で位置を特定できます。電池は不要です。雪崩ビーコンの代わりにはなりません。,本地化补充,,,术语说明试译见风格指南。
 help_label.recco,RECCO,RECCO,RECCO,本地化补充,,,needs_review: v1 补充草译。
-help.pfas,A large group of chemicals. A product can meet a PFAS rule and still contain some of these chemicals.,,,本地化补充,,,说明待审，回退英文。
+help.pfas,A large group of chemicals. A product can meet a PFAS rule and still contain some of these chemicals.,一大类化学物质。符合某项 PFAS 法规的产品仍可能含有其中一些物质。,,本地化补充,,,简中说明已补。日文沿用英文回退。
 help_label.pfas,PFAS,PFAS,PFAS,本地化补充,,,needs_review: v1 补充草译。
-help.weight_size,The brand does not state which size was weighed; treat as approximate.,,,本地化补充,,,说明待审，回退英文。
+help.weight_size,The brand does not state which size was weighed; treat as approximate.,品牌未公布称重所用的尺码，这个重量可作参考。,,本地化补充,,,简中说明已补。日文沿用英文回退。
 status_description.yes,The brand explicitly lists this feature.,品牌明确列出了这项功能。,ブランドがこの機能を明記しています。,本地化补充,,,needs_review: v1 补充草译。
 status_description.no,The brand explicitly says this feature is absent.,品牌明确说明没有这项功能。,ブランドがこの機能がないことを明記しています。,本地化补充,,,needs_review: v1 补充草译。
 status_description.unpublished,The brand has not published enough information to confirm this value.,品牌公布的信息不足以确认这项参数。,ブランドの公表情報ではこの値を確認できません。,本地化补充,,,needs_review: v1 补充草译。

@@ -40,7 +40,7 @@
 | ui.hero_first | Specs, | 看参数， | 宣伝文句より、 | needs_review: v1 补充草译。 |
 | ui.hero_second | not hype. | 不看噱头。 | スペック。 | needs_review: v1 补充草译。 |
 | ui.hero_description | Browse US outdoor catalogs and compare published specs side by side. | 浏览美国户外品牌目录，并排对比已公布的参数。 | 米国向けアウトドアカタログで、公表スペックを比較できます。 | needs_review: v1 补充草译。 |
-| ui.families | Arc’teryx families | Arc’teryx 系列 | Arc’teryxのシリーズ | needs_review: v1 补充草译。 |
+| ui.families | Product families | 商品系列 | 製品シリーズ | needs_review: v1 补充草译。 |
 | ui.catalog_live | US catalog · Published specs and MSRP | 美国目录 · 已公布参数及官方定价 | 米国向けカタログ · 公表スペックと希望小売価格 | needs_review: v1 补充草译。 |
 | ui.breadcrumb | Breadcrumb | 当前位置 | パンくずリスト | needs_review: v1 补充草译。 |
 | ui.family_variants | Other {family} {category} | {family} 系列的其他{category} | {family}シリーズのほかの{category} | needs_review: v1 补充草译。 |

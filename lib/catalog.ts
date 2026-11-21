@@ -3,6 +3,7 @@ import "server-only";
 import {and, eq, inArray, desc, sql} from "drizzle-orm";
 import {readFile} from "node:fs/promises";
 import {cache} from "react";
+import {unstable_cache} from "next/cache";
 import {connection} from "next/server";
 import {catalogDb} from "@/lib/db/read";
 import {brands, manualOverrides, prices, products, productRaw, productSpecs} from "@/lib/db/schema";
@@ -22,7 +23,6 @@ export const catalogEnabled = localCatalog || Boolean(process.env.DATABASE_URL);
 
 async function catalogRows(slugs?: string[], mode: "none" | "card" | "detail" = "none") {
   if (slugs && !slugs.length) return [];
-  await connection();
   const db = catalogDb();
   const query = db.select({
     id: products.id, slug: products.slug, brand: brands.name, name: products.name,
@@ -49,6 +49,7 @@ async function catalogRows(slugs?: string[], mode: "none" | "card" | "detail" = 
 }
 
 export async function indexableProductSlugs() {
+  await connection();
   const rows = localCatalog ? await listProducts() : await catalogRows();
   return rows.filter(({status}) => status !== "pending_review").map(({slug}) => slug);
 }
@@ -167,7 +168,6 @@ const localRows = cache(async (): Promise<FixtureRow[]> => {
 
 async function loadProducts(mode: "card" | "detail", slugs?: string[]) {
   if (localCatalog) {
-    await connection();
     return fixtureProducts(await localRows(), mode === "detail", slugs);
   }
   if (!catalogEnabled) return exampleProducts().filter((product) => brandAdapter(product.brandSlug).accepts(product, {}) && (!slugs || slugs.includes(product.slug)));
@@ -193,9 +193,22 @@ async function loadProducts(mode: "card" | "detail", slugs?: string[]) {
   return rows.map((row) => toView(row, specsByProduct.get(row.id) ?? [], pricesByProduct.get(row.id) ?? [], mode === "detail"));
 }
 
-export const listProducts = cache(async () => consistentTaxonomy(await loadProducts("card")).map(cardOnly));
+async function loadListing() {
+  const views = consistentTaxonomy(await loadProducts("card"));
+  const featured = views.find(({hero, status}) => hero && status === "active");
+  return {
+    cards: views.map(cardOnly),
+    feature: featured && {hero: featured.hero, slug: featured.slug, name: featured.name, gender: featured.gender},
+  };
+}
+
+const cachedListing = unstable_cache(loadListing, ["catalog-v1.8.0"], {revalidate: 300});
+const readListing = cache(catalogEnabled && !localCatalog ? cachedListing : loadListing);
+export const listProducts = async () => (await readListing()).cards;
+export const homeFeature = async () => (await readListing()).feature;
 
 export async function readProducts(slugs: string[]) {
+  if (!slugs.length) return [];
   const detail = await loadProducts("detail", slugs);
   if (!detail.length) return [];
   const classified = new Map((await listProducts()).map(({slug, taxonomy}) => [slug, taxonomy]));

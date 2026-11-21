@@ -3,13 +3,12 @@
 import {Link} from "@/i18n/navigation";
 import {activityCode, activityLabel, displayCardCell, displayParameter, displayPrice, optionLabel, useCopy} from "@/i18n/copy";
 import { useSearchParams } from "next/navigation";
-import { useDeferredValue, useEffect, useRef, useState } from "react";
+import { Suspense, useDeferredValue, useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CompareButton } from "@/components/catalog/compare-selection";
 import { ColorDot, GenderPill, ProductBadges, ProductImage } from "@/components/catalog/product-media";
-import type {CatalogCard} from "@/lib/product-view";
-import {taxonomy, taxonomyGroup, taxonomyLabelKey, taxonomyPath} from "@/lib/taxonomy";
+import {matchesTaxonomy, taxonomy, taxonomyGroup, taxonomyLabelKey, taxonomyPath} from "@/lib/taxonomy";
 
 import {ParameterHelp} from "@/components/catalog/parameter-help";
 import {catalogSort, defaultCatalogSort, rankFeatured, type CatalogSort} from "@/lib/catalog/featured-sort";
@@ -18,7 +17,7 @@ import type {CatalogListing} from "@/lib/catalog";
 import { cardFields, fieldsByKey } from "@/lib/parameters/registry";
 import { missing } from "@/lib/parameters/model";
 
-const PAGE_SIZE = 24;
+import {catalogPageSize, type catalogFacets} from "@/lib/catalog/facets";
 const sortLabels: Record<CatalogSort, string> = {
   featured: "ui.sort_featured",
   name: "ui.sort_name",
@@ -43,10 +42,10 @@ function CatalogCardView({ product, eager }: { product: CatalogListing; eager: b
         </span>
       </Link>
       <div className="grid gap-2.5 p-2.5 sm:p-4">
-        {product.swatches.length > 0 && (
-          <div className="flex items-center gap-1.5" aria-label={t("ui.color_count", {count: product.swatches.length})}>
-            {product.swatches.slice(0, 5).map((color, index) => <span key={index} title={color.label}><ColorDot color={color} /></span>)}
-            {product.swatches.length > 5 && <span className="font-mono text-[0.65rem] text-muted-foreground">+{product.swatches.length - 5}</span>}
+        {product.swatchCount > 0 && (
+          <div className="flex items-center gap-1.5" aria-label={t("ui.color_count", {count: product.swatchCount})}>
+            {product.swatches.map((color, index) => <span key={index} title={color.label}><ColorDot color={color} /></span>)}
+            {product.swatchCount > 5 && <span className="font-mono text-[0.65rem] text-muted-foreground">+{product.swatchCount - 5}</span>}
           </div>
         )}
         <div className="flex min-h-5 flex-wrap items-center gap-1.5 empty:hidden"><ProductBadges product={product} /></div>
@@ -76,11 +75,19 @@ function CatalogCardView({ product, eager }: { product: CatalogListing; eager: b
   );
 }
 
-export function CatalogBrowser({products, category, categoryCounts, total}: {
-  products: CatalogListing[]; category: string; categoryCounts: Record<string, number>; total: number;
+function CatalogQuery({onChange}: {onChange: (query: string) => void}) {
+  const query = useSearchParams().toString();
+  useEffect(() => onChange(query), [onChange, query]);
+  return null;
+}
+
+export function CatalogBrowser({preview, facets: catalogOptions, category, categoryCounts, total, matchingCount}: {
+  preview: CatalogListing[]; facets: ReturnType<typeof catalogFacets>; category: string;
+  categoryCounts: Record<string, number>; total: number; matchingCount: number;
 }) {
   const {t, locale} = useCopy();
-  const params = useSearchParams();
+  const [queryString, setQueryString] = useState("");
+  const params = new URLSearchParams(queryString);
   const query = params.get("q") ?? "";
   const gender = params.get("gender") ?? "";
   const legacyLine = params.get("line");
@@ -94,8 +101,26 @@ export function CatalogBrowser({products, category, categoryCounts, total}: {
   const protectionType = params.get("protection") ?? (params.get("hard") === "1" ? "hard_shell" : "");
   const deferredQuery = useDeferredValue(query);
   const deferredParams = useDeferredValue(params.toString());
-  const [page, setPage] = useState({ filters: "", count: PAGE_SIZE });
+  const [page, setPage] = useState({ filters: "", count: catalogPageSize });
   const searchInput = useRef<HTMLInputElement>(null);
+  const [catalog, setCatalog] = useState<CatalogListing[] | null>(null);
+  const [failed, setFailed] = useState(false);
+  const hasFilters = Boolean(query || gender || legacyLine || brand.length || series.length || activity.length || family ||
+    productType || protectionType || sort !== defaultCatalogSort);
+  const count = page.filters === deferredParams ? page.count : catalogPageSize;
+  const needsCatalog = hasFilters || count > preview.length && matchingCount > preview.length;
+
+  useEffect(() => {
+    if (!needsCatalog || catalog || failed) return;
+    const controller = new AbortController();
+    fetch("/api/catalog", {signal: controller.signal}).then(async (response) => {
+      if (!response.ok) throw new Error("Catalog request failed");
+      setCatalog(await response.json() as CatalogListing[]);
+    }).catch(() => {
+      if (!controller.signal.aborted) setFailed(true);
+    });
+    return () => controller.abort();
+  }, [needsCatalog, catalog, failed]);
 
   useEffect(() => {
     // Read the current location so a deferred router update cannot overwrite a newer keystroke.
@@ -132,26 +157,23 @@ export function CatalogBrowser({products, category, categoryCounts, total}: {
 
   const group = taxonomyGroup(category);
   const facets = [
-    {key: "brand", label: "field.brand", selected: brand, options: [...new Map(products.map(({brandSlug, brand}) => [brandSlug, brand]))]},
+    {key: "brand", label: "field.brand", selected: brand, options: catalogOptions.brands},
     {key: "series", label: "ui.line", selected: series.length ? series : legacyLine === "veilance" ? ["Veilance"] : [],
-      options: [...new Set(products.flatMap(({series}) => series ?? []))].sort().map((value) => [value, value])},
-    {key: "activity", label: "field.activities", selected: activity,
-      options: [...new Map(products.flatMap(({activities}) => activities.map((value) => [activityCode(value), value] as const)))].sort((a, b) => a[1].localeCompare(b[1]))},
+      options: catalogOptions.series},
+    {key: "activity", label: "field.activities", selected: activity, options: catalogOptions.activities},
   ];
   const typeFilters = [
-    { field: fieldsByKey.get("product_type")!, queryKey: "type", selected: productType, read: (product: CatalogCard) => product.productType },
-    { field: fieldsByKey.get("protection_type")!, queryKey: "protection", selected: protectionType, read: (product: CatalogCard) => product.protectionType },
+    {field: fieldsByKey.get("product_type")!, queryKey: "type", selected: productType, present: catalogOptions.productTypes},
+    {field: fieldsByKey.get("protection_type")!, queryKey: "protection", selected: protectionType, present: catalogOptions.protectionTypes},
   ].map((filter) => {
-    const present = new Set(products.map(filter.read));
     const options = [...Object.entries(filter.field.options ?? {}).map(([key, label]) => [key, optionLabel(t, filter.field, key, label)]), ...(["review", "unpublished", "inapplicable"] as const)
-      .map((state) => [state, displayParameter(t, locale, filter.field, missing(state))])].filter(([key]) => present.has(key) || key === filter.selected);
-    return { ...filter, options };
+      .map((state) => [state, displayParameter(t, locale, filter.field, missing(state))])].filter(([key]) => filter.present.includes(key) || key === filter.selected);
+    return {...filter, options};
   });
-  const familyCounts = new Map<string, number>();
-  for (const product of products) if (product.family) familyCounts.set(product.family, (familyCounts.get(product.family) ?? 0) + 1);
-  const topFamilies = [...familyCounts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 8).map(([name]) => name);
+  const topFamilies = catalogOptions.families;
   const familyFilters = family && !topFamilies.includes(family) ? [...topFamilies, family] : topFamilies;
 
+  const products = (catalog ?? []).filter((product) => !category || matchesTaxonomy(product, category));
   const filtered = products.filter((product) =>
     (!gender || product.gender === gender) && (!family || product.family === family) &&
     (!brand.length || brand.includes(product.brandSlug)) &&
@@ -159,7 +181,7 @@ export function CatalogBrowser({products, category, categoryCounts, total}: {
     (!activity.length || activity.some((value) => product.activities.some((label) => activityCode(label) === value))) && (!productType || product.productType === productType) &&
     (!protectionType || product.protectionType === protectionType));
   const matches = searchCatalog(filtered, deferredQuery);
-  const results = sort === defaultCatalogSort ? rankFeatured(matches).map(({product}) => product)
+  const results = !catalog ? preview : sort === defaultCatalogSort ? rankFeatured(matches).map(({product}) => product)
     : [...matches].sort((a, b) => {
       if (sort === "name") return a.name.localeCompare(b.name);
       const first = sort === "weight" ? a.card.weight : a.msrp;
@@ -171,10 +193,12 @@ export function CatalogBrowser({products, category, categoryCounts, total}: {
       }
       return (first - second) * (sort === "price-desc" ? -1 : 1) || a.name.localeCompare(b.name);
     });
-  const count = page.filters === deferredParams ? page.count : PAGE_SIZE;
+  const resultCount = catalog ? results.length : matchingCount;
+  const pending = needsCatalog && !catalog;
 
   return (
     <>
+      <Suspense fallback={null}><CatalogQuery onChange={setQueryString} /></Suspense>
       <nav aria-label={t("ui.product_categories")} className="catalog-tabs">
         <Link href={categoryHref("")} aria-current={category ? undefined : "page"} className="catalog-tab">
           {t("ui.all")} <span>{total}</span>
@@ -243,18 +267,22 @@ export function CatalogBrowser({products, category, categoryCounts, total}: {
         </div>}
       </section>
       <div className="mb-3 flex min-h-7 items-center justify-between gap-3">
-        <p role="status" className="font-mono text-xs tabular-nums text-muted-foreground">{t("ui.product_count", {count: results.length})}</p>
-        {Boolean(query || gender || legacyLine || brand.length || series.length || activity.length || family || productType || protectionType || sort !== defaultCatalogSort) &&
+        <p role="status" className="font-mono text-xs tabular-nums text-muted-foreground">{t(pending ? "ui.loading_catalog_filters" : "ui.product_count", {count: resultCount})}</p>
+        {hasFilters &&
           <button type="button" className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             onClick={() => window.history.pushState(null, "", location.pathname)}>{t("ui.reset_filters")}</button>}
       </div>
-      {results.length > 0
+      {pending && failed && <div className="mb-3 flex items-center gap-3 text-sm text-muted-foreground" role="alert">
+        <span>{t("ui.catalog_load_failed")}</span>
+        <Button type="button" variant="outline" size="sm" onClick={() => setFailed(false)}>{t("ui.catalog_retry")}</Button>
+      </div>}
+      {(!pending || !hasFilters) && (results.length > 0
         ? <div className="grid grid-cols-2 items-stretch gap-2.5 md:grid-cols-3 md:gap-4 xl:grid-cols-4">
           {results.slice(0, count).map((product, index) => <CatalogCardView key={product.slug} product={product} eager={index < 2} />)}
         </div>
-        : <p className="border bg-card p-6 text-muted-foreground">{t("ui.no_products_match_these_filters")}</p>}
-      {results.length > count && <div className="mt-7 flex justify-center">
-        <Button type="button" variant="outline" className="h-10 px-5" onClick={() => setPage({ filters: deferredParams, count: count + PAGE_SIZE })}>{t("ui.show_more_products")}</Button>
+        : <p className="border bg-card p-6 text-muted-foreground">{t("ui.no_products_match_these_filters")}</p>)}
+      {!pending && resultCount > count && <div className="mt-7 flex justify-center">
+        <Button type="button" variant="outline" className="h-10 px-5" onClick={() => setPage({ filters: deferredParams, count: count + catalogPageSize })}>{t("ui.show_more_products")}</Button>
       </div>}
     </>
   );

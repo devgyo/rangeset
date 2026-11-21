@@ -1,14 +1,14 @@
 import {getTranslations} from "next-intl/server";
-import {currentLocale} from "@/i18n/seo";
-import {pageAlternates} from "@/i18n/routing";
+import {pageAlternates, type Locale} from "@/i18n/routing";
 import type {Metadata} from "next";
-import {Suspense} from "react";
 import {CatalogBrowser} from "@/components/catalog/catalog-browser";
 import {catalogEnabled, listProducts, localCatalog} from "@/lib/catalog";
+import {catalogFacets, catalogPageSize} from "@/lib/catalog/facets";
+import {rankFeatured} from "@/lib/catalog/featured-sort";
 import {matchesTaxonomy, taxonomyLabelKey, taxonomyPath, taxonomySlugs} from "@/lib/taxonomy";
 
-export async function catalogMetadata(category = ""): Promise<Metadata> {
-  const [locale, t] = await Promise.all([currentLocale(), getTranslations()]);
+export async function catalogMetadata(locale: Locale, category = ""): Promise<Metadata> {
+  const t = await getTranslations({locale});
   return {
     title: t(category ? taxonomyLabelKey(category) : "ui.product_catalog"),
     description: t("seo.catalog_description"),
@@ -17,17 +17,16 @@ export async function catalogMetadata(category = ""): Promise<Metadata> {
   };
 }
 
-export async function CatalogPage({category = ""}: {category?: string}) {
-  const [products, t] = await Promise.all([listProducts(), getTranslations()]);
+export async function CatalogPage({locale, category = ""}: {locale: Locale; category?: string}) {
+  const [products, t] = await Promise.all([listProducts(), getTranslations({locale})]);
   const categoryCounts = Object.fromEntries(taxonomySlugs.map((slug) => [slug, products.filter((product) => matchesTaxonomy(product, slug)).length]));
   const matching = category ? products.filter((product) => matchesTaxonomy(product, category)) : products;
   return (
     <div className="site-width py-7 sm:py-8">
       <h1 className="page-title catalog-title">{t(category ? taxonomyLabelKey(category) : "ui.product_catalog")}</h1>
       <p className="mt-2 mb-4 text-sm text-muted-foreground">{t(localCatalog ? "ui.local_catalog" : catalogEnabled ? "ui.catalog_live" : "ui.example_data")}</p>
-      <Suspense fallback={<p className="border-t py-4 text-sm text-muted-foreground">{t("ui.loading_catalog_filters")}</p>}>
-        <CatalogBrowser products={matching} category={category} categoryCounts={categoryCounts} total={products.length} />
-      </Suspense>
+      <CatalogBrowser key={category} preview={rankFeatured(matching).slice(0, catalogPageSize).map(({product}) => product)}
+        facets={catalogFacets(matching)} category={category} categoryCounts={categoryCounts} total={products.length} matchingCount={matching.length} />
     </div>
   );
 }

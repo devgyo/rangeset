@@ -6,8 +6,8 @@ export function catalogSort(value: string | null): CatalogSort {
   return catalogSorts.find((sort) => sort === value) ?? defaultCatalogSort;
 }
 
-type Tier = "A" | "B" | "C" | "D";
-const tiers: readonly Tier[] = ["A", "B", "C", "D"];
+type Tier = "A" | "C" | "D";
+const tiers: readonly Tier[] = ["A", "C", "D"];
 
 export type FeaturedProduct = {
   slug: string;
@@ -18,6 +18,7 @@ export type FeaturedProduct = {
   inStock: boolean | null;
   stockRatio: number | null;
   cardValueCount: number;
+  status: "active" | "discontinued" | "pending_review";
 };
 
 export function releaseSeasonRank(year: number | null, season: string): number | null {
@@ -28,10 +29,9 @@ export function releaseSeasonRank(year: number | null, season: string): number |
   return null;
 }
 
-function tierFor(product: FeaturedProduct, recent: ReadonlySet<number>): Tier {
+function tierFor(product: FeaturedProduct): Tier {
   if (product.inStock === false || (product.stockRatio !== null && product.stockRatio < 0.5)) return "D";
-  if (product.cardValueCount < 3) return "C";
-  return product.releaseSeason !== null && recent.has(product.releaseSeason) ? "A" : "B";
+  return product.cardValueCount < 3 || product.status === "discontinued" ? "C" : "A";
 }
 
 function groupBy<T, K>(products: readonly T[], keyOf: (product: T) => K): Map<K, T[]> {
@@ -81,8 +81,6 @@ function interleaveBrands<T extends FeaturedProduct>(products: T[]): T[] {
 }
 
 export function rankFeatured<T extends FeaturedProduct>(products: readonly T[]): {product: T; tier: Tier}[] {
-  const recent = new Set([...new Set(products.flatMap(({releaseSeason}) => releaseSeason === null ? [] : [releaseSeason]))]
-    .sort((a, b) => b - a).slice(0, 2));
-  const grouped = groupBy(products, (product) => tierFor(product, recent));
+  const grouped = groupBy(products, tierFor);
   return tiers.flatMap((tier) => interleaveBrands(grouped.get(tier) ?? []).map((product) => ({product, tier})));
 }

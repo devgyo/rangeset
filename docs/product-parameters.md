@@ -1,6 +1,6 @@
-# Rangeset product parameter standard v1.7.0
+# Rangeset product parameter standard v1.8.0
 
-The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.7.0 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
+The registry in `lib/parameters/registry.ts` owns field keys, labels, ordering, types, units, enum values, applicability, formatters, comparison policies, and glossary entries. The table below is the v1.8.0 field inventory. Product adapters emit a `Profile` from `lib/parameters/model.ts`. Add brand-specific extraction in an adapter and map its values to the same keys.
 
 ## Catalog scope
 
@@ -70,18 +70,21 @@ The mapping ignores case and normalizes hyphens and spacing. Search accepts publ
 
 Featured is the default in all three languages. It ranks the current filtered and searched result set before pagination:
 
-- **A:** at least three card values, with a release in one of the two latest distinct published seasons in the results.
-- **B:** at least three card values, with an older or unpublished release season.
-- **C:** at most two card values.
-- **D:** explicitly sold out, or fewer than half of the reported size–color combinations are in stock. D takes precedence over all other tiers.
+- **A:** at least three card values and no lower-tier condition.
+- **C:** fewer than three card values or a discontinued item that has not met D.
+- **D:** explicitly sold out or fewer than half of reported size–color combinations are in stock.
 
-Unknown stock does not downgrade a product. A published value or an explicit N/A counts toward card completeness. The main-fabric composition fallback counts when shown. Within each tier, smooth weighted round-robin interleaves brands in proportion to their product counts. Brand queues use newest season first, same-season style families together, then name A–Z. Missing release seasons follow dated items within their tier and brand. Selecting Featured clears the sort URL parameter. Name, price and weight remain available.
+D takes precedence over C. Discontinued comes from `products.status = 'discontinued'`, after the existing manual status override. Unknown stock does not downgrade a product. A known value or explicit N/A counts toward completeness, as does the main fabric composition fallback. Release season orders each brand queue within its tier. Unknown release seasons follow known ones without changing tier. Same-season style families stay together. Smooth weighted round-robin interleaves brands in proportion to their tier counts.
 
-See [the composite sort report](composite-sort-v1.6.0.md) for the algorithm and data rules.
+See [the v1.8.0 composite sort report](composite-sort-v1.8.0.md) for implementation and verification details.
+
+## Price and stock observation
+
+The daily snapshot job appends each official brand size–color SKU to `price_snapshots`, with observed regular price, sale price, currency and availability. Unpublished observations stay null. The new history is collected independently of the existing listing and has no price-history UI. The migration also creates `outbound_clicks` for the official brand redirect. See the [operating notes](price-snapshots-v1.8.0.md).
 
 ## Evidence and review
 
-Each fact carries the source URL, original field path and text, extraction method, and source update time when available. Evidence is retained internally for resolving conflicts and verifying data. Product detail and comparison pages omit evidence, source links, and raw source text from their parameter presentation. Existing raw payloads and indexed specs stay in their original storage.
+Each fact carries the source URL, original field path and text, extraction method, and source update time when available. Evidence is retained internally for resolving conflicts and verifying data. Parameter tables omit raw source text and evidence links. The separate brand button goes through the first-party outbound endpoint. Existing raw payloads and indexed specs stay in their original storage.
 
 - **Not published** means there is no usable published observation for an applicable field.
 - **Not applicable** means the field does not apply to the product's construction or type.
@@ -247,6 +250,8 @@ These fields support internal data review. They are excluded from detail and com
 
 
 ## Changelog
+
+- **v1.8.0** adds official price and stock snapshots, revises Featured, adds product JSON-LD and brand redirects, and reduces catalog payload with ISR for category and product detail pages.
 
 - **v1.7.0** adds the Rangeset taxonomy, shared brand adapters and a Mammut US dry run.
 

@@ -2,9 +2,9 @@ import {leafSlug, taxonomyLabelKey, taxonomyPath} from "@/lib/taxonomy";
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import {Link} from "@/i18n/navigation";
-import {getTranslations} from "next-intl/server";
-import {currentLocale} from "@/i18n/seo";
-import {pageAlternates} from "@/i18n/routing";
+import {hasLocale} from "next-intl";
+import {getTranslations, setRequestLocale} from "next-intl/server";
+import {localizedPath, locales, pageAlternates} from "@/i18n/routing";
 import {activityLabel, displayParameter, genderDisplay, type Translator} from "@/i18n/copy";
 import { notFound } from "next/navigation";
 import { ProductGallery } from "@/components/catalog/product-gallery";
@@ -20,10 +20,21 @@ import { ParameterLabel, ParameterLegend, ParameterSections, ParameterValue } fr
 import { parametersOf } from "@/lib/brands";
 import { compareValues, getParameter, keyParameters, parameterGroups } from "@/lib/parameters/model";
 import {publicParameterGroups, withoutParameterEvidence} from "@/lib/public-parameters";
+import {brandLink} from "@/lib/outbound";
+import {productJsonLd, serializeJsonLd} from "@/lib/product-jsonld";
+import {siteUrl} from "@/lib/site";
 import { fieldsByKey, parameterVersion } from "@/lib/parameters/registry";
 
+export const revalidate = 300;
+
+export function generateStaticParams() {
+  return [];
+}
+
 export async function generateMetadata({ params }: PageProps<"/[locale]/products/[slug]">): Promise<Metadata> {
-  const [product, t, locale] = await Promise.all([readProduct((await params).slug), getTranslations(), currentLocale()]);
+  const {locale, slug} = await params;
+  if (!hasLocale(locales, locale)) notFound();
+  const [product, t] = await Promise.all([readProduct(slug), getTranslations({locale})]);
   if (!product) return { title: t("ui.product_not_found"), robots: { index: false } };
   return {
     title: [product.name, product.gender && genderDisplay(t, product.gender)].filter(Boolean).join(" · "),
@@ -81,16 +92,22 @@ function Trims({ product, siblings, t, locale }: {product: ProductDetail; siblin
 }
 
 export default async function ProductPage({ params }: PageProps<"/[locale]/products/[slug]">) {
-  const product = await readProduct((await params).slug);
+  const {locale, slug} = await params;
+  if (!hasLocale(locales, locale)) notFound();
+  setRequestLocale(locale);
+  const product = await readProduct(slug);
   if (!product) notFound();
   const category = leafSlug(product.taxonomy);
-  const [siblings, t, locale] = await Promise.all([relatedProducts(product), getTranslations(), currentLocale()]);
+  const [siblings, t] = await Promise.all([relatedProducts(product), getTranslations({locale})]);
   const profile = parametersOf(product);
   const core = keyParameters(profile);
   const sections = publicParameterGroups(parameterGroups([profile]));
   const priceField = fieldsByKey.get("msrp")!;
+  const outbound = brandLink(product, locale);
+  const canonical = new URL(localizedPath(`/products/${product.slug}`, locale), siteUrl).href;
 
   return <article className="site-width py-7 sm:py-11">
+    {!product.example && <script type="application/ld+json" dangerouslySetInnerHTML={{__html: serializeJsonLd(productJsonLd(product, canonical))}} />}
     <div className="grid items-start gap-6 lg:grid-cols-[1fr_.9fr] lg:gap-12">
       <div className="min-w-0 lg:col-start-2 lg:row-start-1">
         <nav aria-label={t("ui.breadcrumb")} className="mb-5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -112,6 +129,7 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
         </ul>}
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <CompareButton product={{ slug: product.slug, name: product.name, image: product.image, category: product.category, gender: product.gender }} />
+          {outbound && <Button variant="outline" asChild><a href={outbound}>{t("ui.view_on_brand_site")}</a></Button>}
         </div>
       </div>
       <div className="min-w-0 lg:col-start-1 lg:row-start-1">

@@ -34,7 +34,7 @@ test("unchanged English paths and self-canonicals use one locale map", () => {
   assert.deepEqual(Object.keys(languageAlternates("/")), ["en", "zh-Hans", "ja", "x-default"]);
 });
 
-test("generated messages cover the registry and only the five approved help translations", () => {
+test("generated messages cover the registry, all Simplified Chinese help and the five approved Japanese help translations", () => {
   for (const [locale, catalogue] of Object.entries(messages)) {
     for (const field of fieldsByKey.values()) {
       if (field.group !== "supplemental") assert.ok(Object.hasOwn(catalogue.field, field.key), locale + " " + field.key);
@@ -45,9 +45,8 @@ test("generated messages cover the registry and only the five approved help tran
     for (const key of Object.keys(productTypes)) assert.ok(Object.hasOwn(catalogue.type, key), locale + " " + key);
     for (const key of Object.keys(protectionTypes)) assert.ok(Object.hasOwn(catalogue.protection, key), locale + " " + key);
   }
-  for (const locale of ["zh", "ja"] as const) {
-    assert.deepEqual(Object.keys(messages[locale].help).sort(), ["3l", "denier", "dwr", "fill", "recco"]);
-  }
+  assert.deepEqual(Object.keys(zh.help).sort(), Object.keys(en.help).sort());
+  assert.deepEqual(Object.keys(ja.help).sort(), ["3l", "denier", "dwr", "fill", "recco"]);
 });
 
 test("Japanese symbols keep text and numeric or technical values keep their original format", () => {

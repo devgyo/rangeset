@@ -1,7 +1,7 @@
 export const fabricParts = { body: "Body", reinforcement: "Reinforcement", panel: "Panel", lining: "Lining" } as const;
 export type FabricPart = keyof typeof fabricParts;
 
-export const parameterVersion = "1.7.0";
+export const parameterVersion = "1.8.0";
 export const cardFields = [
   {key: "weight", label: "field.weight", help: "card.weight_help"},
   {key: "fit", label: "field.fit"},

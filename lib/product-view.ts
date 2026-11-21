@@ -23,6 +23,7 @@ export type ProductDetail = CatalogCard & {
   url: string | null; verifiedAt: string | null; description: string; materials: string[];
   features: { label: string; values: string[] }[];
   facility: string; year: number | null; season: string; sizes: string[]; colorways: Colorway[]; parameters?: Profile;
+  offerRange?: {lowPrice: number; highPrice: number; offerCount: number};
 };
 
 export function plainText(value: unknown): string {

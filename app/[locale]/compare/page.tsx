@@ -5,7 +5,8 @@ import {displayParameter} from "@/i18n/copy";
 import type { Metadata } from "next";
 import { ComparisonGrid, type ComparisonProduct, type PickerProduct } from "@/components/catalog/comparison-grid";
 import { genderLabel, type CatalogCard, type ProductDetail } from "@/lib/product-view";
-import { listProducts, readProducts } from "@/lib/catalog";
+import { listProducts, readProducts, type CatalogListing } from "@/lib/catalog";
+import {brandLink} from "@/lib/outbound";
 import { buildComparison, comparisonIds } from "@/lib/comparison";
 
 import { parametersOf } from "@/lib/brands";
@@ -22,14 +23,14 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-function summary(product: CatalogCard): ComparisonProduct {
+function summary(product: Pick<CatalogCard, "slug" | "name" | "image" | "gender" | "category" | "taxonomy" | "msrp" | "currency" | "example" | "status">): ComparisonProduct {
   return { slug: product.slug, name: product.name, image: product.image, gender: product.gender,
     category: product.category, taxonomy: product.taxonomy, msrp: product.msrp, currency: product.currency, example: product.example, discontinued: product.status === "discontinued" };
 }
 
-function picker(product: CatalogCard): PickerProduct {
+function picker(product: CatalogListing): PickerProduct {
   return { ...summary(product), keywords: [product.name, product.brand, product.family, product.category, ...(product.modelNumbers ?? []),
-    product.gender, genderLabel(product.gender), ...product.subTags, product.specs.membrane?.value].join(" ").toLocaleLowerCase("en-US") };
+    product.gender, genderLabel(product.gender), ...product.subTags, product.membrane].join(" ").toLocaleLowerCase("en-US") };
 }
 
 export default async function ComparePage({ searchParams }: PageProps<"/[locale]/compare">) {
@@ -38,7 +39,7 @@ export default async function ComparePage({ searchParams }: PageProps<"/[locale]
   const price = fieldsByKey.get("msrp")!;
   const compared = products.slice(0, 4);
   const selected = compared.map((product: ProductDetail) => ({
-    ...summary(product), priceLabel: displayParameter(t, locale, price, getParameter(parametersOf(product), price)),
+    ...summary(product), outbound: brandLink(product, locale), priceLabel: displayParameter(t, locale, price, getParameter(parametersOf(product), price)),
   }));
   return (
     <div className="site-width py-7 sm:py-11">

@@ -12,7 +12,7 @@ import { comparisonHref, type ComparisonGroup } from "@/lib/comparison";
 import { visibleInComparison } from "@/lib/parameters/model";
 import { localGroup, ParameterLabel, ParameterLegend, ParameterValue } from "./parameter-table";
 
-export type ComparisonProduct = PickedProduct & { msrp: number | null; currency?: string | null; priceLabel?: string; example?: boolean; discontinued?: boolean };
+export type ComparisonProduct = PickedProduct & { msrp: number | null; currency?: string | null; priceLabel?: string; outbound?: string; example?: boolean; discontinued?: boolean };
 export type PickerProduct = ComparisonProduct & { keywords: string };
 
 function ProductPicker({ products, selected, onPick, onClose }: {
@@ -84,6 +84,9 @@ function CompareTable({ products, groups, highlight, differencesOnly, remove }: 
               {product.example && <span className="text-xs text-muted-foreground">{t("ui.example")}</span>}
             </div>
             <span className="mt-1 block font-mono text-xs tabular-nums text-primary">{product.priceLabel ?? displayPrice(t, product.msrp, product.currency)}</span>
+            {product.outbound && <Button size="sm" variant="outline" className="mt-2 h-auto max-w-full whitespace-normal py-1 text-left text-xs" asChild>
+              <a href={product.outbound}>{t("ui.view_on_brand_site")}</a>
+            </Button>}
           </th>)}
         </tr></thead>
         {visible.map(({ title, rows }) => <tbody key={title}>

@@ -15,7 +15,9 @@ export type CatalogSource = {
 
 export type PriceRow = {variant: string; price: number | null; currency: string | null; inStock: boolean | null};
 export type CatalogView = ProductDetail & Pick<FeaturedProduct, "brandSlug" | "styleFamily" | "stockRatio">;
-export type CatalogListing = CatalogCard & FeaturedProduct & {card: CardParameters};
+export type CatalogListing = Pick<CatalogCard, "brand" | "category" | "gender" | "family" | "subTags" | "veilance" | "example" |
+  "image" | "swatches" | "activities" | "msrp" | "currency" | "taxonomy" | "modelNumbers" | "series" | "productType" | "protectionType">
+  & FeaturedProduct & {card: CardParameters; swatchCount: number; membrane?: string | number | boolean};
 
 export const defaultUnits: Record<string, string> = {
   weight_g: "g", layers: "layers", face_denier: "D", fabric_gsm: "g/m²", centre_back_length_cm: "cm", inseam: "cm",
@@ -89,10 +91,16 @@ export function toView(row: ReturnType<typeof catalogSource>, dbSpecs: IndexedSp
   const currency = typeof currencyCode === "string" && /^[A-Z]{3}$/.test(currencyCode) ? currencyCode : null;
   const priceOverride = row.overrides.get("price");
   const msrp = priceOverride === null || typeof priceOverride === "number" ? amount(priceOverride) : currency ? amount(publishedPrice) : null;
-  const variantStates = dbPrices.filter(({variant}) => variant !== "").map(({inStock}) => inStock);
+  const variants = dbPrices.filter(({variant}) => variant !== "");
+  const variantStates = variants.map(({inStock}) => inStock);
   const variantStock = variantStates.includes(true) ? true : variantStates.length && variantStates.every((state) => state === false) ? false : null;
+  const offers = detail && currency ? variants.flatMap((row) =>
+    row.currency === currency && row.price !== null && Number.isFinite(row.price) && row.price > 0 ? [row.price] : []) : [];
+  const lowPrice = Math.min(...offers);
+  const highPrice = Math.max(...offers);
   const product: CatalogView = {
     ...visuals, specs,
+    offerRange: offers.length > 1 && lowPrice < highPrice ? {lowPrice, highPrice, offerCount: offers.length} : undefined,
     name: row.name, slug: row.slug, brand: row.brand, category: row.category, url: row.url,
     brandSlug: row.brandSlug, styleFamily: row.styleFamily ?? styleFamily ?? null, stockRatio: row.stockRatio,
     gender: productGender(row.gender, row.overrides.has("gender") ? undefined : unisex),
@@ -116,12 +124,13 @@ export function applyTaxonomyPresentation(product: CatalogView, taxonomy: Taxono
 }
 
 export function cardOnly(product: CatalogView): CatalogListing {
-  const {slug, name, brand, category, gender, family, subTags, veilance, isHardshell, status, example,
-    image, hero, swatches, activities, summary, msrp, currency, inStock, specs, taxonomy, modelNumbers, series, salePrice} = product;
+  const {slug, name, brand, category, gender, family, subTags, veilance, status, example,
+    image, swatches, activities, msrp, currency, inStock, specs, taxonomy, modelNumbers, series} = product;
   const profile = parametersOf(product);
   const card = selectCardParameters(profile);
-  return {slug, name, brand, category, gender, family, subTags, veilance, isHardshell, status, example, taxonomy, modelNumbers, series, salePrice,
-    image, hero, swatches, activities, summary, msrp, currency: example ? "USD" : currency, inStock, specs,
+  return {slug, name, brand, category, gender, family, subTags, veilance, status, example, taxonomy, modelNumbers, series,
+    image, swatches: swatches.slice(0, 5), swatchCount: swatches.length, activities, msrp, currency: example ? "USD" : currency, inStock,
+    membrane: specs.membrane?.value,
     productType: classificationFilterValue(profile.values.product_type), protectionType: classificationFilterValue(profile.values.protection_type),
     brandSlug: product.brandSlug, styleFamily: product.styleFamily, stockRatio: product.stockRatio,
     releaseSeason: releaseSeasonRank(product.year, product.season), cardValueCount: countCardValues(card, profile), card};

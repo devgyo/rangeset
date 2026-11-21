@@ -232,14 +232,18 @@
 | en | zh | ja | 依据 | 备注 |
 |---|---|---|---|---|
 | Browse catalog | 浏览目录 | カタログを見る |  |  |
+| Product families | 商品系列 | 製品シリーズ |  |  |
+| View on brand site | 去官网查看 | 公式サイトで見る |  |  |
 | Browse by category | 按品类浏览 | カテゴリーから探す |  |  |
 | Product catalog | 商品目录 | 商品カタログ |  |  |
 | Search catalog | 搜索目录 | カタログを検索 |  |  |
 | Search products or specs | 搜索商品或参数 | 商品名・スペックで検索 |  |  |
 | Search by name, category, or gender | 按名称、品类或性别搜索 | 名前・カテゴリー・性別で検索 |  |  |
+| The catalog could not load. | 目录加载失败。 | カタログを読み込めませんでした。 |  |  |
+| Try again | 重试 | 再試行 |  |  |
 | Sort | 排序 | 並び替え |  |  |
 | Featured | 综合排序 | おすすめ順 |  |  |
-| Featured: in stock on the brand site, complete card specs, and released in the latest two seasons come first; brands are interleaved by share within each group. No paid placement, no scores, no brand favoritism. | 综合排序：官网有货、卡片参数齐全、近两季发布的优先；同组内各品牌按占比穿插。不收费、不打分、不看品牌。 | おすすめ順：公式サイトで在庫あり・カード項目がそろっている・直近2シーズン発売の商品を優先し、各グループ内ではブランドを掲載数の比率で交互に並べます。掲載料・スコア付け・ブランドによる優遇はありません。 |  |  |
+| Featured: available items with at least three card specs come first. Newer release seasons lead within each brand and group. Brands are interleaved by share. No paid placement or scores. | 综合排序：可购买且至少有三项卡片参数的商品优先。同组内各品牌按占比穿插，品牌内新季在前。不收费、不打分。 | おすすめ順：購入可能でカードの項目が3つ以上ある商品を優先します。同じグループではブランドごとの掲載数に応じて交互に並べ、各ブランド内では新しいシーズンを先に表示します。掲載料やスコア付けはありません。 |  |  |
 | All | 全部 | すべて |  |  |
 | Family | 系列 | シリーズ |  |  |
 | Line | 产品线 | ライン |  |  |
