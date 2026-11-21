@@ -1,19 +1,22 @@
-import Image from "next/image";
 import { ImageOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import {genderDisplay, useCopy} from "@/i18n/copy";
+import {genderDisplay, useCopy} from "@/i18n/ui-copy";
 import type { CatalogCard, ColorSwatch } from "@/lib/product-view";
 import { cn } from "@/lib/utils";
 
-export function ProductImage({ src, alt = "", sizes, eager, studio = true, fit = "cover", className }: {
-  src: string | null; alt?: string; sizes: string; eager?: boolean; studio?: boolean; fit?: "cover" | "contain"; className?: string;
+export function ProductImage({ src, alt = "", eager, studio = true, fit = "cover", className }: {
+  src: string | null; alt?: string; eager?: boolean; studio?: boolean; fit?: "cover" | "contain"; className?: string;
 }) {
+  // The catalog already serves unoptimized images from the brand CDNs.
+  /* eslint-disable @next/next/no-img-element */
   return (
     <div className={cn("image-stage relative overflow-hidden", studio && "studio-stage", className)}>
-      {src ? <Image src={src} alt={alt} fill unoptimized sizes={sizes} loading={eager ? "eager" : "lazy"} className={fit === "contain" ? "object-contain" : "object-cover"} />
+      {src ? <img src={src} alt={alt} decoding="async" loading={eager ? "eager" : "lazy"}
+        className={cn("absolute inset-0 size-full text-transparent", fit === "contain" ? "object-contain" : "object-cover")} />
         : <div className="grid h-full place-items-center text-[#73736d]" aria-hidden="true"><ImageOff size={20} /></div>}
     </div>
   );
+  /* eslint-enable @next/next/no-img-element */
 }
 
 export function GenderPill({ gender }: { gender: CatalogCard["gender"] }) {

@@ -1,3 +1,4 @@
+import {ClientMessages} from "@/i18n/client-messages";
 import {getTranslations} from "next-intl/server";
 import {currentLocale} from "@/i18n/seo";
 import {pageAlternates} from "@/i18n/routing";
@@ -26,7 +27,9 @@ export default async function JacketsPage() {
           {t("ui.jacket_intro")}
         </p>
       </div>
-      <JacketTable jackets={jackets} />
+      <ClientMessages scope="jackets">
+        <JacketTable jackets={jackets} />
+      </ClientMessages>
     </div>
   );
 }

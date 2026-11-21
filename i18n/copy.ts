@@ -1,16 +1,11 @@
 import {taxonomyLabelKey, taxonomySlugs} from "@/lib/taxonomy";
-import {useLocale, useTranslations} from "next-intl";
-import en from "@/messages/en.json";
+import parameterLookup from "@/messages/parameter-lookup.json";
 import {formatParameterNumber, formatReference, formatValue, known, parameterStatus, type Fiber, type Parameter} from "@/lib/parameters/model";
 import {cardFields, fieldsByKey, type Field} from "@/lib/parameters/registry";
 import type {CardParameters} from "@/lib/parameters/card";
-import {formatPrice, type Gender} from "@/lib/product-view";
-
-export type Translator = ReturnType<typeof useTranslations>;
-export const englishMessage = (key: string) => {
-  const [namespace, name] = key.split(".");
-  return (en as Record<string, Record<string, string>>)[namespace]?.[name] ?? key;
-};
+import {formatPrice} from "@/lib/product-view";
+import {activityLabel, type Translator} from "./ui-copy";
+export {activityCode, activityLabel, genderDisplay, useCopy, type Translator} from "./ui-copy";
 
 const categoryKeys: Record<string, string> = {
   "Shell Jackets": "shell_jackets", "Insulated Jackets": "insulated_jackets", Pants: "pants",
@@ -28,25 +23,12 @@ const constructionKeys: Record<string, string> = {
 const stretchKeys: Record<string, string> = {
   Mechanical: "mechanical", "2-way": "2way", "4-way": "4way", "Contains elastane": "elastane",
 };
-const partByEnglish = Object.fromEntries(Object.entries(en.part).map(([key, label]) => [label, key]));
-const noteByEnglish = Object.fromEntries(["note", "ui"].flatMap((namespace) =>
-  Object.entries(en[namespace as "note" | "ui"]).map(([key, text]) => [text, namespace + "." + key])));
+const partByEnglish: Record<string, string> = parameterLookup.parts;
+const noteByEnglish: Record<string, string> = parameterLookup.notes;
 
 export const categoryLabel = (t: Translator, data: string | null) => data && categoryKeys[data] ? t("cat." + categoryKeys[data]) : data;
-export const genderDisplay = (t: Translator, data: Gender | null) => data ? t("gender." + data) : t("status.missing");
 export const displayPrice = (t: Translator, amount: number | null, currency?: string | null) =>
   amount === null ? t("status.missing") : formatPrice(amount, currency);
-const activityAliases: Record<string, string> = {hiking: "hike", freeriding: "freeride", ski_touring: "touring", trail_running: "trail_run"};
-export function activityCode(value: string) {
-  const code = value.toLowerCase().replace(/[^a-z0-9]+/g, "_");
-  return activityAliases[code] ?? code;
-}
-
-export const activityLabel = (t: Translator, value: string) => {
-  const key = "activity." + activityCode(value);
-  return t.has(key) ? t(key) : value;
-};
-
 export function localNote(t: Translator, data: string) {
   return data.split(/\. (?=[A-Z])/).map((part, index, parts) => {
     const period = index < parts.length - 1 ? "." : "";
@@ -97,12 +79,6 @@ export function symbolText(t: Translator, key: "yes" | "no" | "unpublished" | "n
   return t("symbol." + key);
 }
 
-export function useCopy() {
-  const t = useTranslations();
-  const locale = useLocale();
-  return {t, locale};
-}
-
 function fiberLabel(t: Translator, value: string) {
   const key = "fiber." + value.toLowerCase().replace(/\s+/g, "_");
   return t.has(key) ? t(key) : value;
@@ -149,7 +125,7 @@ export function displayParameter(t: Translator, locale: string, field: Field, pa
   if (field.type === "list") return (parameter.value as string[]).map((item) => listItem(t, field, item)).join(" · ");
   const text = formatValue(field, parameter);
   if (locale === "en") return text;
-  if (field.format === "recycled") return text.replace(englishMessage("ui.recycled_claim"), t("ui.recycled_claim"))
+  if (field.format === "recycled") return text.replace(parameterLookup.recycledClaim, t("ui.recycled_claim"))
     .replace(/\((fabric|face|garment|scope not published)\)/g, (_, scope) => `(${t("ui.scope_" + (scope === "scope not published" ? "unknown" : scope))})`);
   if (field.format === "composition") return (parameter.value as Fiber[]).map(({pct, fiber, recycled}) => {
     const label = fiberLabel(t, fiber);

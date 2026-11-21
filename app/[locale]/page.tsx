@@ -35,7 +35,7 @@ export default async function Home() {
             </Button>
           </div>
           {feature && <Link href={`/products/${feature.slug}`} className="group block max-w-lg border bg-card">
-            <ProductImage src={feature.hero} studio={false} eager sizes="(min-width: 1024px) 40vw, 90vw" className="home-image" />
+            <ProductImage src={feature.hero} studio={false} eager className="home-image" />
             <div className="flex items-center justify-between gap-2 px-3.5 py-2.5">
               <span className="text-sm font-medium">{feature.name} <span className="ml-1 text-xs text-muted-foreground">{genderDisplay(t, feature.gender)}</span></span>
               <ArrowUpRight size={16} className="text-primary" aria-hidden="true" />

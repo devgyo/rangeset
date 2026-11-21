@@ -1,15 +1,17 @@
 "use client";
 
 import {Link, usePathname} from "@/i18n/navigation";
-import {genderDisplay, useCopy} from "@/i18n/copy";
+import {genderDisplay, useCopy} from "@/i18n/ui-copy";
 import { useMemo, useSyncExternalStore } from "react";
-import { ArrowRight, Check, Plus, X } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ProductImage } from "@/components/catalog/product-media";
+import dynamic from "next/dynamic";
 import {taxonomyPath} from "@/lib/taxonomy";
-import { comparisonHref } from "@/lib/comparison";
+import { comparisonHref } from "@/lib/comparison-href";
 import {isCatalogProduct} from "@/lib/catalog-scope";
 import {safeImage, type CatalogCard} from "@/lib/product-view";
+
+const CompareDockPanel = dynamic(() => import("./compare-dock-panel"), {ssr: false});
 
 const storageKey = "rangeset:comparison";
 const listeners = new Set<() => void>();
@@ -77,40 +79,10 @@ export function CompareButton({ product, compact = false }: { product: PickedPro
 }
 
 export function CompareDock() {
-  const {t} = useCopy();
   const selection = useCompareSelection();
   const route = usePathname();
   if (!selection.length || (!route.startsWith("/products") && route !== "/jackets")) return null;
-  const mixed = new Set(selection.map(({ category }) => category)).size > 1;
-  return (
-    <aside data-compare-dock aria-label={t("ui.compare_dock")} className="compare-dock">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <div className="flex gap-1.5 overflow-x-auto px-0.5 py-1">
-            {selection.map((product) => (
-              <div key={product.slug} className="flex max-w-44 shrink-0 items-center gap-2 border border-border bg-card p-1">
-                <ProductImage src={product.image} sizes="28px" className="size-7 shrink-0" />
-                <Link href={`/products/${product.slug}`} className="truncate text-xs hover:text-primary" title={product.name}>
-                  {product.name} <span className="sr-only">{genderDisplay(t, product.gender)}</span>
-                </Link>
-                <button type="button" aria-label={t("ui.compare_action", {action: t("ui.remove"), name: `${product.name} (${genderDisplay(t, product.gender)})`})}
-                  className="grid size-7 shrink-0 place-items-center hover:text-primary"
-                  onClick={() => rememberSelection(selection.filter(({ slug }) => slug !== product.slug))}>
-                  <X size={14} aria-hidden="true" />
-                </button>
-              </div>
-            ))}
-          </div>
-          {mixed && <p className="mt-1 text-xs text-muted-foreground">{t("ui.mixed_categories_·_some_parameters_may_n")}</p>}
-        </div>
-        <div className="ml-auto flex shrink-0 gap-1.5">
-          <Button type="button" variant="ghost" className="h-9" onClick={() => rememberSelection([])}>{t("ui.clear")}</Button>
-          {selection.length < 2 ? <Button className="h-9" disabled>{t("ui.compare_count", {count: 1})}</Button> :
-            <Button asChild className="h-9"><Link href={comparisonHref(selection.map(({ slug }) => slug))}>{t("ui.compare_count", {count: selection.length})} <ArrowRight aria-hidden="true" /></Link></Button>}
-        </div>
-      </div>
-    </aside>
-  );
+  return <CompareDockPanel selection={selection} onChange={rememberSelection} />;
 }
 
 export function CatalogNav() {

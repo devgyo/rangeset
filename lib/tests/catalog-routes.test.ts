@@ -153,18 +153,13 @@ test("catalog HTML omits full product specs and detail fields", options, async (
   const html = await (await get("/products")).text();
   const flight = [...html.matchAll(/self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)<\/script>/g)]
     .map(([, value]) => JSON.parse(value)).join("");
-  const line = flight.split("\n").find((chunk) => chunk.includes('"cardValueCount"'));
-  assert.ok(line);
-  const preview = line.match(/"preview":(\[[\s\S]*?\]),"facets":/)?.[1];
-  assert.ok(preview);
-  const firstPage = JSON.parse(preview);
-  assert.equal(firstPage.length, 24);
+  assert.match(flight, /"previewCount":24/);
+  assert.doesNotMatch(flight, /"cardValueCount":/);
   const response = await get("/api/catalog");
   assert.equal(response.status, 200);
   const cards = await response.json();
   assert.ok(cards.length > 24);
   for (const field of ["summary", "specs", "colorways", "description", "facility", "hero", "verifiedAt", "url", "salePrice"]) {
-    assert.ok(firstPage.every((card: Record<string, unknown>) => !(field in card)), field);
     assert.ok(cards.every((card: Record<string, unknown>) => !(field in card)), field);
   }
   assert.equal((html.match(/<article class="gear-card/g) ?? []).length, 24);

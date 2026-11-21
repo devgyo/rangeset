@@ -1,23 +1,22 @@
 "use client";
 
 import {Link} from "@/i18n/navigation";
-import {activityCode, activityLabel, displayCardCell, displayParameter, displayPrice, optionLabel, useCopy} from "@/i18n/copy";
+import {activityLabel, useCopy} from "@/i18n/ui-copy";
+import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useDeferredValue, useEffect, useRef, useState } from "react";
-import { ArrowUpRight, Search } from "lucide-react";
+import { Suspense, useDeferredValue, useEffect, useRef, useState, type ReactNode } from "react";
+import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CompareButton } from "@/components/catalog/compare-selection";
-import { ColorDot, GenderPill, ProductBadges, ProductImage } from "@/components/catalog/product-media";
-import {matchesTaxonomy, taxonomy, taxonomyGroup, taxonomyLabelKey, taxonomyPath} from "@/lib/taxonomy";
+import {taxonomy, taxonomyGroup, taxonomyLabelKey, taxonomyPath} from "@/lib/taxonomy";
 
 import {ParameterHelp} from "@/components/catalog/parameter-help";
-import {catalogSort, defaultCatalogSort, rankFeatured, type CatalogSort} from "@/lib/catalog/featured-sort";
-import {searchCatalog} from "@/lib/catalog-search";
+import {catalogSort, defaultCatalogSort, type CatalogSort} from "@/lib/catalog/featured-sort";
 import type {CatalogListing} from "@/lib/catalog";
-import { cardFields, fieldsByKey } from "@/lib/parameters/registry";
-import { missing } from "@/lib/parameters/model";
 
 import {catalogPageSize, type catalogFacets} from "@/lib/catalog/facets";
+const CatalogResultCards = dynamic(() => import("./catalog-result-cards"), {ssr: false});
+type StyleFilters = Record<"type" | "protection", {label: string; options: [string, string][]}>;
+
 const sortLabels: Record<CatalogSort, string> = {
   featured: "ui.sort_featured",
   name: "ui.sort_name",
@@ -27,65 +26,18 @@ const sortLabels: Record<CatalogSort, string> = {
 };
 const genders = [["", "ui.all"], ["men", "ui.filter_men"], ["women", "ui.filter_women"], ["unisex", "gender.unisex"]];
 
-function CatalogCardView({ product, eager }: { product: CatalogListing; eager: boolean }) {
-  const {t} = useCopy();
-  return (
-    <article className="gear-card min-w-0 overflow-hidden border bg-card">
-      <Link href={`/products/${product.slug}`} prefetch={false} className="group relative block">
-        <ProductImage src={product.image} sizes="(min-width: 1280px) 320px, (min-width: 768px) 30vw, 46vw" eager={eager} className="aspect-[4/5]" />
-        <div className="absolute inset-x-2 top-2 flex flex-wrap items-start gap-1">
-          <GenderPill gender={product.gender} />
-        </div>
-        <span className="sr-only">{t("ui.view_product", {name: product.name})}</span>
-        <span className="absolute right-2 bottom-2 hidden size-8 place-items-center bg-background text-foreground sm:grid">
-          <ArrowUpRight size={15} aria-hidden="true" />
-        </span>
-      </Link>
-      <div className="grid gap-2.5 p-2.5 sm:p-4">
-        {product.swatchCount > 0 && (
-          <div className="flex items-center gap-1.5" aria-label={t("ui.color_count", {count: product.swatchCount})}>
-            {product.swatches.map((color, index) => <span key={index} title={color.label}><ColorDot color={color} /></span>)}
-            {product.swatchCount > 5 && <span className="font-mono text-[0.65rem] text-muted-foreground">+{product.swatchCount - 5}</span>}
-          </div>
-        )}
-        <div className="flex min-h-5 flex-wrap items-center gap-1.5 empty:hidden"><ProductBadges product={product} /></div>
-        <div>
-          <h2 className="text-balance text-[0.95rem] leading-tight font-semibold sm:text-lg">
-            <Link href={`/products/${product.slug}`} prefetch={false} className="hover:text-primary">{product.name}</Link>
-          </h2>
-          <p className="text-xs text-muted-foreground">{product.brand}</p>
-          <p className="mt-1 font-mono text-sm tabular-nums text-primary">{displayPrice(t, product.msrp, product.currency)}</p>
-        </div>
-        <dl aria-label={t("ui.key_specs")} data-card-fields className="grid grid-cols-2 gap-px border border-border bg-border">
-          {cardFields.map((field) => {
-            const label = t(field.label);
-            const {text, title} = displayCardCell(t, product.card, field.key);
-            return <div key={field.key} data-card-field={field.key} data-parameter-row className="min-w-0 bg-card px-1.5 py-1.5 sm:px-2">
-              <dt className="flex h-6 min-w-0 items-center gap-0.5 text-[0.65rem] text-muted-foreground">
-                <span className="truncate" title={label}>{label}</span>
-                {"help" in field && <ParameterHelp label={label} text={t(field.help)} />}
-              </dt>
-              <dd data-parameter-value className="truncate font-mono text-[0.65rem] tabular-nums sm:text-xs" title={title}>{text}</dd>
-            </div>;
-          })}
-        </dl>
-        <CompareButton product={product} compact />
-      </div>
-    </article>
-  );
-}
-
 function CatalogQuery({onChange}: {onChange: (query: string) => void}) {
   const query = useSearchParams().toString();
   useEffect(() => onChange(query), [onChange, query]);
   return null;
 }
 
-export function CatalogBrowser({preview, facets: catalogOptions, category, categoryCounts, total, matchingCount}: {
-  preview: CatalogListing[]; facets: ReturnType<typeof catalogFacets>; category: string;
+export function CatalogBrowser({previewCards, previewCount, styleFilters, facets: catalogOptions, category, categoryCounts, total, matchingCount}: {
+  previewCards: ReactNode; previewCount: number; styleFilters: StyleFilters;
+  facets: ReturnType<typeof catalogFacets>; category: string;
   categoryCounts: Record<string, number>; total: number; matchingCount: number;
 }) {
-  const {t, locale} = useCopy();
+  const {t} = useCopy();
   const [queryString, setQueryString] = useState("");
   const params = new URLSearchParams(queryString);
   const query = params.get("q") ?? "";
@@ -103,19 +55,25 @@ export function CatalogBrowser({preview, facets: catalogOptions, category, categ
   const deferredParams = useDeferredValue(params.toString());
   const [page, setPage] = useState({ filters: "", count: catalogPageSize });
   const searchInput = useRef<HTMLInputElement>(null);
-  const [catalog, setCatalog] = useState<CatalogListing[] | null>(null);
+  const [catalog, setCatalog] = useState<{
+    products: CatalogListing[];
+    filter: typeof import("./catalog-filter-results").filterCatalog;
+  } | null>(null);
   const [failed, setFailed] = useState(false);
   const hasFilters = Boolean(query || gender || legacyLine || brand.length || series.length || activity.length || family ||
     productType || protectionType || sort !== defaultCatalogSort);
   const count = page.filters === deferredParams ? page.count : catalogPageSize;
-  const needsCatalog = hasFilters || count > preview.length && matchingCount > preview.length;
+  const needsCatalog = hasFilters || count > previewCount && matchingCount > previewCount;
 
   useEffect(() => {
     if (!needsCatalog || catalog || failed) return;
     const controller = new AbortController();
-    fetch("/api/catalog", {signal: controller.signal}).then(async (response) => {
+    const listings = fetch("/api/catalog", {signal: controller.signal}).then(async (response) => {
       if (!response.ok) throw new Error("Catalog request failed");
-      setCatalog(await response.json() as CatalogListing[]);
+      return await response.json() as CatalogListing[];
+    });
+    Promise.all([listings, import("./catalog-filter-results")]).then(([products, {filterCatalog}]) => {
+      if (!controller.signal.aborted) setCatalog({products, filter: filterCatalog});
     }).catch(() => {
       if (!controller.signal.aborted) setFailed(true);
     });
@@ -163,37 +121,20 @@ export function CatalogBrowser({preview, facets: catalogOptions, category, categ
     {key: "activity", label: "field.activities", selected: activity, options: catalogOptions.activities},
   ];
   const typeFilters = [
-    {field: fieldsByKey.get("product_type")!, queryKey: "type", selected: productType, present: catalogOptions.productTypes},
-    {field: fieldsByKey.get("protection_type")!, queryKey: "protection", selected: protectionType, present: catalogOptions.protectionTypes},
-  ].map((filter) => {
-    const options = [...Object.entries(filter.field.options ?? {}).map(([key, label]) => [key, optionLabel(t, filter.field, key, label)]), ...(["review", "unpublished", "inapplicable"] as const)
-      .map((state) => [state, displayParameter(t, locale, filter.field, missing(state))])].filter(([key]) => filter.present.includes(key) || key === filter.selected);
-    return {...filter, options};
+    {queryKey: "type", selected: productType, present: catalogOptions.productTypes},
+    {queryKey: "protection", selected: protectionType, present: catalogOptions.protectionTypes},
+  ].map(({queryKey, selected, present}) => {
+    const descriptor = styleFilters[queryKey as keyof StyleFilters];
+    return {queryKey, selected, label: descriptor.label,
+      options: descriptor.options.filter(([key]) => present.includes(key) || key === selected)};
   });
   const topFamilies = catalogOptions.families;
   const familyFilters = family && !topFamilies.includes(family) ? [...topFamilies, family] : topFamilies;
 
-  const products = (catalog ?? []).filter((product) => !category || matchesTaxonomy(product, category));
-  const filtered = products.filter((product) =>
-    (!gender || product.gender === gender) && (!family || product.family === family) &&
-    (!brand.length || brand.includes(product.brandSlug)) &&
-    (!series.length ? !legacyLine || product.veilance === (legacyLine === "veilance") : series.some((value) => product.series?.includes(value))) &&
-    (!activity.length || activity.some((value) => product.activities.some((label) => activityCode(label) === value))) && (!productType || product.productType === productType) &&
-    (!protectionType || product.protectionType === protectionType));
-  const matches = searchCatalog(filtered, deferredQuery);
-  const results = !catalog ? preview : sort === defaultCatalogSort ? rankFeatured(matches).map(({product}) => product)
-    : [...matches].sort((a, b) => {
-      if (sort === "name") return a.name.localeCompare(b.name);
-      const first = sort === "weight" ? a.card.weight : a.msrp;
-      const second = sort === "weight" ? b.card.weight : b.msrp;
-      if (typeof first !== "number") return typeof second === "number" ? 1 : 0;
-      if (typeof second !== "number") return -1;
-      if (sort !== "weight" && a.currency !== b.currency) {
-        return (a.currency ?? "").localeCompare(b.currency ?? "");
-      }
-      return (first - second) * (sort === "price-desc" ? -1 : 1) || a.name.localeCompare(b.name);
-    });
-  const resultCount = catalog ? results.length : matchingCount;
+  const results = catalog && catalog.filter(catalog.products, {
+    category, gender, family, brand, series, legacyLine, activity, productType, protectionType, query: deferredQuery, sort,
+  });
+  const resultCount = results?.length ?? matchingCount;
   const pending = needsCatalog && !catalog;
 
   return (
@@ -249,9 +190,9 @@ export function CatalogBrowser({preview, facets: catalogOptions, category, categ
           ))}
         </div>
         <div className="flex flex-wrap gap-2.5">
-          {typeFilters.map(({ field, queryKey, selected, options }) => (
+          {typeFilters.map(({ label, queryKey, selected, options }) => (
             <label key={queryKey} className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span>{t("field." + field.key)}</span>
+              <span>{label}</span>
               <select value={selected} onChange={(event) => update({ [queryKey]: event.target.value, hard: queryKey === "protection" ? "" : params.get("hard") ?? "" })}
                 className="catalog-input h-8">
                 <option value="">{t("ui.all")}</option>
@@ -276,9 +217,9 @@ export function CatalogBrowser({preview, facets: catalogOptions, category, categ
         <span>{t("ui.catalog_load_failed")}</span>
         <Button type="button" variant="outline" size="sm" onClick={() => setFailed(false)}>{t("ui.catalog_retry")}</Button>
       </div>}
-      {(!pending || !hasFilters) && (results.length > 0
+      {(!pending || !hasFilters) && (resultCount > 0
         ? <div className="grid grid-cols-2 items-stretch gap-2.5 md:grid-cols-3 md:gap-4 xl:grid-cols-4">
-          {results.slice(0, count).map((product, index) => <CatalogCardView key={product.slug} product={product} eager={index < 2} />)}
+          {results ? <CatalogResultCards products={results.slice(0, count)} /> : previewCards}
         </div>
         : <p className="border bg-card p-6 text-muted-foreground">{t("ui.no_products_match_these_filters")}</p>)}
       {!pending && resultCount > count && <div className="mt-7 flex justify-center">

@@ -3,9 +3,7 @@ import { parametersOf } from "./brands";
 import { parameterGroups, type ParameterGroup } from "./parameters/model";
 import {publicParameterGroups} from "./public-parameters";
 
-export function comparisonHref(slugs: string[]) {
-  return slugs.length ? "/compare?ids=" + slugs.map(encodeURIComponent).join(",") : "/compare";
-}
+export {comparisonHref} from "./comparison-href";
 
 export function comparisonIds(value: string | string[] | undefined) {
   if (typeof value !== "string") return [];

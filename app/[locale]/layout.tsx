@@ -1,7 +1,8 @@
 import type {Metadata} from "next";
 import {notFound} from "next/navigation";
-import {hasLocale, NextIntlClientProvider, useTranslations} from "next-intl";
+import {hasLocale, useTranslations} from "next-intl";
 import {getTranslations, setRequestLocale} from "next-intl/server";
+import {ClientMessages} from "@/i18n/client-messages";
 import {Link} from "@/i18n/navigation";
 import {languageTags, routing} from "@/i18n/routing";
 import {CatalogNav, CompareDock} from "@/components/catalog/compare-selection";
@@ -57,7 +58,7 @@ export default async function LocaleLayout({children, params}: LayoutProps<"/[lo
   setRequestLocale(locale);
   return <html lang={languageTags[locale]} className="dark">
     <body className="flex min-h-dvh flex-col">
-      <NextIntlClientProvider><SiteContents>{children}</SiteContents></NextIntlClientProvider>
+      <ClientMessages scope="layout"><SiteContents>{children}</SiteContents></ClientMessages>
     </body>
   </html>;
 }

@@ -51,6 +51,27 @@ function checkFile(path, content) {
 }
 
 for (const locale of languages) checkFile(`messages/${locale}.json`, JSON.stringify(catalogues[locale], null, 2) + "\n");
+// Parameter notes are stored as their English source text. Generate only the
+// reverse lookup that the client needs to translate those data values.
+const {part, note, ui} = catalogues.en;
+const comparisonNotes = [
+  "cannot_compare_unpublished_values", "applies_to_different_product_types",
+  "verify_the_source_values_before_comparin", "different_or_unpublished_measurement_ref",
+  "different_or_unpublished_test_methods", "different_or_unpublished_currencies",
+  "different_down-content_reporting_bases", "sizes_refer_to_different_fit_ranges",
+];
+const parameterLookup = {
+  parts: Object.fromEntries(Object.entries(part).map(([key, label]) => [label, key])),
+  notes: Object.fromEntries([
+    ...Object.entries(note).map(([key, label]) => [label, "note." + key]),
+    ...comparisonNotes.map((key) => {
+      if (!ui[key]) errors.push("Missing comparison note: ui." + key);
+      return [ui[key], "ui." + key];
+    }),
+  ]),
+  recycledClaim: ui.recycled_claim,
+};
+checkFile("messages/parameter-lookup.json", JSON.stringify(parameterLookup, null, 2) + "\n");
 const marked = rows.filter((row) => /needs_review|争议/.test(row["备注/needs_review"]));
 const helpFallback = rows.filter((row) => row.key.startsWith("help.") && (!row.zh || !row.ja));
 const table = (items, columns) => items.map((row) => "| " + columns.map((name) => String(row[name] || "—").replaceAll("|", "\\|").replace(/\r?\n/g, " ")).join(" | ") + " |").join("\n");

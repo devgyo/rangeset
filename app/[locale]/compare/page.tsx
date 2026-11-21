@@ -1,3 +1,4 @@
+import {ClientMessages} from "@/i18n/client-messages";
 import {getTranslations} from "next-intl/server";
 import {currentLocale} from "@/i18n/seo";
 import {pageAlternates} from "@/i18n/routing";
@@ -44,8 +45,10 @@ export default async function ComparePage({ searchParams }: PageProps<"/[locale]
   return (
     <div className="site-width py-7 sm:py-11">
       <h1 className="page-title mb-5 sm:mb-7">{t("ui.compare_products")}</h1>
-      <ComparisonGrid products={selected} catalog={catalog.map(picker)}
-        groups={buildComparison(compared)} explicitIds={ids !== undefined} />
+      <ClientMessages scope="compare">
+        <ComparisonGrid products={selected} catalog={catalog.map(picker)}
+          groups={buildComparison(compared)} explicitIds={ids !== undefined} />
+      </ClientMessages>
     </div>
   );
 }

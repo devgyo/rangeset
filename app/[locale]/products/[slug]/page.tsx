@@ -1,3 +1,4 @@
+import {ClientMessages} from "@/i18n/client-messages";
 import {leafSlug, taxonomyLabelKey, taxonomyPath} from "@/lib/taxonomy";
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
@@ -133,7 +134,9 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
         </div>
       </div>
       <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-        <ProductGallery name={product.name} colorways={product.colorways} hero={product.hero} cutout={product.image} />
+        <ClientMessages scope="gallery">
+          <ProductGallery name={product.name} colorways={product.colorways} hero={product.hero} cutout={product.image} />
+        </ClientMessages>
       </div>
     </div>
     {core.length > 0 && <section className="mt-9" aria-labelledby="key-heading">

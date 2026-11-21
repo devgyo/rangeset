@@ -1,3 +1,8 @@
+import {ClientMessages} from "@/i18n/client-messages";
+import {CatalogCardView} from "./catalog-card-view";
+import {displayParameter, optionLabel} from "@/i18n/copy";
+import {fieldsByKey} from "@/lib/parameters/registry";
+import {missing} from "@/lib/parameters/model";
 import {getTranslations} from "next-intl/server";
 import {pageAlternates, type Locale} from "@/i18n/routing";
 import type {Metadata} from "next";
@@ -21,12 +26,25 @@ export async function CatalogPage({locale, category = ""}: {locale: Locale; cate
   const [products, t] = await Promise.all([listProducts(), getTranslations({locale})]);
   const categoryCounts = Object.fromEntries(taxonomySlugs.map((slug) => [slug, products.filter((product) => matchesTaxonomy(product, slug)).length]));
   const matching = category ? products.filter((product) => matchesTaxonomy(product, category)) : products;
+  const preview = rankFeatured(matching).slice(0, catalogPageSize);
+  function styleFilter(fieldKey: "product_type" | "protection_type") {
+    const field = fieldsByKey.get(fieldKey)!;
+    const options: [string, string][] = Object.entries(field.options ?? {}).map(([key, label]) => [key, optionLabel(t, field, key, label)]);
+    for (const state of ["review", "unpublished", "inapplicable"] as const) {
+      options.push([state, displayParameter(t, locale, field, missing(state))]);
+    }
+    return {label: t("field." + fieldKey), options};
+  }
   return (
     <div className="site-width py-7 sm:py-8">
       <h1 className="page-title catalog-title">{t(category ? taxonomyLabelKey(category) : "ui.product_catalog")}</h1>
       <p className="mt-2 mb-4 text-sm text-muted-foreground">{t(localCatalog ? "ui.local_catalog" : catalogEnabled ? "ui.catalog_live" : "ui.example_data")}</p>
-      <CatalogBrowser key={category} preview={rankFeatured(matching).slice(0, catalogPageSize).map(({product}) => product)}
-        facets={catalogFacets(matching)} category={category} categoryCounts={categoryCounts} total={products.length} matchingCount={matching.length} />
+      <ClientMessages scope="catalog">
+        <CatalogBrowser key={category} previewCount={preview.length}
+          previewCards={preview.map(({product}, index) => <CatalogCardView key={product.slug} product={product} eager={index < 2} />)}
+          styleFilters={{type: styleFilter("product_type"), protection: styleFilter("protection_type")}}
+          facets={catalogFacets(matching)} category={category} categoryCounts={categoryCounts} total={products.length} matchingCount={matching.length} />
+      </ClientMessages>
     </div>
   );
 }

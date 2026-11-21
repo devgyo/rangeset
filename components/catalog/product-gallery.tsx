@@ -1,6 +1,6 @@
 "use client";
 
-import {useCopy} from "@/i18n/copy";
+import {useCopy} from "@/i18n/ui-copy";
 import { useState } from "react";
 import { ColorDot, ProductImage } from "@/components/catalog/product-media";
 import type { Colorway, Photo } from "@/lib/product-view";
@@ -20,14 +20,14 @@ export function ProductGallery({ name, colorways, hero, cutout }: {
   return <div className="min-w-0">
     <figure>
       <ProductImage src={active?.url ?? null} alt={active?.label ?? ""} studio={active?.url === cutout || (angle === 0 && Boolean(selected))} eager
-        sizes="(min-width: 1024px) 48vw, 90vw" fit="contain" className="gallery-stage" />
+        fit="contain" className="gallery-stage" />
       {caption && <figcaption className="border-x border-b bg-card px-3 py-2 text-xs text-muted-foreground">{caption}</figcaption>}
     </figure>
     {photos.length > 1 && <div className="gallery-angles" role="group" aria-label={t("ui.photo_angles")}>
       {photos.map((photo, index) => (
         <button type="button" key={photo.url} aria-label={photo.label} aria-pressed={index === angle}
           className="gallery-angle" onClick={() => setAngle(index)}>
-          <ProductImage src={photo.url} studio={index === 0} sizes="64px" className="aspect-[4/5]" />
+          <ProductImage src={photo.url} studio={index === 0} className="aspect-[4/5]" />
         </button>
       ))}
     </div>}

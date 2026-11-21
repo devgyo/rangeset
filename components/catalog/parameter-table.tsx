@@ -1,5 +1,3 @@
-"use client";
-
 import {displayParameter, displayReference, listItem, localNote, partDisplay, useCopy, type Translator} from "@/i18n/copy";
 import { ParameterHelp } from "./parameter-help";
 import { fieldsByKey, groups as groupLabels, terms, type Field, type Term } from "@/lib/parameters/registry";

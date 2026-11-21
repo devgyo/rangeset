@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import {useCopy} from "@/i18n/copy";
+import {useCopy} from "@/i18n/ui-copy";
 import { CircleHelp } from "lucide-react";
 
 const openEvent = "rangeset:parameter-help";
