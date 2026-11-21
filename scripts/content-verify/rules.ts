@@ -29,7 +29,7 @@ function sizeRank(value: string, brand: Brand, gender: string | null, pack: bool
   if (brand === "arcteryx" && /^(?:SHO?RT|SRT|REG(?:ULAR)?|TALL|LONG)$/.test(size)) {
     return /^(?:SH|SRT)/.test(size) ? 0 : size.startsWith("REG") ? 1 : 2;
   }
-  const parsed = apparelSize(size);
+  const parsed = apparelSize(size, brand === "arcteryx");
   if (parsed?.type === "alpha") return brand === "mammut" || !parsed.compound && parsed.base !== "XXXXL" || pack ? parsed.rank : null;
   if (!parsed || pack) return null;
   const ranks = sizeOrder[brand];
@@ -67,8 +67,18 @@ export function checkCatalog(products: AuditProduct[]): Issue[] {
       const allSizes = new Set(sizes);
       const invalid = [...allSizes].filter((size) => sizeRank(size, product.brandSlug, view.gender, pack) === null);
       if (invalid.length) issue("size_chart", invalid);
-      const ranks = sizes.map((size) => sizeRank(size, product.brandSlug, view.gender, pack));
-      if (ranks.some((rank, index) => rank !== null && index > 0 && ranks[index - 1] !== null && rank < ranks[index - 1]!)) issue("size_order", sizes);
+      const previousRank = new Map<string, number>();
+      const outOfOrder = sizes.some((size) => {
+        const rank = sizeRank(size, product.brandSlug, view.gender, pack);
+        if (rank === null) return false;
+        const apparel = product.brandSlug === "arcteryx" ? apparelSize(size, true) : undefined;
+        // Arc'teryx can group the selector by inseam rather than waist.
+        const group = apparel ? `${apparel.type}/${apparel.length}` : "default";
+        const predecessor = previousRank.get(group);
+        previousRank.set(group, rank);
+        return predecessor !== undefined && rank < predecessor;
+      });
+      if (outOfOrder) issue("size_order", sizes);
       const colors = product.brandSlug === "arcteryx" ? arcColors : view.swatches.map(({label}) => label);
       if (!colors.length || colors.some((color) => !color.trim()) || variants.some(({color}) => !color?.trim())) issue("color_empty", colors);
       if (new Set(colors.map((color) => color.trim().toLowerCase())).size !== colors.length) issue("color_duplicate", colors);

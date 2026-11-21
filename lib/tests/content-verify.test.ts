@@ -162,8 +162,13 @@ test("offline rules flag price, currency, snapshot changes and identical images 
 });
 
 test("accepts published Arc'teryx size and length combinations and sorts Mammut labels", () => {
-  const payload = {...arc.payload!, sizeOptions: {options: ["29-R", "30-R", "32-S", "34-T"].map((label) => ({label}))}};
-  assert.ok(checkCatalog([{...arc, payload}]).every(({rule}) => rule !== "size_chart"));
+  const bySizes = (sizes: string[]) => ({...arc, payload: {...arc.payload,
+    sizeOptions: {options: sizes.map((label) => ({label}))}}});
+  const grouped = bySizes(["28-R", "28-S", "30-S", "32-S", "29-R", "30-R", "34-T"]);
+  assert.ok(checkCatalog([grouped]).every(({rule}) => rule !== "size_chart" && rule !== "size_order"));
+  const letterGroups = bySizes(["XS-S", "S-S", "M-S", "M-T", "L-T", "2X-T", "XS-R", "S-R", "M-R"]);
+  assert.ok(checkCatalog([letterGroups]).every(({rule}) => rule !== "size_chart" && rule !== "size_order"));
+  assert.ok(checkCatalog([bySizes(["30-R", "28-S", "29-R"])]).some(({rule}) => rule === "size_order"));
   assert.deepEqual(orderMammutSizes(["S", "XS", "XXS", "XL", "2XL"]), ["XXS", "XS", "S", "XL", "2XL"]);
   assert.deepEqual(orderMammutSizes(["US 30 L", "US 30", "US 28", "US 30 S"]), ["US 28", "US 30 S", "US 30", "US 30 L"]);
   const reordered = {...mammut.payload!, variants: [...(mammut.payload!.variants as unknown[])].reverse()};
