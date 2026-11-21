@@ -1,4 +1,5 @@
 import type {MammutPayload} from "../../crawler/adapters/mammut";
+import productLines from "../../data/mammut-product-lines.json";
 import {entries, plainText, safeImage, type ProductDetail} from "../product-view";
 import {known, missing, type Evidence, type Part, type Profile, type Reference, type Value} from "../parameters/model";
 import {applyOverrides} from "../parameters/overrides";
@@ -37,8 +38,12 @@ function namedBody(raw: MammutPayload) {
   }
 }
 
+// The Mammut importer requires modelNumber to equal products.external_id.
+const verifiedProductLines = new Map(productLines.map((line) => [line.external_id, line]));
+
 function productSeries(raw: MammutPayload) {
-  return raw.collection === "Eiger Extreme" ? raw.collection : null;
+  return verifiedProductLines.get(raw.modelNumber)?.product_line ??
+    (raw.collection === "Eiger Extreme" ? raw.collection : null);
 }
 
 function fitFields(raw: MammutPayload) {
@@ -186,7 +191,16 @@ export function mammutParameters(product: ProductDetail, input: BrandInput = {})
   set("protection_type", protection, "description / categories", raw.shortDescription);
   values.protection_type ??= missing("inapplicable");
   set("category", product.category, "category");
-  set("product_line", productSeries(raw), "collection");
+  const series = productSeries(raw);
+  const verifiedLine = verifiedProductLines.get(raw.modelNumber);
+  if (series && verifiedLine) {
+    values.product_line = known(series, [{
+      path: "collection.product", url: verifiedLine.source_url, raw: verifiedLine.evidence_text,
+      method: "published", updatedAt: verifiedLine.verified_at,
+    }]);
+  } else {
+    set("product_line", series, "collection");
+  }
   set("gender", product.gender, "gender");
   set("msrp", product.msrp, "variants.originalPrice / variants.price", JSON.stringify(raw.variants.map(({id, price, originalPrice}) => ({id, price, originalPrice}))), {unit: "USD"});
   if (product.activities.length) set("activities", product.activities, "activities");

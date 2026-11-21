@@ -70,3 +70,24 @@ test("Mammut hybrid softshell keeps its category when the published water column
   assert.equal(record.raw.fields.find(({label}) => label === "Water column")?.value, "20000 mm");
   assert.deepEqual(product.taxonomy, {state: "classified", leaf: "outer.softshell"});
 });
+
+test("Mammut series uses verified article matches before the raw Eiger Extreme fallback", () => {
+  const record = get("hybrid", "1011-03100/aenergy-pro-so-hybrid-hooded-jacket-men");
+  const view = (modelNumber: string, collection: string) =>
+    fixtureProducts([mammutSource({...record, raw: {...record.raw, modelNumber, collection}})], true)[0];
+
+  const mapped = view("1013-04830", "Eiger Extreme");
+  assert.deepEqual(cardOnly(mapped).series, ["Aenergy"]);
+  const productLine = mapped.parameters?.values.product_line;
+  assert.equal(productLine?.value, "Aenergy");
+  assert.equal(productLine?.evidence[0].url, "https://au.mammut.com/collections/aenergy");
+  assert.match(productLine?.evidence[0].raw ?? "", /1013-04830/);
+
+  const fallback = view("1011-03100", "Eiger Extreme");
+  assert.deepEqual(cardOnly(fallback).series, ["Eiger Extreme"]);
+  assert.equal(fallback.parameters?.values.product_line?.value, "Eiger Extreme");
+
+  const unverified = view("1011-03100", "New Colors Added");
+  assert.deepEqual(cardOnly(unverified).series, []);
+  assert.equal(unverified.parameters?.values.product_line?.value, undefined);
+});

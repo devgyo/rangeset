@@ -202,7 +202,7 @@ async function loadListing() {
   };
 }
 
-const cachedListing = unstable_cache(loadListing, ["catalog-v1.8.0-with-listing-id"], {revalidate: 300});
+const cachedListing = unstable_cache(loadListing, ["catalog-v1.8.0-with-mammut-product-lines"], {revalidate: 300});
 const readListing = cache(catalogEnabled && !localCatalog ? cachedListing : loadListing);
 export const listProducts = async () => (await readListing()).cards;
 export const homeFeature = async () => (await readListing()).feature;
