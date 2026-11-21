@@ -10,6 +10,7 @@ import {cardFitAliases, productTypes, type FabricPart, type ProductType, type Pr
 import {garmentStyle} from "../parameters/classification";
 import type {TaxonomyEvidence} from "../taxonomy";
 import type {BrandAdapter, BrandInput} from "./types";
+import {orderMammutSizes} from "../brand-sizes";
 
 export function mammutPayload(raw: Record<string, unknown>): MammutPayload | undefined {
   return typeof raw.modelNumber === "string" && Array.isArray(raw.fields) && Array.isArray(raw.variants) ? raw as unknown as MammutPayload : undefined;
@@ -204,7 +205,7 @@ export function mammutParameters(product: ProductDetail, input: BrandInput = {})
   set("gender", product.gender, "gender");
   set("msrp", product.msrp, "variants.originalPrice / variants.price", JSON.stringify(raw.variants.map(({id, price, originalPrice}) => ({id, price, originalPrice}))), {unit: "USD"});
   if (product.activities.length) set("activities", product.activities, "activities");
-  if (product.sizes.length) set("sizes", product.sizes, "variants.sizes");
+  if (product.sizes.length) set("sizes", product.sizes, "variants.sizes", JSON.stringify([...new Set(raw.variants.flatMap(({size}) => size ? [size] : []))]));
   if (product.swatches.length) set("colors", product.swatches.length, "variants.colors");
   const release = [product.year, product.season].filter(Boolean).join(" · ");
   set("release", release, "release", release);
@@ -310,7 +311,7 @@ export const mammutAdapter: BrandAdapter = {
       series: src ? [productSeries(src)].filter((value): value is string => Boolean(value)) : [],
       modelNumbers: src ? [src.modelNumber] : [], image, hero: image, swatches: colorways,
       summary: src?.shortDescription ?? "", description: detail ? src?.description ?? "" : "",
-      materials: [], features: [], facility: "", sizes: [...new Set(variants.flatMap(({size}) => size ? [size] : []))],
+      materials: [], features: [], facility: "", sizes: orderMammutSizes([...new Set(variants.flatMap(({size}) => size ? [size] : []))]),
       year: src?.year ?? null, season: src?.season ?? "", salePrice: src?.salePrice ?? null,
       colorways: detail ? colorways : [], activities: src ? entries(src.activities).map(plainText).filter(Boolean) : [], specs: {},
     };

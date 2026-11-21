@@ -103,8 +103,11 @@ export function productFacts(product: AuditProduct) {
   }));
   const money = mammut ? {msrp: mammut.msrp, salePrice: mammut.salePrice, currency: mammut.currency}
     : {price: raw.price, discountPrice: raw.discountPrice, currencyCode: raw.currencyCode};
-  const sale = mammut ? mammut.salePrice : typeof raw.discountPrice === "number" && typeof raw.price === "number" &&
-    raw.discountPrice > 0 && raw.discountPrice < raw.price ? raw.discountPrice : null;
+  const quotedVariants = mammut?.variants.filter(({price}) => typeof price === "number" && price > 0) ?? [];
+  const sale = mammut ? mammut.salePrice ?? (quotedVariants.length &&
+    quotedVariants.every(({price, originalPrice}) => price === originalPrice) ? "No discount" : null)
+    : typeof raw.discountPrice === "number" && typeof raw.price === "number" && raw.discountPrice > 0 && raw.discountPrice <= raw.price
+      ? raw.discountPrice === raw.price ? "No discount" : raw.discountPrice : null;
   const facts: Facts = {
     name: fact(view.name, mammut?.name ?? raw.name ?? raw.marketingName),
     sku: fact(product.sku, mammut?.modelNumber ?? raw.id),

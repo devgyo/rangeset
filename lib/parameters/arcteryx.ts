@@ -181,6 +181,9 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
     }
     const part = fabricLocation(label);
     if (part) materials.push(fabricPart(part, label, text, line.evidence));
+    else if (/^Frame Polo Shirt\b/i.test(product.name) && /^Merino\s*\/\s*Nylon core[- ]spun jersey\b/i.test(label)) {
+      materials.push(fabricPart("body", "Body", `${label} - ${text}`, line.evidence));
+    }
     else {
       notes.push(line);
       fabricIssues.push(line);

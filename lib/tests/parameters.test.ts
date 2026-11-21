@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { ProductDetail } from "../arcteryx-view";
 import { fabricLocation } from "../parameters/fabric";
+import { selectCardParameters } from "../parameters/card";
 import { convert, normalizeArcProduct, parseDenier } from "../parameters/arcteryx";
 import { type Fiber, compareValues, formatValue, getParameter, known, missing, parameterGroups, parameterStatus, visibleInComparison, weightPresentation, type Part } from "../parameters/model";
 import { fieldsByKey, parameterVersion, registry } from "../parameters/registry";
@@ -435,6 +436,79 @@ test("renders core gaps on details and aligns only known fabric rows in comparis
   assert.ok(!compare.some(({ field }) => field.key === "fiber_content"));
   assert.equal(compare.find(({ field }) => field.key === "fabric_weight")?.cells[0].state, "unpublished");
   assert.equal(compare.find(({ field }) => field.key === "fabric_weight")?.cells[1].value, 119);
+});
+
+const currentShell = "Body: 3L GORE-TEX®, 80d, 165gsm, FC0 DWR - 100% Nylon with ePE and PU Membrane, 100% Polyester Backing";
+const currentLining = "Lining: 100d SD Cordura nylon 6,6 Dobby, DWR FC0, 120gsm - 100% Nylon";
+const reviewedMaterials = [
+  {sku: "X000008928", name: "Sabre Pant", materials: [currentShell], fabric: "GORE-TEX® ePE", denier: [80], weight: 165},
+  {sku: "X000009106", name: "Sentinel Bib Pant", materials: [currentShell], fabric: "GORE-TEX® ePE", denier: [80], weight: 165},
+  {sku: "X000008896", name: "Sentinel Pant", materials: [currentLining, currentShell], fabric: "GORE-TEX® ePE", denier: [80], weight: 165},
+  {sku: "X000008467", name: "Gamma MX Pant",
+    materials: ["Body: 60d Fortius™ 2.0 with Fleece Backer, 233gsm, FC0 DWR - 84% Nylon, 16% Elastane 100% Polyester Backing"],
+    fabric: "Fortius™ 2.0 with Fleece Backer", denier: [60], weight: 233},
+  {sku: "X000008472", name: "Rho Crew Neck LS",
+    materials: ["Body: Torrent™ - Jersey knit, 185gsm - 84% Polyester, 16% Elastane"],
+    fabric: "Torrent™", denier: undefined, weight: 185},
+];
+
+for (const {sku, name, materials, fabric, denier, weight} of reviewedMaterials) {
+  test(`matches the current published fabric for ${name} (${sku})`, () => {
+    const profile = normalizeArcProduct(product({name, slug: sku}), {raw: {materials}, ...rawSample});
+    const parts = partsOf(profile);
+    const body = parts.find(({part}) => part === "body")!;
+    assert.equal(selectCardParameters(profile).mainFabric, fabric);
+    assert.equal(body.fields.fabric_name.value, fabric);
+    assert.deepEqual(body.fields.denier?.value, denier);
+    assert.equal(body.fields.fabric_weight.value, weight);
+    assert.deepEqual(body.fields.weave?.value, sku === "X000008472" ? ["Jersey", "Knit"] : undefined);
+    assert.deepEqual(body.fields.fabric_stretch?.value,
+      sku === "X000008467" || sku === "X000008472" ? ["Contains elastane"] : undefined);
+    assert.equal(body.fields.fabric_recycled_content, undefined);
+    if (materials.includes(currentLining)) {
+      const lining = parts.find(({part}) => part === "lining")!;
+      assert.equal(lining.fields.fabric_name.value, "SD Cordura nylon 6,6 Dobby");
+      assert.equal(lining.fields.fabric_weight.value, 120);
+    }
+  });
+}
+
+test("keeps explicitly published weave and recycling claims on archived shells and avoids inferring membrane chemistry", () => {
+  const archived = "Body: 3L GORE-TEX® ePE, Beam Dyed, 80d plain weave recycled nylon, 165gsm, FC0 DWR - 100% Nylon with ePE and PU Membrane, 100% Polyester Backing";
+  const profile = normalizeArcProduct(product(), {raw: {materials: [archived, "Panel: 3L GORE-TEX®, 50d, 120gsm - 100% Nylon"]}});
+  const [body, panel] = partsOf(profile);
+  assert.equal(body.fields.fabric_name.value, "GORE-TEX® ePE");
+  assert.deepEqual(body.fields.weave.value, ["Plain weave"]);
+  assert.deepEqual(body.fields.fabric_recycled_content.value, [{pct: null, scope: "claim_only"}]);
+  assert.equal(panel.fields.fabric_name.value, "GORE-TEX®");
+});
+
+test("parses the published body blend of both Frame Polo shirts without absorbing the contrast fabric", () => {
+  const jersey = "Merino / Nylon core spun jersey 16.5mn: 87% Wool, 13% Nylon - RWS Wool";
+  for (const [name, materialLines] of [
+    ["Frame Polo Shirt LS", [jersey]],
+    ["Frame Polo Shirt SS", ["Contrast: Altitude Nylon - 115gsm, 78% Nylon, 22% Elastane", jersey]],
+  ] as const) {
+    const profile = normalizeArcProduct(product({name}), {raw: {materials: materialLines}});
+    const body = partsOf(profile).find(({part}) => part === "body")!;
+    assert.deepEqual(body.fields.fiber_content.value, [
+      {fiber: "Wool", pct: 87, recycled: null}, {fiber: "Nylon", pct: 13, recycled: null},
+    ]);
+    assert.equal(body.fields.fiber_content.evidence[0].raw, jersey);
+    assert.equal(selectCardParameters(profile).composition?.primary.pct, 87);
+  }
+  assert.equal(partsOf(normalizeArcProduct(product(), {raw: {materials: [jersey]}})), undefined);
+});
+
+test("counts published Polyarylate separately in each fabric and preserves backer percentages", () => {
+  const profile = normalizeArcProduct(product(), {raw: {materials: [
+    "Body: 315d Cordura nylon 6,6 w/4mm, 400d untwisted Vectran grid, 240gsm - 86% Nylon, 14% Polyarylate",
+    "Contrast: 50D Hadron - 3L GORE-TEX PRO ePE, 99 gsm, FC0 DWR - 94% Nylon, 6% Polyarylate with ePE and PU Membrane 100% Nylon Backing",
+  ]}});
+  const [body, contrast] = partsOf(profile);
+  assert.deepEqual(body.fields.fiber_content.value, [{fiber: "Nylon", pct: 86, recycled: null}, {fiber: "Polyarylate", pct: 14, recycled: null}]);
+  assert.deepEqual(contrast.fields.fiber_content.value, [{fiber: "Nylon", pct: 94, recycled: null}, {fiber: "Polyarylate", pct: 6, recycled: null}]);
+  assert.deepEqual(contrast.backers?.[0].fields.fiber_content.value, [{fiber: "Nylon", pct: 100, recycled: null}]);
 });
 
 

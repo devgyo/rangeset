@@ -9,8 +9,8 @@ import {entries, record} from "../../lib/product-view";
 import {productFacts, snippet} from "./compare";
 import type {AuditProduct, Brand} from "./data";
 import type {Issue} from "./report";
+import {apparelSize} from "../../lib/brand-sizes";
 
-const alpha = ["XXXS", "XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL", "XXXXL"];
 const sizeOrder = {
   arcteryx: {
     male: [28, 29, 30, 31, 32, 33, 34, 36, 38, 40, 42],
@@ -23,19 +23,18 @@ const sizeOrder = {
 };
 
 function sizeRank(value: string, brand: Brand, gender: string | null, pack: boolean) {
-  const size = value.trim().toUpperCase().replace(/^([234])XL$/, (_, n: string) => "X".repeat(Number(n)) + "L");
+  const size = value.trim().toUpperCase();
   if (size === "ONE SIZE" || size === "OS") return 0;
   if (pack && /^\d{1,2}\s*L$/.test(size)) return parseInt(size, 10);
   if (brand === "arcteryx" && /^(?:SHO?RT|SRT|REG(?:ULAR)?|TALL|LONG)$/.test(size)) {
     return /^(?:SH|SRT)/.test(size) ? 0 : size.startsWith("REG") ? 1 : 2;
   }
-  const letter = size.match(/^([X]{0,3}S|M|[X]{0,4}L)(?:[-/]([X]{0,2}S|M|[X]{0,3}L))?(?:(?:\s+|-)(?:SHORT|REGULAR|TALL|LONG|[SLRT]))?$/);
-  if (letter && (brand === "mammut" || !letter[2] && letter[1] !== "XXXXL" || pack)) return alpha.indexOf(letter[1]);
-  const numeric = size.match(/^(?:(?:US|EU)\s+)?(\d{1,2})(?:\s*(?:-?\s*(?:SHORT|REGULAR|TALL|LONG)|[SLRT]))?$/);
-  if (!numeric || pack) return null;
+  const parsed = apparelSize(size);
+  if (parsed?.type === "alpha") return brand === "mammut" || !parsed.compound && parsed.base !== "XXXXL" || pack ? parsed.rank : null;
+  if (!parsed || pack) return null;
   const ranks = sizeOrder[brand];
   const allowed = gender === "women" ? ranks.female : gender === "men" ? ranks.male : [...ranks.male, ...ranks.female];
-  return allowed.includes(Number(numeric[1])) ? Number(numeric[1]) : null;
+  return allowed.includes(parsed.rank) ? parsed.rank : null;
 }
 
 const weightRanges: Record<string, [number, number]> = {
@@ -103,7 +102,9 @@ export function checkCatalog(products: AuditProduct[]): Issue[] {
 
       const weight = profile.values.weight;
       const leaf = view.taxonomy?.state === "classified" ? view.taxonomy.leaf : "";
-      const [low, high] = weightRanges[leaf] ?? (pack ? [50, 6000] : [25, 3000]);
+      const removableLiner = leaf === "outer.hardshell" &&
+        /\b(?:removable|detachable|zip[- ]out)\s+(?:(?:insulated|inner|down|fleece)\s+){0,2}(?:liner|lining|inner jacket)\b/i.test(view.description);
+      const [low, high] = removableLiner ? [150, 1800] : weightRanges[leaf] ?? (pack ? [50, 6000] : [25, 3000]);
       if (weight?.state === "known" &&
         (typeof weight.value !== "number" || weight.value < low || weight.value > high || weight.reference?.unit && weight.reference.unit !== "g")) {
         issue("weight_range_or_unit", {value: weight.value, reference: weight.reference, allowedGrams: [low, high]});

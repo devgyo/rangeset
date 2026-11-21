@@ -8,6 +8,7 @@ import {officialProduct, OfficialReader, parseSeries, seriesEvidence} from "../.
 import {failing, summarize, type ProductAudit} from "../../scripts/content-verify/report";
 import {verifyProducts} from "../../scripts/content-verify/run";
 import {checkCatalog, checkTranslations} from "../../scripts/content-verify/rules";
+import {orderMammutSizes} from "../brand-sizes";
 
 const publishedAt = "2026-11-20T00:00:00Z";
 const mammutUrl = "https://www.mammut.com/us/en/products/1013-02962/broad-peak-in-hooded-jacket-men";
@@ -158,4 +159,29 @@ test("offline rules flag price, currency, snapshot changes and identical images 
   for (const rule of ["nonpositive_price", "region_currency", "price_delta_above_50_percent", "identical_image_url"]) {
     assert.ok(issues.some((entry) => entry.rule === rule), rule);
   }
+});
+
+test("accepts published Arc'teryx size and length combinations and sorts Mammut labels", () => {
+  const payload = {...arc.payload!, sizeOptions: {options: ["29-R", "30-R", "32-S", "34-T"].map((label) => ({label}))}};
+  assert.ok(checkCatalog([{...arc, payload}]).every(({rule}) => rule !== "size_chart"));
+  assert.deepEqual(orderMammutSizes(["S", "XS", "XXS", "XL", "2XL"]), ["XXS", "XS", "S", "XL", "2XL"]);
+  assert.deepEqual(orderMammutSizes(["US 30 L", "US 30", "US 28", "US 30 S"]), ["US 28", "US 30 S", "US 30", "US 30 L"]);
+  const reordered = {...mammut.payload!, variants: [...(mammut.payload!.variants as unknown[])].reverse()};
+  assert.deepEqual(productFacts({...mammut, payload: reordered}).view.sizes, productFacts(mammut).view.sizes);
+});
+
+test("raises the weight ceiling only for hardshells with a published removable liner", () => {
+  const payload = {...arc.payload!, weight: {value: "1390 g"}, description: "A hardshell."};
+  const shell = {...arc, payload, specs: arc.specs.filter(({key}) => key !== "weight_g")};
+  assert.ok(checkCatalog([shell]).some(({rule}) => rule === "weight_range_or_unit"));
+  assert.ok(checkCatalog([{...shell, payload: {...payload, description: "This insulated hardshell comes with a removable liner vest."}}])
+    .every(({rule}) => rule !== "weight_range_or_unit"));
+});
+
+test("equal published prices are comparable as no discount; missing discount data remains unverifiable", () => {
+  const fact = (discountPrice: number | null) => productFacts({...arc, payload: {...arc.payload, price: 650, discountPrice}}).facts.salePrice;
+  assert.equal(fact(650).value, "No discount");
+  assert.equal(compare("salePrice", fact(650), fact(650), arcUrl).status, "match");
+  assert.equal(compare("salePrice", fact(650), fact(500), arcUrl).status, "mismatch");
+  assert.equal(compare("salePrice", fact(650), fact(null), arcUrl).status, "unverifiable");
 });

@@ -41,7 +41,7 @@ export function fabricWeight(value: number, unit: string, evidence: Evidence[]):
 export const constructions = ["Ripstop", "Plain weave", "Double weave", "Jersey", "Grid fleece", "Twill", "Knit"] as const;
 const publishedConstruction = /\b(?:ripstop|plain[- ]weave|double[- ]weave|jersey|grid[- ]fleece|twill|(?:circular |warp |weft )?knit)\b/gi;
 
-const compositionPattern = /\b(\d+(?:[.,]\d+)?)\s*%\s*((?:(?:certified |post-consumer |pre-consumer )?recycled |virgin )?)(nylon(?:\s+\d+(?:[.,]\d+)?)?|polyamide|polyester|elastane|spandex|lycra|cotton|(?:merino )?wool|elastomultiester|polypropylene|polyethylene|polyurethane|viscose|lyocell|acrylic|linen|hemp|silk|rayon|modal|aramid|PTFE)\b/gi;
+const compositionPattern = /\b(\d+(?:[.,]\d+)?)\s*%\s*((?:(?:certified |post-consumer |pre-consumer )?recycled |virgin )?)(nylon(?:\s+\d+(?:[.,]\d+)?)?|polyamide|polyarylate|polyester|elastane|spandex|lycra|cotton|(?:merino )?wool|elastomultiester|polypropylene|polyethylene|polyurethane|viscose|lyocell|acrylic|linen|hemp|silk|rayon|modal|aramid|PTFE)\b/gi;
 
 function composition(text: string, evidence: Evidence[]): Parameter | undefined {
   const content: Fiber[] = [...text.matchAll(compositionPattern)].map(([, pct, qualifier, name]) => ({
@@ -80,7 +80,13 @@ export function garmentRecycledContent(text: string): RecycledContent | undefine
 
 function nameOf(text: string) {
   const named = text.match(/\b(?:GORE[ -]TEX[®™]?(?:\s+(?:PRO|PACLITE(?: PLUS)?|ACTIVE)[®™]?)?(?:\s+e(?:PE|PTFE))?|Fortius(?:™|®)?\s+DW\s+\d+(?:\.\d+)?|TerraTex[™®]?|Tyono[™®]?\s+\d+)/i)?.[0];
-  if (named) return named;
+  if (named) {
+    if (!/^GORE[ -]TEX/i.test(named) || /\be(?:PE|PTFE)$/i.test(named)) return named;
+    // Some Arc'teryx material lines publish the membrane chemistry after the fiber content.
+    const chemistry = new Set([...text.matchAll(/\bwith\s+(ePE|ePTFE)(?:\s+(?:and|&)\s+PU)?\s+membrane\b/gi)]
+      .map((match) => match[1].toLowerCase() === "epe" ? "ePE" : "ePTFE"));
+    return chemistry.size === 1 ? `${named} ${[...chemistry][0]}` : named;
+  }
   const segment = text.split(/\s+[-–]\s+(?=\d+(?:[.,]\d+)?\s*%)|,\s*(?!\d)/)[0]
     .replace(denierPair, "").replace(denierSuffix, "").replace(denierPrefix, "").replace(density, "")
     .replace(/\b(?:2\.5|[23])\s*L\b|\b(?:FC0 |C0 |FC-free |PFC-free )?DWR\b|\bdurable water repellent\b/gi, "")
