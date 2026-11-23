@@ -303,7 +303,7 @@ export const mammutAdapter: BrandAdapter = {
   fields(_product, raw, detail) {
     const src = mammutPayload(raw);
     const variants = src?.variants ?? [];
-    const colorways = [...new Map(variants.flatMap(({color, image}) => color ? [[color, {label: color, hex: null, photos: image ? [{url: image, label: color, height: "", size: ""}] : []}]] as const : [])).values()];
+    const colorways = [...new Map(variants.flatMap(({color, image}) => color ? [[color, {label: color, hex: null, image: safeImage(image)}]] as const : [])).values()];
     const image = safeImage(src?.image);
     const family = plainText(src?.name).match(/^(.+?)\s+(?:HS|SO|IN|ML|FL|T-Shirt|Pants|Jacket|\d{2}\b)/)?.[1] ?? null;
     return {

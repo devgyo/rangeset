@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/products
     description: product.summary || t("seo.product_description", {brand: product.brand, name: product.name}),
     alternates: pageAlternates(`/products/${product.slug}`, locale),
     robots: product.example || product.status === "pending_review" ? { index: false, follow: true } : undefined,
-    openGraph: product.hero ? { images: [product.hero] } : undefined,
+    openGraph: product.image ? { images: [product.image] } : undefined,
   };
 }
 
@@ -109,7 +109,7 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
   const canonical = new URL(localizedPath(`/products/${product.slug}`, locale), siteUrl).href;
 
   return <article className="site-width py-7 sm:py-11">
-    {!product.example && <script type="application/ld+json" dangerouslySetInnerHTML={{__html: serializeJsonLd(productJsonLd(product, canonical))}} />}
+    {!product.example && <script type="application/ld+json" dangerouslySetInnerHTML={{__html: serializeJsonLd(productJsonLd({...product, hero: null}, canonical))}} />}
     <div className="grid items-start gap-6 lg:grid-cols-[1fr_.9fr] lg:gap-12">
       <div className="min-w-0 lg:col-start-2 lg:row-start-1">
         <nav aria-label={t("ui.breadcrumb")} className="mb-5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -137,7 +137,7 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
       </div>
       <div className="min-w-0 lg:col-start-1 lg:row-start-1">
         <ClientMessages scope="gallery">
-          <ProductGallery name={product.name} colorways={product.colorways} hero={product.hero} cutout={product.image} />
+          <ProductGallery name={product.name} colorways={product.colorways} cutout={product.image} />
         </ClientMessages>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import {arcLeafProductUrl} from "../brand-urls";
+import {arcPackshotSource} from "../arcteryx-packshot";
 import {categoryOrder, categorySpecs, productFamily} from "../arcteryx-view";
 import {colorwaysOf, entries, featuresOf, plainText, record, safeImage, swatchesOf, textList} from "../product-view";
 import {normalizeArcProduct} from "../parameters/arcteryx";
@@ -25,7 +26,7 @@ export const arcAdapter: BrandAdapter = {
         ...(/\bwalk gently\b/i.test(product.name) ? ["Walk Gently"] : []), ...(/\bsystem[_ ]a\b/i.test(product.name) ? ["System_A"] : [])],
       modelNumbers: product.slug.match(/-(\d{4})-(x\d+)$/i)?.slice(1) ??
         (leaf ? product.slug.match(/-(x\d+)$/i)?.slice(1) : undefined) ?? [],
-      image: safeImage(raw.image ?? record(record(colors[0]).image).url),
+      image: arcPackshotSource(raw.image ?? record(record(colors[0]).image).url),
       hero: safeImage(record(raw.mainImage).url), swatches: swatchesOf(colors),
       summary: plainText(raw.shortDescription), description: detail ? plainText(raw.description) : "",
       materials: detail ? materials : [], features: detail ? features : [],

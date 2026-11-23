@@ -247,6 +247,11 @@
     background-color: #f2f2ef;
   }
 
+  .packshot-stage {
+    background: #f2f0ea url("/catalog-grain.png") repeat;
+    background-size: 128px 128px;
+  }
+
   .studio-stage {
     isolation: isolate;
   }
@@ -340,7 +345,7 @@
     @apply size-4;
   }
 
-  .color-button[aria-pressed="true"], .gallery-angle[aria-pressed="true"] {
+  .color-button[aria-pressed="true"] {
     @apply border-primary;
   }
 
@@ -358,15 +363,6 @@
     .key-spec-strip {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
-  }
-
-  .gallery-angles {
-    @apply mt-3 flex gap-1.5 overflow-x-auto p-0.5;
-    scrollbar-width: thin;
-  }
-
-  .gallery-angle {
-    @apply w-13 shrink-0 border-2 border-transparent bg-card hover:border-foreground sm:w-16;
   }
 
   .compare-dock {

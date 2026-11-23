@@ -29,20 +29,25 @@ test("identifies documented insulation with fill power and leaves unsupported te
   assert.equal(categorySpecs("Insulated Jackets", ["Nylon exterior"], [], null).insulation, undefined);
 });
 
-test("validates image hosts, swatches, and gallery metadata", () => {
+test("uses only the official color packshot and never fills missing colors with gallery images", () => {
   const url = "https://images.arcteryx.com/white.jpg";
-  const [color] = colorwaysOf([{
+  const colors = colorwaysOf([{
     label: "Stone", hexCode: "afafaf", image: { url }, imageAssets: [
       { image: { url: "https://images.arcteryx.com/front.jpg", alt: "Front" }, talent: { height: "183cm", fullName: "Not used" }, wearingSize: { size: "M" } },
       { image: { url: "https://images.arcteryx.com.example.com/other.jpg" } },
       { image: { url } },
     ],
+  }, {
+    label: "Black", image: {url: "https://images.arcteryx.com.example.com/black.jpg"},
+    heroImage: {image: {url: "https://images.arcteryx.com/details/black-front.jpg"}},
+  }, {
+    label: "Clay", image: {url: "https://images.arcteryx.com/details/clay-front.jpg"},
   }]);
-  assert.equal(color.hex, "#afafaf");
-  assert.equal(color.photos.length, 2);
-  assert.deepEqual(color.photos[1], {
-    url: "https://images.arcteryx.com/front.jpg", label: "Front", height: "183cm", size: "M",
-  });
+  assert.deepEqual(colors, [
+    {label: "Stone", hex: "#afafaf", image: url},
+    {label: "Black", hex: null, image: null},
+    {label: "Clay", hex: null, image: null},
+  ]);
 });
 
 function product(fields: Partial<ProductDetail>): ProductDetail {

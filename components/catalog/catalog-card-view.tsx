@@ -4,6 +4,7 @@ import {displayCardCell, displayPrice} from "@/i18n/copy";
 import {useCopy} from "@/i18n/ui-copy";
 import {ArrowUpRight} from "lucide-react";
 import {CompareButton} from "./compare-selection";
+import {CatalogPackshot} from "./catalog-packshot";
 import {ColorDot, GenderPill, ProductBadges, ProductImage} from "./product-media";
 import {ParameterHelp} from "./parameter-help";
 import {cardFields} from "@/lib/parameters/registry";
@@ -14,7 +15,8 @@ export function CatalogCardView({ product, eager }: { product: CatalogListing; e
   return (
     <article className="gear-card min-w-0 overflow-hidden border bg-card">
       <Link href={`/products/${product.slug}`} prefetch={false} className="group relative block">
-        <ProductImage src={product.image} eager={eager} className="aspect-[4/5]" />
+        {product.brandSlug === "arcteryx" ? <CatalogPackshot source={product.image} eager={eager} />
+          : <ProductImage src={product.image} eager={eager} className="aspect-[4/5]" />}
         <div className="absolute inset-x-2 top-2 flex flex-wrap items-start gap-1">
           <GenderPill gender={product.gender} />
         </div>

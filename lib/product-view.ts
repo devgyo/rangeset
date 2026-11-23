@@ -1,3 +1,4 @@
+import {arcPackshotSource} from "./arcteryx-packshot";
 import { decode } from "html-entities";
 import type {TaxonomyResult} from "./taxonomy";
 import { formatMoney, type Profile } from "./parameters/model";
@@ -17,8 +18,7 @@ export type CatalogCard = {
   taxonomy?: TaxonomyResult; modelNumbers?: string[]; series?: string[]; brandSlug?: string; salePrice?: number | null;
   productType?: string; protectionType?: string; currency?: string | null;
 };
-export type Photo = { url: string; label: string; height: string; size: string };
-export type Colorway = ColorSwatch & { photos: Photo[] };
+export type Colorway = ColorSwatch & { image: string | null };
 export type ProductDetail = CatalogCard & {
   url: string | null; verifiedAt: string | null; description: string; materials: string[];
   features: { label: string; values: string[] }[];
@@ -82,18 +82,7 @@ export function colorwaysOf(value: unknown): Colorway[] {
   return entries(value).map(record).flatMap((color) => {
     const [swatch] = swatchesOf([color]);
     if (!swatch) return [];
-    const photos: Photo[] = [];
-    const add = (img: unknown, label: string, talent?: unknown, wearing?: unknown) => {
-      const image = record(img);
-      const url = safeImage(image.url);
-      if (!url || photos.some((photo) => photo.url === url)) return;
-      photos.push({ url, label: plainText(image.alt ?? image.label) || label,
-        height: plainText(record(talent).height), size: plainText(record(wearing).size) });
-    };
-    add(color.image, swatch.label);
-    for (const asset of entries(color.imageAssets).map(record)) add(asset.image, swatch.label, asset.talent, asset.wearingSize);
-    add(record(color.heroImage).image, swatch.label);
-    return [{ ...swatch, photos }];
+    return [{ ...swatch, image: arcPackshotSource(record(color.image).url) }];
   });
 }
 

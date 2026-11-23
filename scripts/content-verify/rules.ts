@@ -5,7 +5,7 @@ import {mammutPayload} from "../../lib/brands/mammut";
 import {countCardValues, selectCardParameters} from "../../lib/parameters/card";
 import type {Fiber, Part} from "../../lib/parameters/model";
 import {priceCents} from "../../crawler/snapshot-observation";
-import {entries, record} from "../../lib/product-view";
+import {entries, record, safeImage} from "../../lib/product-view";
 import {productFacts, snippet} from "./compare";
 import type {AuditProduct, Brand} from "./data";
 import type {Issue} from "./report";
@@ -135,7 +135,10 @@ export function checkCatalog(products: AuditProduct[]): Issue[] {
       const card = selectCardParameters(profile);
       const available = countCardValues(card, profile);
       if (available < 4) issue("missing_card_parameters", {available, card});
-      for (const url of new Set([view.image, view.hero, ...view.colorways.flatMap(({photos}) => photos.map(({url}) => url))])) {
+      const galleryImages = entries(arc?.colourOptions).map(record).flatMap((color) => [
+        color.image, record(color.heroImage).image, ...entries(color.imageAssets).map((asset) => record(asset).image),
+      ]).map((image) => safeImage(record(image).url));
+      for (const url of new Set([view.image, view.hero, ...view.colorways.map(({image}) => image), ...galleryImages])) {
         if (url) add(images, url, product);
       }
       add(sku, product.brandSlug + "/" + product.sku, product);

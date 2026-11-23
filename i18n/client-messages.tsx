@@ -25,7 +25,7 @@ const scopes = {
     "ui.product_count", "ui.reset_filters", "ui.catalog_load_failed", "ui.catalog_retry",
     "ui.no_products_match_these_filters", "ui.catalog_all_shown",
   ],
-  gallery: ["ui.model_height", "ui.wearing_size", "ui.photo_angles", "ui.colorway", "ui.colorways"],
+  gallery: ["ui.colorway", "ui.colorways"],
   compare: [
     ...compareAction, ...about, "taxonomy", "field", "group", "help", "help_label", "status", "status_description",
     "symbol", "part", "subgroup", "note", "season", "cat", "fiber", "construction", "stretch", "value", "activity",
