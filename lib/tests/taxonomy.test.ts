@@ -92,14 +92,14 @@ test("the archived Arc’teryx catalog meets the 97% taxonomy target with all re
   assert.equal(records.filter(({category}) => category !== "Footwear").length, reference.length);
   const eligible = records.filter(({taxonomy}) => taxonomy.state !== "hidden");
   assert.ok(eligible.filter(({taxonomy}) => taxonomy.state === "classified" && !taxonomy.manual).length / eligible.length >= 0.97);
-  assert.ok(!eligible.some(({name}) => name === "PRO Backpack Lid Replacement"));
+  assert.ok(eligible.some((item) => /\bbackpack lid\b/i.test(item.name) && matchesTaxonomy(item, "accessories")));
   assert.equal(eligible.filter((item) => matchesTaxonomy(item, "hardshell-jackets")).length, 59);
 });
 
 test("all taxonomy labels exist in English, Chinese and Japanese", () => {
   const slugs = new Set(taxonomy.flatMap(({slug, leaves}) => [slug, ...leaves.map((leaf) => leaf.slug)]));
-  assert.equal(taxonomy.length, 7);
-  assert.equal(taxonomy.flatMap(({leaves}) => [...leaves] as unknown[]).length, 22);
+  assert.equal(taxonomy.length, 8);
+  assert.equal(taxonomy.flatMap(({leaves}) => [...leaves] as unknown[]).length, 23);
   for (const slug of slugs) {
     const key = taxonomyLabelKey(slug).slice("taxonomy.".length);
     for (const language of [en, zh, ja]) assert.ok(Object.hasOwn(language.taxonomy, key), key);

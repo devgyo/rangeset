@@ -173,7 +173,7 @@ async function loadListing() {
   };
 }
 
-const cachedListing = unstable_cache(loadListing, ["catalog-v1.8.0-with-fabric-and-size-normalization", catalogBrand], {revalidate: 300});
+const cachedListing = unstable_cache(loadListing, ["catalog-v1.8.0-with-accessories", catalogBrand], {revalidate: 300});
 const readListing = cache(catalogEnabled && !localCatalog ? cachedListing : loadListing);
 export const listProducts = async () => (await readListing()).cards;
 export const homeFeature = async () => (await readListing()).feature;

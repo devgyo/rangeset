@@ -143,7 +143,8 @@
     "base_layer": "打底层",
     "professional": "专业用途",
     "shorts": "短裤",
-    "dresses_skirts": "连衣裙与半身裙"
+    "dresses_skirts": "连衣裙与半身裙",
+    "accessories": "配件"
   },
   "protection": {
     "hard_shell": "硬壳",
@@ -560,6 +561,7 @@
     "dresses_and_one_pieces": "连衣裙与连体服",
     "dresses": "连衣裙",
     "one_piece_suits": "连体服",
-    "backpacks": "背包"
+    "backpacks": "背包",
+    "accessories": "配件"
   }
 }

@@ -10,7 +10,7 @@ export {activityCode, activityLabel, genderDisplay, useCopy, type Translator} fr
 const categoryKeys: Record<string, string> = {
   "Shell Jackets": "shell_jackets", "Insulated Jackets": "insulated_jackets", Pants: "pants",
   "Shirts and Tops": "shirts_tops", Fleece: "fleece", "Base Layer": "base_layer",
-  "Professional Use": "professional", Shorts: "shorts", "Dresses and Skirts": "dresses_skirts",
+  "Professional Use": "professional", Shorts: "shorts", "Dresses and Skirts": "dresses_skirts", Accessories: "accessories",
 };
 const options: Record<string, string> = {
   product_type: "type", protection_type: "protection", gender: "gender", wind: "wind",

@@ -32,7 +32,7 @@ The public catalog lists Arc’teryx’s US products. For the read-only local ca
 
 ## Arc'teryx catalog
 
-The crawler reads both US storefront sitemaps, then discovers PRO · LEAF apparel and backpacks on the official LEAF US category pages. Both sources use the same Arc’teryx catalog and the same weekly workflow. A LEAF run validates the rendered tiles against the official list and structured metadata before reconciling the advertised SKUs with the detail pages. Any disagreement stops the LEAF update and retains its last complete import. The LEAF product pages publish list prices and product options. The catalog and snapshots leave LEAF online stock unknown because that storefront does not offer public online checkout. It reads robots.txt on each run, waits at least 1.5 seconds between requests, and stops the run on a 403, 429, or detected challenge. It never uses an ecommerce API. Gzipped PDP HTML and JSON sidecars with the HTTP status, requested/final URLs, and UTC timestamp go under the gitignored `.crawl/raw/arcteryx/` directory. GitHub Actions keeps the crawl log artifact. Raw HTML from a hosted runner is temporary, while Postgres retains the latest parsed JSON for each product.
+The crawler reads both US storefront sitemaps, then discovers PRO · LEAF apparel, backpacks and accessories on the official LEAF US category pages. Both sources use the same Arc’teryx catalog and the same weekly workflow. A LEAF run validates the rendered tiles against the official list and structured metadata before reconciling the advertised SKUs with the detail pages. Any disagreement stops the LEAF update and retains its last complete import. The LEAF product pages publish list prices and product options. The catalog and snapshots leave LEAF online stock unknown because that storefront does not offer public online checkout. It reads robots.txt on each run, waits at least 1.5 seconds between requests, and stops the run on a 403, 429, or detected challenge. It never uses an ecommerce API. Gzipped PDP HTML and JSON sidecars with the HTTP status, requested/final URLs, and UTC timestamp go under the gitignored `.crawl/raw/arcteryx/` directory. GitHub Actions keeps the crawl log artifact. Raw HTML from a hosted runner is temporary, while Postgres retains the latest parsed JSON for each product.
 
 ```sh
 pnpm test
@@ -67,7 +67,7 @@ New products and changes to price, stock, and catalog text are applied automatic
 
 Inspect `changes` where `status = 'needs_review'`. To approve a spec, confirm the candidate is still current, then update the live `product_specs` row and mark the change approved in one transaction. For a successor, set the predecessor and successor references together before approving the change. A rejected candidate keeps the published value in place. Use `manual_overrides` for operator values that should take precedence over later crawl observations. The site recognizes product fields `name`, `category`, `gender`, `url`, `status`, dollar `price`, and `spec.<key>` values such as `spec.weight_g`. Use `parameters.taxonomy` to choose a unified category. A JSON null spec override displays as unpublished.
 
-Arc’teryx has 453 archived styles. The catalog hides 34 footwear styles and one backpack lid, leaving 418 styles eligible for categorization and display.
+The public catalog includes official website accessories such as hats, gloves, socks, garment care and pack accessories. The weekly crawl also processes footwear for the archive.
 
 ## Catalog content verification
 

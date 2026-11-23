@@ -32,6 +32,9 @@ export const taxonomy = [
     {key: "onepiece.dress", slug: "dresses", definition: "A one-piece garment with a skirt extending from the bodice."},
     {key: "onepiece.suit", slug: "one-piece-suits", definition: "A one-piece garment joining an upper body and pants."},
   ]},
+  {slug: "accessories", leaves: [
+    {key: "accessories", slug: "accessories", definition: "An accessory for clothing, gear, or product care."},
+  ]},
   {slug: "backpacks", leaves: [
     {key: "packs.backpack", slug: "backpacks", definition: "A bag designed to be carried on the back using shoulder straps."},
   ]},
@@ -44,7 +47,7 @@ export type TaxonomyResult =
   | {state: "needs_review" | "hidden"; reason: string; manual?: true};
 
 export type TaxonomyEvidence = {
-  hidden?: string; backpack?: boolean; base?: "top" | "bottom"; shape?: "suit" | "dress" | "skirt" | "shorts" | "tight" | "pants" | "vest" | "top" | "tailoring";
+  hidden?: string; accessory?: boolean; backpack?: boolean; base?: "top" | "bottom"; shape?: "suit" | "dress" | "skirt" | "shorts" | "tight" | "pants" | "vest" | "top" | "tailoring";
   waterproof?: boolean; membrane?: boolean; conflict?: string; fleece?: boolean; softshell?: boolean; windshell?: boolean;
   fill?: "down" | "synthetic" | "unknown"; threeInOne?: boolean;
 };
@@ -61,6 +64,7 @@ export function classifyTaxonomy(facts: TaxonomyEvidence, override?: unknown): T
   if (selected !== undefined) return {...review("Manual taxonomy requires review"), manual: true};
   const {shape, waterproof, membrane, conflict, fleece, softshell, windshell} = facts;
   const fill = facts.threeInOne ? undefined : facts.fill;
+  if (facts.accessory) return classified("accessories");
   if (facts.backpack) return classified("packs.backpack");
   if (facts.base) return classified(facts.base === "top" ? "base.top" : "base.bottom");
   if (shape === "suit") return classified("onepiece.suit");
@@ -127,7 +131,7 @@ export const taxonomySlugs: readonly string[] = [...new Set([...taxonomy.map(({s
 export const legacyTaxonomy: Readonly<Record<string, string>> = {
   "Shell Jackets": "outerwear", "Insulated Jackets": "outerwear", Pants: "bottoms",
   Fleece: "fleece-and-midlayers", "Shirts and Tops": "tops", "Base Layer": "base-layers",
-  Shorts: "shorts", "Dresses and Skirts": "dresses-and-one-pieces",
+  Shorts: "shorts", "Dresses and Skirts": "dresses-and-one-pieces", Accessories: "accessories",
   // Professional Use is now the PRO series facet.
   "Professional Use": "",
 };

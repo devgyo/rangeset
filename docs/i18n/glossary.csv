@@ -113,6 +113,7 @@ cat.base_layer,Base Layer,打底层,ベースレイヤー,品类,,https://arcter
 cat.professional,Professional Use,专业用途,プロフェッショナル,品类,,repo:lib/parameters + Neon products.category,needs_review: 指 LEAF 等军警/专业线，名称待定
 cat.shorts,Shorts,短裤,ショーツ,品类,,repo:lib/parameters + Neon products.category,
 cat.dresses_skirts,Dresses and Skirts,连衣裙与半身裙,ワンピース・スカート,品类,,repo:lib/parameters + Neon products.category,日文 dress=「ワンピース」，不用「ドレス」
+cat.accessories,Accessories,配件,アクセサリー,品类,,,
 protection.hard_shell,Hardshell,硬壳,ハードシェル,防护类型,,https://arcteryx.com/us/zh/c/mens/shell-jackets https://arcteryx.jp/products/beta-ar-jacket-m,
 protection.soft_shell,Softshell,软壳,ソフトシェル,防护类型,,https://arcteryx.com/us/zh/c/mens/shell-jackets https://colorfulrock.com/yamanobori/softshell/,
 protection.wind_shell,Windshell,风壳,ウインドシェル,防护类型,,https://arcteryx.com/us/zh/c/mens/shell-jackets https://colorfulrock.com/yamanobori/softshell/,
@@ -492,6 +493,7 @@ taxonomy.dresses_and_one_pieces,Dresses & One-Pieces,连衣裙与连体服,ワ�
 taxonomy.dresses,Dresses,连衣裙,ワンピース,统一品类,,,needs_review: 日文草译。
 taxonomy.one_piece_suits,One-Piece Suits,连体服,オールインワン,统一品类,,,needs_review: 日文草译。
 taxonomy.backpacks,Backpacks,背包,バックパック,统一品类,,,needs_review: 日文草译。
+taxonomy.accessories,Accessories,配件,アクセサリー,品类,,,
 ui.subcategories,Subcategories,二级品类,サブカテゴリー,界面,,,needs_review: 日文草译。
 ui.local_catalog,Local catalog · Saved product data,本地目录 · 已保存的商品数据,ローカルカタログ · 保存済みの商品データ,界面,,,needs_review: 日文草译。
 activity.approach,Approach,接近路线,アプローチ,活动,,,needs_review: 日文草译。

@@ -4,11 +4,11 @@ import {parseArcteryx, scripts, type CatalogProduct} from "./adapters/arcteryx";
 import { fetchProduct } from "./fetch";
 import {arcLeafPolicy, CrawlStop, discover, fixtureUrl, leafListings, PoliteClient} from "./http";
 
-// Apparel and footwear only: packs, accessories, climbing gear and care products are skipped.
+// Keep the main-store apparel, footwear and official accessory category.
 export const excludedCategory = /\b(packs?|bags?|accessor(y|ies)|gloves?|mitts?|hats?|caps?|toques?|beanies?|socks?|climbing gear|harness(es)?|chalk|product care|care|belts?|gaiters?|neck|headbands?|luggage|duffels?)\b/i;
 
 export function isExcluded(category: string | null) {
-  return !!category && excludedCategory.test(category);
+  return category !== "Accessories" && !!category && excludedCategory.test(category);
 }
 
 export type CrawlResult = {

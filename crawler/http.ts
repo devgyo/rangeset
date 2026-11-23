@@ -65,7 +65,7 @@ export const arcPolicy: CrawlPolicy = {
 };
 
 export const leafListings = [
-  "base-layer", "cold-weather-insulation", "combat-uniforms", "load-carriage-equipment",
+  "apparel-accessories", "base-layer", "cold-weather-insulation", "combat-uniforms", "load-carriage-equipment",
   "mid-layer", "softshell", "wet-weather-protection",
 ].map((category) => arcLeafOrigin + "/us/en/c/" + category);
 

@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { test } from "node:test";
 import {arcSnapshotVariants, deriveSpecs, nameFamily, parseArcteryx} from "../adapters/arcteryx";
 import {arcLeafPolicy, arcPolicyFor, fixtureUrl} from "../http";
-import {leafListingProducts} from "../crawl";
+import {isExcluded, leafListingProducts} from "../crawl";
 import {brandLink} from "../../lib/outbound";
 import {catalogSource, toView} from "../../lib/catalog/product";
 
@@ -121,4 +121,25 @@ test("LEAF products preserve official model numbers and prices while leaving ret
   assert.deepEqual(view.taxonomy, {state: "classified", leaf: "packs.backpack"});
   assert.equal(brandLink(view, "en"), "/out/X000007023?to=brand");
   assert.equal(arcSnapshotVariants(product.raw, url)[0].inStock, null);
+});
+
+
+test("the catalog includes accessories from both stores and the previously archived pack lid", () => {
+  assert.equal(isExcluded("Accessories"), false);
+  assert.equal(isExcluded("Packs"), true);
+  const url = arcLeafPolicy.origin + "/us/en/shop/cold-wx-beanie-ar-wool";
+  const raw = {id: "X000007231", slug: "cold-wx-beanie-ar-wool", name: "Cold WX Beanie AR Wool",
+    categoryEnglish: "Apparel Accessories", price: 42, currencyCode: "USD",
+    variants: [{id: "X000007231001", price: 42}]};
+  const jsonLd = {"@type": "ProductGroup", productGroupID: raw.id,
+    hasVariant: [{sku: raw.variants[0].id, offers: {price: 42, priceCurrency: "USD"}}]};
+  const html = `<script id="__NEXT_DATA__">${JSON.stringify({props: {pageProps: {product: JSON.stringify(raw)}}})}</script>
+    <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`;
+  const product = parseArcteryx(html, url, fetchedAt);
+  assert.equal(product.category, "Accessories");
+  const source = catalogSource({...product, brand: "Arc’teryx", brandSlug: "arcteryx", status: "active",
+    styleFamily: null, lastSeen: fetchedAt, payloadFetchedAt: fetchedAt, stockRatio: null, payload: product.raw});
+  assert.deepEqual(toView(source, [], product.prices, true).taxonomy, {state: "classified", leaf: "accessories"});
+  const lid = {...source, name: "Alpha PRO Backpack Lid", category: "Professional Use", subTags: ["Pack Accessories"]};
+  assert.deepEqual(toView(lid, [], [], true).taxonomy, {state: "classified", leaf: "accessories"});
 });

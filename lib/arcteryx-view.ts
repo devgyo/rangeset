@@ -4,7 +4,7 @@ export * from "./product-view";
 type Scalar = CatalogSpec["value"];
 export const categoryOrder = [
   "Shell Jackets", "Insulated Jackets", "Pants", "Fleece", "Shirts and Tops",
-  "Base Layer", "Professional Use", "Shorts", "Dresses and Skirts",
+  "Base Layer", "Professional Use", "Shorts", "Dresses and Skirts", "Accessories",
 ];
 export const featuredFamilies = ["Beta", "Alpha", "Atom", "Gamma", "Norvan"];
 const families = new Map([

@@ -6,7 +6,9 @@ export function arcTaxonomy(product: Pick<ProductDetail, "name" | "category" | "
   const {name, category, subTags: tags} = product;
   const tag = (pattern: RegExp) => tags.some((entry) => pattern.test(entry));
   if (isFootwearProduct(product, {raw, overrides})) return {hidden: "Footwear"};
-  if (tag(/^Pack Accessories$/i) || /\b(?:backpack|pack) lid\b/i.test(name)) return {hidden: "Backpack accessory"};
+  if (category === "Accessories" || tag(/^Pack Accessories$/i) || /\b(?:backpack|pack) lid\b/i.test(name)) {
+    return {accessory: true};
+  }
   const backpack = /\b(?:backpack|assault pack)\b/i.test(name) || category === "Packs";
   const lower = /\b(?:bottoms?|pants?|tights?|leggings?|boxers?|briefs?)\b/i.test(name);
   const base = category === "Base Layer" || tag(/^Base Layer (?:Tops|Bottoms)$/i)

@@ -143,7 +143,8 @@
     "base_layer": "Base Layer",
     "professional": "Professional Use",
     "shorts": "Shorts",
-    "dresses_skirts": "Dresses and Skirts"
+    "dresses_skirts": "Dresses and Skirts",
+    "accessories": "Accessories"
   },
   "protection": {
     "hard_shell": "Hardshell",
@@ -560,6 +561,7 @@
     "dresses_and_one_pieces": "Dresses & One-Pieces",
     "dresses": "Dresses",
     "one_piece_suits": "One-Piece Suits",
-    "backpacks": "Backpacks"
+    "backpacks": "Backpacks",
+    "accessories": "Accessories"
   }
 }

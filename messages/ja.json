@@ -143,7 +143,8 @@
     "base_layer": "ベースレイヤー",
     "professional": "プロフェッショナル",
     "shorts": "ショーツ",
-    "dresses_skirts": "ワンピース・スカート"
+    "dresses_skirts": "ワンピース・スカート",
+    "accessories": "アクセサリー"
   },
   "protection": {
     "hard_shell": "ハードシェル",
@@ -549,6 +550,7 @@
     "dresses_and_one_pieces": "ワンピース・オールインワン",
     "dresses": "ワンピース",
     "one_piece_suits": "オールインワン",
-    "backpacks": "バックパック"
+    "backpacks": "バックパック",
+    "accessories": "アクセサリー"
   }
 }

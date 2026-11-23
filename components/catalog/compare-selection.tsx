@@ -40,7 +40,7 @@ function decodeSelection(value: string): PickedProduct[] {
       image: safeImage(item.image),
       category: typeof item.category === "string" ? item.category : null,
       gender: ["men", "women", "unisex"].includes(item.gender) ? item.gender : null,
-    } as PickedProduct])).values()].filter((product) => isCatalogProduct(product) && !/\b(?:backpack|pack) lid\b/i.test(product.name)).slice(0, 4);
+    } as PickedProduct])).values()].filter((product) => isCatalogProduct(product)).slice(0, 4);
   } catch { return []; }
 }
 

@@ -240,6 +240,8 @@ function verifyLeafPrices(groups: Json[], sku: string, prices: Observation[]) {
 function leafCategory(category: string | null, name: string, tags: string[]) {
   const pants = /\b(?:pants?|bottoms?|bibs?)\b/i.test(name);
   switch (category) {
+    case "Accessories":
+    case "Apparel Accessories": return "Accessories";
     case "Base Layer": return "Base Layer";
     case "Cold Weather Insulation": return pants ? "Pants" : "Insulated Jackets";
     case "Combat Uniform":
@@ -295,7 +297,8 @@ export function parseArcteryx(html: string, url: string, fetchedAt: string): Cat
   const inStock = states.includes(true) ? true : states.length && states.every((state) => state === false) ? false : null;
   const prices = [{ variant: "", price: salePrice(raw), currency, inStock }, ...new Map(variants.map((row) => [row.variant, row])).values()];
   const slug = [string(raw.slug) ?? name, externalId].map((value) => normalizedName(value).replace(/ /g, "-")).join("-");
-  const category = leaf ? leafCategory(sourceCategory, name, subTags) : sourceCategory;
+  const category = leaf ? leafCategory(sourceCategory, name, subTags)
+    : sourceCategory === "Apparel Accessories" ? "Accessories" : sourceCategory;
   const groups = productGroups(html);
   if (leaf) verifyLeafPrices(groups, externalId, prices);
   return {
