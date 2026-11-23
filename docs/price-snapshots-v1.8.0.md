@@ -6,7 +6,7 @@
 
 唯一的 repository secret 是 `DATABASE_URL`，填 Neon direct 连接串。快照脚本会拒绝 Neon pooled 主机名。现有 Arc’teryx 定时任务也读同名 secret，配置时保留该任务所需的权限。快照任务读取 `brands`、`products`、`product_raw`、`manual_overrides`，向两个新表写入，其中运行表还需要 UPDATE。
 
-任务每天 05:17 UTC（UTC+8 13:17）触发，沿用 Arc’teryx 爬虫的 concurrency group。商品清单来自数据库，应用前台商品可见性判断及停产状态过滤。只请求支持品牌现有的官网公开商品页。现有机器人规则、至少 1.5 秒请求间隔和防护停止行为都适用。每次 GitHub run 对应稳定的 UUID，GitHub rerun 复用同一个 UUID。手动跑脚本时可用 `SNAPSHOT_RUN_ID` 指定。已完成页不会重抓。
+任务每天 05:17 UTC（UTC+8 13:17）触发，沿用 Arc’teryx 爬虫的 concurrency group。商品清单来自数据库，应用前台商品可见性判断及停产状态过滤。只请求始祖鸟美国官网公开商品页。现有机器人规则、至少 1.5 秒请求间隔和防护停止行为都适用。每次 GitHub run 对应稳定的 UUID，GitHub rerun 复用同一个 UUID。手动跑脚本时可用 `SNAPSHOT_RUN_ID` 指定。已完成页不会重抓。
 
 每个已完成商品独立提交。尺码×颜色记录优先使用厂商 SKU，只有 SKU 缺失时才用 `color|size`。颜色或尺码无展示名时可保留品牌提供的选项代码。金额用整数分存储，未知值及无法确认的零值记为 NULL。404 存一条 `missing_404`，只有商品页 HTTP 403/429 存一条 `blocked`，记录停止页序（从 1 开始）和原因后停止整个运行。商品页级状态使用预留的 `__page__` 键。机器人规则拒绝的地址不会发送商品请求。无 URL、robots 或策略拒绝、超时、解析失败各有单独的运行日志和汇总计数。这四类继续处理余下商品。汇总计数覆盖当前执行。仅呈现防护内容而未返回 403/429 的页面仍停止运行，运行日志保留原因。快照不改变前台价格或库存来源。
 

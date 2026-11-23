@@ -304,7 +304,7 @@
     "home_label": "Rangeset home",
     "hero_first": "Specs,",
     "hero_second": "not hype.",
-    "hero_description": "Browse US outdoor catalogs and compare published specs side by side.",
+    "hero_description": "Browse the Arc’teryx US catalog and compare published specs side by side.",
     "families": "Product families",
     "view_on_brand_site": "View on brand site",
     "catalog_live": "US catalog · Published specs and MSRP",
@@ -410,7 +410,7 @@
     "title": "Rangeset — specs, not hype",
     "template": "{title} | Rangeset",
     "description": "Browse and compare published Arc’teryx product specifications.",
-    "catalog_description": "Browse US outdoor gear and compare published specifications across models.",
+    "catalog_description": "Browse the Arc’teryx US catalog and compare published specifications across models.",
     "compare_description": "Compare published specifications for up to four Arc’teryx products.",
     "jackets_description": "Browse and compare hardshell jackets by membrane, construction, weight, price, and features.",
     "product_description": "Published configuration and specs for the {brand} {name}."

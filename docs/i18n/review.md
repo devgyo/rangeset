@@ -39,7 +39,7 @@
 | ui.navigation | Main navigation | 主导航 | メインナビゲーション | needs_review: v1 补充草译。 |
 | ui.hero_first | Specs, | 看参数， | 宣伝文句より、 | needs_review: v1 补充草译。 |
 | ui.hero_second | not hype. | 不看噱头。 | スペック。 | needs_review: v1 补充草译。 |
-| ui.hero_description | Browse US outdoor catalogs and compare published specs side by side. | 浏览美国户外品牌目录，并排对比已公布的参数。 | 米国向けアウトドアカタログで、公表スペックを比較できます。 | needs_review: v1 补充草译。 |
+| ui.hero_description | Browse the Arc’teryx US catalog and compare published specs side by side. | 浏览始祖鸟美国商品目录，并排对比官方公布的参数。 | Arc’teryxの米国向けカタログで、公表スペックを比較できます。 | needs_review: v1 补充草译。 |
 | ui.families | Product families | 商品系列 | 製品シリーズ | needs_review: v1 补充草译。 |
 | ui.catalog_live | US catalog · Published specs and MSRP | 美国目录 · 已公布参数及官方定价 | 米国向けカタログ · 公表スペックと希望小売価格 | needs_review: v1 补充草译。 |
 | ui.breadcrumb | Breadcrumb | 当前位置 | パンくずリスト | needs_review: v1 补充草译。 |
@@ -72,7 +72,7 @@
 | ui.virgin_fiber | virgin {fiber} | 原生{fiber} | バージン{fiber} | needs_review: v1 补充草译。 |
 | seo.title | Rangeset — specs, not hype | Rangeset — 看参数，不看噱头 | Rangeset — 宣伝文句よりスペック | needs_review: v1 补充草译。 |
 | seo.description | Browse and compare published Arc’teryx product specifications. | 浏览和对比 Arc’teryx 公布的商品参数。 | Arc’teryxが公表した製品スペックを閲覧・比較できます。 | needs_review: v1 补充草译。 |
-| seo.catalog_description | Browse US outdoor gear and compare published specifications across models. | 浏览美国户外商品目录，对比不同款式的已公布参数。 | 米国向けアウトドア用品のカタログで、モデルごとの公表スペックを比較できます。 | needs_review: v1 补充草译。 |
+| seo.catalog_description | Browse the Arc’teryx US catalog and compare published specifications across models. | 浏览始祖鸟美国商品目录，对比不同款式的官方参数。 | Arc’teryxの米国向けカタログで、モデルごとの公表スペックを比較できます。 | needs_review: v1 补充草译。 |
 | seo.compare_description | Compare published specifications for up to four Arc’teryx products. | 并排对比最多 4 款 Arc’teryx 商品的已公布参数。 | Arc’teryx製品の公表スペックを最大4点まで並べて比較できます。 | needs_review: v1 补充草译。 |
 | seo.jackets_description | Browse and compare hardshell jackets by membrane, construction, weight, price, and features. | 按防水膜、结构、重量、价格和功能浏览和对比硬壳夹克。 | 防水メンブレン、構造、重量、価格、機能からハードシェルジャケットを比較できます。 | needs_review: v1 补充草译。 |
 | seo.product_description | Published configuration and specs for the {brand} {name}. | {brand} {name} 的已公布配置与参数。 | {brand} {name}の公表仕様とスペック。 | needs_review: v1 补充草译。 |

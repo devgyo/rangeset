@@ -1,4 +1,5 @@
 import {Client} from "pg";
+import {catalogBrand} from "../../lib/catalog-scope";
 import type {IndexedSpec} from "../../lib/brands/types";
 import {catalogSource, sourceIsVisible, type CatalogSource, type PriceRow} from "../../lib/catalog/product";
 
@@ -41,8 +42,8 @@ export async function readInventory(connectionString: string) {
             ORDER BY latest.captured_at DESC, latest.run_id DESC LIMIT 1
           )), '[]') AS snapshots
       FROM products p JOIN brands b ON b.id = p.brand_id LEFT JOIN product_raw r ON r.product_id = p.id
-      WHERE b.slug IN ('arcteryx', 'mammut') ORDER BY b.slug, p.id
-    `);
+      WHERE b.slug = $1 ORDER BY p.id
+    `, [catalogBrand]);
     return rows.map(catalogSource).filter(sourceIsVisible);
   } finally {
     await db.end();

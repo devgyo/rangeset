@@ -48,7 +48,7 @@ export async function CatalogPage({locale, category = "", page = 1}: {locale: Lo
   return (
     <div className="site-width py-7 sm:py-8">
       <h1 className="page-title catalog-title">{t(category ? taxonomyLabelKey(category) : "ui.product_catalog")}</h1>
-      <p className="mt-2 mb-4 text-sm text-muted-foreground">{t(localCatalog ? "ui.local_catalog" : catalogEnabled ? "ui.catalog_live" : "ui.example_data")}</p>
+      {catalogEnabled && <p className="mt-2 mb-4 text-sm text-muted-foreground">{t(localCatalog ? "ui.local_catalog" : "ui.catalog_live")}</p>}
       <ClientMessages scope="catalog">
         <CatalogBrowser key={category + ":" + page} startPage={page} previewCount={preview.length}
           previewCards={preview.map(({product}, index) => <CatalogCardView key={product.slug} product={product} eager={index < 2} />)}

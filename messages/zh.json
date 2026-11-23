@@ -304,7 +304,7 @@
     "home_label": "Rangeset",
     "hero_first": "看参数，",
     "hero_second": "不看噱头。",
-    "hero_description": "浏览美国户外品牌目录，并排对比已公布的参数。",
+    "hero_description": "浏览始祖鸟美国商品目录，并排对比官方公布的参数。",
     "families": "商品系列",
     "view_on_brand_site": "去官网查看",
     "catalog_live": "美国目录 · 已公布参数及官方定价",
@@ -410,7 +410,7 @@
     "title": "Rangeset — 看参数，不看噱头",
     "template": "{title} | Rangeset",
     "description": "浏览和对比 Arc’teryx 公布的商品参数。",
-    "catalog_description": "浏览美国户外商品目录，对比不同款式的已公布参数。",
+    "catalog_description": "浏览始祖鸟美国商品目录，对比不同款式的官方参数。",
     "compare_description": "并排对比最多 4 款 Arc’teryx 商品的已公布参数。",
     "jackets_description": "按防水膜、结构、重量、价格和功能浏览和对比硬壳夹克。",
     "product_description": "{brand} {name} 的已公布配置与参数。"

@@ -8,14 +8,12 @@ import {connection} from "next/server";
 import {catalogDb} from "@/lib/db/read";
 import {brands, manualOverrides, prices, products, productRaw, productSpecs} from "@/lib/db/schema";
 import type {Jacket, Spec} from "@/lib/types";
-import type {MammutProduct} from "@/crawler/adapters/mammut";
-import exampleData from "@/data/jackets.json";
+import {catalogBrand} from "@/lib/catalog-scope";
 import type {ProductDetail} from "@/lib/product-view";
 import {storedBrandPayload} from "@/lib/brands/db-payload";
-import {brandAdapter} from "@/lib/brands";
-import {classifyTaxonomy, consistentTaxonomy, matchesTaxonomy} from "@/lib/taxonomy";
-import {applyTaxonomyPresentation, cardOnly, catalogSource, defaultUnits, isoDate, sourceIsVisible, toView, type CatalogView} from "@/lib/catalog/product";
-import {fixtureProducts, mammutSource, type FixtureRow} from "@/lib/catalog/fixture";
+import {consistentTaxonomy, matchesTaxonomy} from "@/lib/taxonomy";
+import {applyTaxonomyPresentation, cardOnly, catalogSource, isoDate, sourceIsVisible, toView} from "@/lib/catalog/product";
+import {fixtureProducts, type FixtureRow} from "@/lib/catalog/fixture";
 
 export type {CatalogListing} from "@/lib/catalog/product";
 export const localCatalog = process.env.RANGESET_LOCAL_CATALOG === "1" && !process.env.VERCEL;
@@ -44,7 +42,8 @@ async function catalogRows(slugs?: string[], mode: "none" | "card" | "detail" = 
     payloadFetchedAt: mode === "detail" ? productRaw.fetchedAt : sql<null>`null`,
     ...storedBrandPayload(mode),
   }).from(products).innerJoin(brands, eq(products.brandId, brands.id)).leftJoin(productRaw, eq(productRaw.productId, products.id));
-  const rows = await query.where(slugs ? inArray(products.slug, slugs) : undefined).orderBy(products.name, products.id);
+  const rows = await query.where(and(eq(brands.slug, catalogBrand), slugs ? inArray(products.slug, slugs) : undefined))
+    .orderBy(products.name, products.id);
   return rows.map(catalogSource).filter(sourceIsVisible);
 }
 
@@ -133,44 +132,16 @@ function byProduct<T extends { productId: number }>(rows: T[]) {
   return groups;
 }
 
-function exampleProducts(): CatalogView[] {
-  const keys = {
-    weight: "weight_g", weightSize: "weight_size", membrane: "membrane", layers: "layers", faceDenier: "face_denier",
-    backLength: "centre_back_length_cm", fit: "fit", pitZips: "pit_zips", helmetHood: "helmet_hood",
-    waterproof: "waterproof_mm", breathability: "breathability",
-  } as const;
-  return (exampleData as Jacket[]).map((item) => {
-    const specs: ProductDetail["specs"] = {};
-    for (const [field, key] of Object.entries(keys)) {
-      const spec = item.specs[field as keyof typeof keys];
-      if (spec && spec.source !== "not_published") specs[key] = {
-        value: spec.value, unit: spec.unit ?? defaultUnits[key] ?? null, source: spec.source, date: spec.verifiedAt ?? item.verifiedAt,
-      };
-    }
-    return {
-      slug: item.slug, brand: item.brand, name: item.model, category: "Shell Jackets", gender: null, family: null,
-      brandSlug: "arcteryx", styleFamily: null, stockRatio: null,
-      subTags: [], veilance: false, isHardshell: true, taxonomy: classifyTaxonomy({waterproof: true, membrane: true}), status: item.status ?? "active", example: true,
-      image: null, hero: null, swatches: [], activities: [], summary: "", msrp: item.specs.price?.value ?? null,
-      inStock: null, specs, url: item.sourceUrl, verifiedAt: item.verifiedAt, description: "", materials: [], features: [],
-      facility: "", year: null, season: "", sizes: [], colorways: [],
-    };
-  });
-}
-
-const localRows = cache(async (): Promise<FixtureRow[]> => {
-  const [arc, mammut] = await Promise.all([
-    readFile("data/arcteryx-local.json", "utf8").then((data) => JSON.parse(data) as FixtureRow[]),
-    readFile("data/mammut-dry-run.json", "utf8").then((data) => JSON.parse(data) as {products: MammutProduct[]}),
-  ]);
-  return [...arc, ...mammut.products.map(mammutSource)];
+const localRows = cache(async () => {
+  const rows = JSON.parse(await readFile("data/arcteryx-local.json", "utf8")) as FixtureRow[];
+  return rows.filter(({brandSlug}) => brandSlug === catalogBrand);
 });
 
 async function loadProducts(mode: "card" | "detail", slugs?: string[]) {
   if (localCatalog) {
     return fixtureProducts(await localRows(), mode === "detail", slugs);
   }
-  if (!catalogEnabled) return exampleProducts().filter((product) => brandAdapter(product.brandSlug).accepts(product, {}) && (!slugs || slugs.includes(product.slug)));
+  if (!catalogEnabled) return [];
   const rows = await catalogRows(slugs, mode);
   if (!rows.length) return [];
   const db = catalogDb();
@@ -202,7 +173,7 @@ async function loadListing() {
   };
 }
 
-const cachedListing = unstable_cache(loadListing, ["catalog-v1.8.0-with-fabric-and-size-normalization"], {revalidate: 300});
+const cachedListing = unstable_cache(loadListing, ["catalog-v1.8.0-with-fabric-and-size-normalization", catalogBrand], {revalidate: 300});
 const readListing = cache(catalogEnabled && !localCatalog ? cachedListing : loadListing);
 export const listProducts = async () => (await readListing()).cards;
 export const homeFeature = async () => (await readListing()).feature;

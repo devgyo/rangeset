@@ -27,8 +27,7 @@ export function summarize(products: ProductAudit[]) {
   }
   const stockVariants = {comparable, mismatch, mismatchRate: comparable ? mismatch / comparable : null, threshold: stockThreshold};
   const byField = (items: Result[]) => Object.fromEntries(fields.map((field) => [field, totals(items.filter((r) => r.field === field))]));
-  const byBrand = (["arcteryx", "mammut"] as const).map((brand) => {
-    const items = products.filter((row) => row.brand === brand);
+  const byBrand = [...Map.groupBy(products, ({brand}) => brand)].map(([brand, items]) => {
     const values = items.flatMap(({results}) => results);
     return [brand, {products: items.length, total: totals(values), fields: byField(values)}] as const;
   });

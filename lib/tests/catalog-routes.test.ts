@@ -114,17 +114,29 @@ test("the unified category and its 301 redirects use English slugs and three lan
   }
 });
 
-test("the local two-brand catalog renders both brands and a Mammut product can be compared", {
-  skip: !site || process.env.RANGESET_LOCAL_CATALOG !== "1",
-}, async () => {
-  const html = await rendered(await get("/products/category/softshell-jackets"));
-  const cards = [...html.matchAll(/<article class="gear-card [^"]*">([\s\S]*?)<\/article>/g)].map(([, card]) => card);
-  assert.ok(cards.some((card) => card.includes("Arc’teryx")));
-  assert.ok(cards.some((card) => card.includes("Mammut")));
-  const compare = await rendered(await get(`/compare?ids=mammut-1010-33030,${beta}`));
-  assert.match(compare, /class="comparison-matrix"/);
-  assert.match(compare, /Eiger Free Pro HS Hooded Jacket Men/);
-  assert.match(compare, /Beta AR Jacket/);
+test("public catalog routes exclude Mammut and preserve Arc’teryx comparisons", options, async () => {
+  const mammut = "mammut-1010-33030";
+  for (const prefix of locales) {
+    const listing = await rendered(await get(prefix + "/products?brand=mammut"));
+    assert.match(listing, /gear-card/);
+    assert.doesNotMatch(listing, /Mammut/i);
+    const detail = await get(prefix + "/products/" + mammut);
+    assert.equal(detail.status, 404, prefix);
+    assert.match(await detail.text(), /noindex/i);
+    const compare = await rendered(await get(prefix + "/compare?ids=" + [mammut, beta, adze].join(",")));
+    assert.match(compare, /class="comparison-matrix"/);
+    assert.match(compare, /Beta AR Jacket/);
+    assert.match(compare, /Adze Pant/);
+    assert.doesNotMatch(compare, /Mammut|Eiger Free Pro HS Hooded Jacket Men/i);
+  }
+  const response = await get("/api/catalog");
+  assert.equal(response.status, 200);
+  const cards = await response.json();
+  assert.ok(cards.length > 0 && cards.every((card: {brandSlug: string}) => card.brandSlug === "arcteryx"));
+  assert.doesNotMatch(await (await get("/sitemap.xml")).text(), /mammut/i);
+  if (process.env.RANGESET_LOCAL_CATALOG !== "1") {
+    assert.equal((await get("/out/1010-33030?to=brand")).status, 404);
+  }
 });
 
 test("each translated detail includes Product JSON-LD and the official-site route", options, async () => {

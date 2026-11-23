@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
 import {taxonomyPath} from "@/lib/taxonomy";
 import { comparisonHref } from "@/lib/comparison-href";
-import {isCatalogProduct} from "@/lib/catalog-scope";
+import {catalogBrand, isCatalogProduct} from "@/lib/catalog-scope";
 import {safeImage, type CatalogCard} from "@/lib/product-view";
 
 const CompareDockPanel = dynamic(() => import("./compare-dock-panel"), {ssr: false});
@@ -35,13 +35,12 @@ function decodeSelection(value: string): PickedProduct[] {
     const items: unknown = JSON.parse(value);
     if (!Array.isArray(items)) return [];
     return [...new Map(items.filter((item) => item && typeof item.slug === "string" && typeof item.name === "string" &&
-      /^[a-z0-9-]+$/i.test(item.slug)).map((item) => [item.slug as string, {
+      item.slug.startsWith(catalogBrand + "-") && /^[a-z0-9-]+$/i.test(item.slug)).map((item) => [item.slug as string, {
       slug: item.slug, name: item.name,
       image: safeImage(item.image),
       category: typeof item.category === "string" ? item.category : null,
       gender: ["men", "women", "unisex"].includes(item.gender) ? item.gender : null,
-    } as PickedProduct])).values()].filter((product) => /^mammut-\d{4}-\d{5}$/.test(product.slug) ||
-      isCatalogProduct(product) && !/\b(?:backpack|pack) lid\b/i.test(product.name)).slice(0, 4);
+    } as PickedProduct])).values()].filter((product) => isCatalogProduct(product) && !/\b(?:backpack|pack) lid\b/i.test(product.name)).slice(0, 4);
   } catch { return []; }
 }
 

@@ -1,6 +1,6 @@
 # Rangeset
 
-A catalog for comparing outdoor apparel and backpacks in English, Simplified Chinese and Japanese. Built with the Next.js App Router, TypeScript, Tailwind CSS, and shadcn/ui.
+A catalog for comparing Arc’teryx apparel and backpacks in English, Simplified Chinese and Japanese. Built with the Next.js App Router, TypeScript, Tailwind CSS, and shadcn/ui.
 
 ## Local setup
 
@@ -21,15 +21,7 @@ pnpm start
 
 ## Catalog data
 
-For the read-only Arc’teryx and Mammut fixtures, set `RANGESET_LOCAL_CATALOG=1` on the local app server. See [the parameter standard](docs/product-parameters.md) for category rules and the dry-run workflow.
-
-Edit `data/jackets.json` using the `Jacket` type in `lib/types.ts`. The three example records are fictional and use reserved `.example` URLs. Replace them with real records and remove `example: true` to include their detail pages in the sitemap.
-
-- Give each jacket a unique URL-safe `slug`, such as `brand-model`. The same slug identifies a jacket in `/compare?ids=brand-model,other-model`.
-- Use grams for weight, centimeters for center back length, millimeters for waterproof rating, denier for face fabric, and USD for price. Weight and price sort on their numeric values in those units. Store weight reference size separately.
-- Store breathability with its original unit and test method. The catalog displays each result as reported.
-- Store sources as `brand`, `third_party`, or `not_published`. Use `null` with `not_published` or leave an unknown spec out. Keep `false` for a confirmed absence of a feature.
-- Set the jacket-level `sourceUrl` and `verifiedAt` when known. Individual specs can also carry a `sourceUrl` and `verifiedAt`. Write dates as `YYYY-MM-DD`.
+The public catalog lists Arc’teryx’s US products. For the read-only local catalog, export the Arc’teryx fixture with `pnpm exec tsx scripts/export-arcteryx-fixture.ts` and set `RANGESET_LOCAL_CATALOG=1` on the local app server. The public catalog is empty when neither Postgres nor the fixture is configured. See [the parameter standard](docs/product-parameters.md) for category rules and the dry-run workflow.
 
 ## Deploy to Vercel
 
@@ -52,8 +44,8 @@ The dry run accepts 1–5 PDP requests, including redirect hops, and never write
 ### Set up Neon and GitHub Actions
 
 1. Create a Neon Postgres database and copy its **direct** connection URL. Apply the checked-in Drizzle migration to a test branch first. Use the direct URL as `DATABASE_URL` when running `pnpm db:migrate`.
-2. The initial migration adds eight catalog tables, three enums, indexes, constraints, and Drizzle's migration-history table. It has no data backfill. Confirm before applying it to production. To roll back application behavior, remove the Vercel `DATABASE_URL` and redeploy to return to the example catalog. Dropping the catalog schema later would delete its stored products, prices, and review history.
-3. In Vercel, set the **pooled** Neon URL as the server-side `DATABASE_URL` and redeploy. With this variable set, `/products`, `/jackets`, jacket details, comparisons, and the sitemap read Postgres. With it unset, the catalog pages show the example JSON and remain `noindex`.
+2. The initial migration adds eight catalog tables, three enums, indexes, constraints, and Drizzle's migration-history table. It has no data backfill. Confirm before applying it to production. Removing the Vercel `DATABASE_URL` and redeploying leaves the catalog empty. Dropping the catalog schema later would delete its stored products, prices, and review history.
+3. In Vercel, set the **pooled** Neon URL as the server-side `DATABASE_URL` and redeploy. With this variable set, `/products`, `/jackets`, jacket details, comparisons, and the sitemap read Postgres. With it unset, the catalog pages remain empty and marked `noindex`.
 4. On GitHub, set the Actions repository secret `DATABASE_URL` to the **direct** URL for the same database. Run `gh secret set DATABASE_URL --repo devgyo/rangeset` and paste the connection URL at the prompt. The crawler's session-level lock requires a direct connection.
 5. Merge the workflow to the default branch to enable its Monday 03:00 UTC schedule. **Run workflow** in GitHub Actions runs the full catalog on demand. The runner uploads its crawl log on success or failure. Apply migrations before either trigger runs.
 
@@ -78,11 +70,11 @@ Arc’teryx has 453 archived styles. The catalog hides 34 footwear styles and on
 
 ## Catalog content verification
 
-Run `pnpm verify:content` with the direct `DATABASE_URL`, or add `--full` for a baseline over the entire visible catalog. The database session is read-only. The daily sample targets 5% (at least 40, where available) with per-brand quotas and includes all products added or recorded in `changes` in the last seven days. This can make the sample larger. Archived styles excluded from the storefront are outside the audit.
+Run `pnpm verify:content` with the direct `DATABASE_URL`, or add `--full` for a baseline over the entire visible catalog. The database session is read-only. The daily sample targets 5% (at least 40, where available) and includes all products added or recorded in `changes` in the last seven days. This can make the sample larger. Archived styles excluded from the storefront are outside the audit.
 
-The verifier uses the US public product pages and checks mapped Mammut series against the recorded regional listing. It follows robots.txt, waits at least 1.5 seconds between requests within a run and stops on HTTP 403/429 or a challenge. A missing or unreadable value is reported as unverifiable. The accuracy denominator is matches plus mismatches. The JSON report includes the offline rule findings and individual checks. The Markdown report includes an accuracy breakdown and the first ten mismatches per field.
+The verifier uses Arc’teryx’s US public product pages. It follows robots.txt, waits at least 1.5 seconds between requests within a run and stops on HTTP 403/429 or a challenge. A missing or unreadable value is reported as unverifiable. The accuracy denominator is matches plus mismatches. The JSON report includes the offline rule findings and individual checks. The Markdown report includes an accuracy breakdown and the first ten mismatches per field.
 
-The offline checks use catalog data and the latest successful per-product snapshot where available. Size conventions use the official [Arc’teryx US sizing guide](https://arcteryx.com/us/en/help/sizing/unisex) and [Mammut US sizing options](https://www.mammut.com/us/en/category/5818/clothing). The translation check uses the versioned glossary and preserves protected names and the approved Japanese help fallback.
+The offline checks use catalog data and the latest successful per-product snapshot where available. Size conventions use the official [Arc’teryx US sizing guide](https://arcteryx.com/us/en/help/sizing/unisex). The translation check uses the versioned glossary and preserves protected names and the approved Japanese help fallback.
 
 Online stock checks match the manufacturer's variant SKU against the latest successful `price_snapshots` records. A snapshot must be from the same Asia/Shanghai calendar day as the official observation and no more than six hours older. Missing, older and unpaired observations are reported as unverifiable.
 

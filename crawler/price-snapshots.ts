@@ -1,8 +1,9 @@
 import {setTimeout as delay} from "node:timers/promises";
-import {eq, inArray, sql} from "drizzle-orm";
+import {eq, sql} from "drizzle-orm";
 import {drizzle} from "drizzle-orm/node-postgres";
 import pg from "pg";
 import {storedBrandPayload} from "../lib/brands/db-payload";
+import {catalogBrand} from "../lib/catalog-scope";
 import {catalogSource, sourceIsVisible} from "../lib/catalog/product";
 import {brands, manualOverrides, priceSnapshotCrawlRuns as runs, priceSnapshots, productRaw, products} from "../lib/db/schema";
 import {arcPolicy, CrawlPolicyDenied, CrawlStop, PoliteClient} from "./http";
@@ -42,7 +43,7 @@ async function main() {
         ...storedBrandPayload("none"),
       }).from(products).innerJoin(brands, eq(brands.id, products.brandId))
         .leftJoin(productRaw, eq(productRaw.productId, products.id))
-        .where(inArray(brands.slug, Object.keys(policies))).orderBy(brands.slug, products.id),
+        .where(eq(brands.slug, catalogBrand)).orderBy(products.id),
     ]);
     const targets: Target[] = rows.flatMap((row) => {
       const source = catalogSource(row);

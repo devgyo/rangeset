@@ -304,7 +304,7 @@
     "home_label": "Rangeset",
     "hero_first": "宣伝文句より、",
     "hero_second": "スペック。",
-    "hero_description": "米国向けアウトドアカタログで、公表スペックを比較できます。",
+    "hero_description": "Arc’teryxの米国向けカタログで、公表スペックを比較できます。",
     "families": "製品シリーズ",
     "view_on_brand_site": "公式サイトで見る",
     "catalog_live": "米国向けカタログ · 公表スペックと希望小売価格",
@@ -410,7 +410,7 @@
     "title": "Rangeset — 宣伝文句よりスペック",
     "template": "{title} | Rangeset",
     "description": "Arc’teryxが公表した製品スペックを閲覧・比較できます。",
-    "catalog_description": "米国向けアウトドア用品のカタログで、モデルごとの公表スペックを比較できます。",
+    "catalog_description": "Arc’teryxの米国向けカタログで、モデルごとの公表スペックを比較できます。",
     "compare_description": "Arc’teryx製品の公表スペックを最大4点まで並べて比較できます。",
     "jackets_description": "防水メンブレン、構造、重量、価格、機能からハードシェルジャケットを比較できます。",
     "product_description": "{brand} {name}の公表仕様とスペック。"

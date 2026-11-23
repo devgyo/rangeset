@@ -6,7 +6,6 @@ export function catalogFacets(products: CatalogListing[]) {
   const families = new Map<string, number>();
   for (const {family} of products) if (family) families.set(family, (families.get(family) ?? 0) + 1);
   return {
-    brands: [...new Map(products.map(({brandSlug, brand}) => [brandSlug, brand]))],
     series: seriesGroups(products),
     activities: [...new Map(products.flatMap(({activities}) => activities.map((value) => [activityCode(value), value] as const)))]
       .sort((a, b) => a[1].localeCompare(b[1])),

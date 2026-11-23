@@ -12,7 +12,8 @@ import {ParameterHelp} from "@/components/catalog/parameter-help";
 import {catalogSort, defaultCatalogSort, type CatalogSort} from "@/lib/catalog/featured-sort";
 import type {CatalogListing} from "@/lib/catalog";
 
-import {pruneSeries, seriesMatches, seriesSelection, visibleSeries} from "@/lib/catalog/series";
+import {catalogBrand} from "@/lib/catalog-scope";
+import {seriesMatches, seriesSelection, visibleSeries} from "@/lib/catalog/series";
 import type {catalogFacets} from "@/lib/catalog/facets";
 import {catalogPageSize, catalogPageSlice} from "@/lib/catalog/pagination";
 type StyleFilters = Record<"type" | "protection", {label: string; options: [string, string][]}>;
@@ -95,8 +96,10 @@ export function CatalogBrowser({previewCards, previewCount, startPage, styleFilt
   const gender = params.get("gender") ?? "";
   const legacyLine = params.get("line");
   const selections = (key: string) => params.getAll(key);
-  const brand = selections("brand");
-  const series = selections("series");
+  const series = selections("series").filter((value) => {
+    const {brand} = seriesSelection(value);
+    return !brand || brand === catalogBrand;
+  });
   const activity = selections("activity");
   const family = params.get("family") ?? "";
   const sort = catalogSort(params.get("sort"));
@@ -108,7 +111,7 @@ export function CatalogBrowser({previewCards, previewCount, startPage, styleFilt
   const searchInput = useRef<HTMLInputElement>(null);
   const [catalog, setCatalog] = useState<Awaited<ReturnType<typeof fetchCatalog>> | null>(null);
   const [failed, setFailed] = useState(false);
-  const hasFilters = Boolean(query || gender || legacyLine || brand.length || series.length || activity.length || family ||
+  const hasFilters = Boolean(query || gender || legacyLine || series.length || activity.length || family ||
     productType || protectionType || sort !== defaultCatalogSort);
   const currentPage = hasFilters ? 1 : startPage;
   const count = Math.max(page.filters === queryString ? page.count : catalogPageSize, returnPosition?.count ?? 0);
@@ -133,6 +136,7 @@ export function CatalogBrowser({previewCards, previewCount, startPage, styleFilt
 
   function writeQuery(next: URLSearchParams, replace = false) {
     next.delete("page");
+    next.delete("brand");
     const search = next.toString();
     const suffix = search ? "?" + search : "";
     window.scrollTo(0, 0);
@@ -158,7 +162,6 @@ export function CatalogBrowser({previewCards, previewCount, startPage, styleFilt
     const prior = next.getAll(key);
     next.delete(key);
     for (const item of prior.includes(value) ? prior.filter((item) => item !== value) : [...prior, value]) next.append(key, item);
-    if (key === "brand") pruneSeries(next, catalogOptions.series);
     writeQuery(next);
   }
 
@@ -166,7 +169,7 @@ export function CatalogBrowser({previewCards, previewCount, startPage, styleFilt
 
   function toggleSeries(brandScope: string, line: string) {
     const next = new URLSearchParams(window.location.search);
-    const existing = next.getAll("series");
+    const existing = series;
     const selections = existing.length ? existing : next.get("line") === "veilance" ? ["Veilance"] : [];
     const matches = brandScope ? (value: string) => seriesMatches(value, brandScope, line) :
       (value: string) => seriesSelection(value).line === line;
@@ -180,16 +183,12 @@ export function CatalogBrowser({previewCards, previewCount, startPage, styleFilt
 
   function categoryHref(slug: string) {
     const next = new URLSearchParams(params.toString());
-    for (const key of ["category", "family", "hard", "type", "protection", "page"]) next.delete(key);
+    for (const key of ["category", "family", "hard", "type", "protection", "page", "brand"]) next.delete(key);
     const search = next.toString();
     return taxonomyPath(slug) + (search ? "?" + search : "");
   }
 
   const group = taxonomyGroup(category);
-  const facets = [
-    {key: "brand", label: "field.brand", selected: brand, options: catalogOptions.brands},
-    {key: "activity", label: "field.activities", selected: activity, options: catalogOptions.activities},
-  ];
   const typeFilters = [
     {queryKey: "type", selected: productType, present: catalogOptions.productTypes},
     {queryKey: "protection", selected: protectionType, present: catalogOptions.protectionTypes},
@@ -202,10 +201,10 @@ export function CatalogBrowser({previewCards, previewCount, startPage, styleFilt
   const familyFilters = family && !topFamilies.includes(family) ? [...topFamilies, family] : topFamilies;
 
   const filtered = catalog && catalog.filterCatalog(catalog.products, {
-    category, gender, family, brand, series, legacyLine, activity, productType, protectionType, query: deferredQuery, sort,
+    category, gender, family, brand: [], series, legacyLine, activity, productType, protectionType, query: deferredQuery, sort,
   });
   const results = filtered?.results;
-  const seriesOptions = visibleSeries(catalogOptions.series, brand, filtered?.counts ?? (hasFilters ? [] : undefined));
+  const seriesOptions = visibleSeries(catalogOptions.series, [catalogBrand], filtered?.counts ?? (hasFilters ? [] : undefined));
   const resultCount = results?.length ?? matchingCount;
   const pending = needsCatalog && !catalog;
   const shown = catalogPageSlice(results ?? [], currentPage, count);
@@ -287,13 +286,11 @@ export function CatalogBrowser({previewCards, previewCount, startPage, styleFilt
             {genders.map(([value, label]) => <button key={value} type="button" className="filter-pill" aria-pressed={gender === value}
               onClick={() => update({ gender: value })}>{t(label)}</button>)}
           </div>
-          {facets.map(({key, label, selected, options}) => options.length > 0 && (
-            <div key={key} role="group" aria-label={t(label)} className="filter-group">
-              <span className="control-label">{t(label)}</span>
-              {options.map(([value, name]) => <button key={value} type="button" className="filter-pill" aria-pressed={selected.includes(value)}
-                onClick={() => toggle(key, value)}>{key === "activity" ? activityLabel(t, name) : name}</button>)}
-            </div>
-          ))}
+          {catalogOptions.activities.length > 0 && <div role="group" aria-label={t("field.activities")} className="filter-group">
+            <span className="control-label">{t("field.activities")}</span>
+            {catalogOptions.activities.map(([value, name]) => <button key={value} type="button" className="filter-pill"
+              aria-pressed={activity.includes(value)} onClick={() => toggle("activity", value)}>{activityLabel(t, name)}</button>)}
+          </div>}
           {seriesOptions.length > 0 && <div role="group" aria-label={t("ui.line")} className="filter-group min-w-0">
             <span className="control-label">{t("ui.line")}</span>
             {seriesOptions.map(({brand: scope, name, options}) => <div key={scope} className="filter-group"
