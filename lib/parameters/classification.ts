@@ -14,7 +14,7 @@ export type Classification = { productType: Parameter; protectionType: Parameter
 
 const namePatterns: [Style, RegExp][] = [
   ["base_layer_bottom", /\bbase[ -]layer bottoms?\b/i], ["base_layer_top", /\bbase[ -]layer tops?\b/i],
-  ["backpack", /\bbackpacks?\b/i], ["bib_pants", /\bbibs?(?: pants?)?\b/i],
+  ["backpack", /\b(?:backpacks?|assault packs?)\b/i], ["bib_pants", /\bbibs?(?: pants?)?\b/i],
   ["t_shirt", /\b(?:t[ -]?shirts?|tees?|crew[ -]neck shirts?)\b/i],
   ["halter_top", /\bhalters?(?: tops?)?\b/i], ["cardigan", /\bcardigans?\b/i], ["blazer", /\bblazers?\b/i],
   ["bomber", /\bbombers?(?: jackets?)?\b/i],
@@ -41,7 +41,7 @@ export function garmentStyle(product: StyleSubject, raw: Record<string, unknown>
   const marketing = plainText(raw.marketingName);
   const text = [name, marketing].join(" ");
   if (category === "base layer" || /^base layer$/i.test(plainText(raw.category))) {
-    if (tags.some((tag) => /^base layer bottoms?$/i.test(tag)) || /\b(?:bottoms?|pants?|tights?|leggings?)\b/i.test(text)) return "base_layer_bottom";
+    if (tags.some((tag) => /^base layer bottoms?$/i.test(tag)) || /\b(?:bottoms?|pants?|tights?|leggings?|boxers?|briefs?)\b/i.test(text)) return "base_layer_bottom";
     if (tags.some((tag) => /^base layer tops?$/i.test(tag)) ||
       /\b(?:tops?|crew(?: neck)?|shirts?|hood(?:ie|y)|zip neck|henley)\b/i.test(text)) return "base_layer_top";
   }

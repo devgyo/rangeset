@@ -40,7 +40,7 @@ export function sample(products: AuditProduct[], date: string, full: boolean) {
 
 export function variantsOf(product: AuditProduct) {
   const raw = product.payload ?? {};
-  if (product.brandSlug === "arcteryx") return arcSnapshotVariants(raw);
+  if (product.brandSlug === "arcteryx") return arcSnapshotVariants(raw, product.url);
   return (mammutPayload(raw)?.variants ?? []).map(({id, color, size, inStock, price, originalPrice, currency}) => ({
     variantKey: id, color, size, inStock: inStock ?? null, currency: currency ?? null, priceCents: priceCents(originalPrice ?? price),
     salePriceCents: price !== null && originalPrice !== null && price < originalPrice ? priceCents(price) : null,
@@ -112,7 +112,7 @@ export function productFacts(product: AuditProduct) {
   const facts: Facts = {
     name: fact(view.name, mammut?.name ?? raw.name ?? raw.marketingName),
     sku: fact(product.sku, mammut?.modelNumber ?? raw.id),
-    productLine: fact(view.series, mammut?.collection ?? {breadcrumbs: raw.breadcrumbs, isPro: raw.isPro, name: raw.name}),
+    productLine: fact(view.series, mammut?.collection ?? {breadcrumbs: raw.breadcrumbs, isPro: raw.isPro, name: raw.name, url: product.url}),
     colors: fact(view.swatches.map(({label}) => label), mammut ? view.swatches.map(({label}) => label) : arcColors),
     sizes: fact(view.sizes, mammut ? view.sizes : arcSizes),
     price: fact(view.msrp, money), salePrice: fact(sale, money), currency: fact(view.currency, money),

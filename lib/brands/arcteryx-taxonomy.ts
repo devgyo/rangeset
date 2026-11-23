@@ -7,7 +7,7 @@ export function arcTaxonomy(product: Pick<ProductDetail, "name" | "category" | "
   const tag = (pattern: RegExp) => tags.some((entry) => pattern.test(entry));
   if (isFootwearProduct(product, {raw, overrides})) return {hidden: "Footwear"};
   if (tag(/^Pack Accessories$/i) || /\b(?:backpack|pack) lid\b/i.test(name)) return {hidden: "Backpack accessory"};
-  const backpack = /\bbackpack\b/i.test(name) || category === "Packs";
+  const backpack = /\b(?:backpack|assault pack)\b/i.test(name) || category === "Packs";
   const lower = /\b(?:bottoms?|pants?|tights?|leggings?|boxers?|briefs?)\b/i.test(name);
   const base = category === "Base Layer" || tag(/^Base Layer (?:Tops|Bottoms)$/i)
     ? tag(/^Base Layer Bottoms$/i) || lower ? "bottom" : "top" : undefined;
@@ -19,11 +19,11 @@ export function arcTaxonomy(product: Pick<ProductDetail, "name" | "category" | "
   const bodyClaims = claims.filter((line) => !/\b(?:zippers?|pockets?)\s+(?:are|is)\b/i.test(line)).join(" · ");
   const nonWaterproof = /\b(?:not (?:a )?(?:(?:fully|completely) )?|non[- ])waterproof\b|\bwaterproof(?:ing| protection)? (?:only |in [^.]{0,45} (?:areas|panels))\b/i;
   const windMembrane = /\b(?:INFINIUM|WINDSTOPPER)\b/i;
-  const gore = /\bGORE[- ]TEX\b(?![®™ ]*\s*(?:INFINIUM|WINDSTOPPER))/i;
+  const gore = /\bGORE[-–— ]TEX\b(?![®™ ]*\s*(?:INFINIUM|WINDSTOPPER))/i;
   const windBody = windMembrane.test(body) || claims.some((line) => /\b(?:WINDSTOPPER|INFINIUM)\b.{0,120}\b(?:body|outer (?:fabric|shell))\b/i.test(line));
   const membrane = !windBody && (
     gore.test(body) || /\b(?:ePE|ePTFE)\b[^.]{0,36}\b(?:membrane|hardshell)\b/i.test(body) ||
-    tag(/^(?:GORE[- ]TEX(?:[®™ ]+(?:PRO(?: ePE)?))?[®™ ]*\s*\(Waterproof\)|GORE[- ]TEX[®™ ]+PRO)$/i));
+    tag(/^(?:GORE[-–— ]TEX(?:[®™ ]+(?:PRO(?: ePE)?))?[®™ ]*\s*\(Waterproof\)|GORE[-–— ]TEX[®™ ]+PRO)$/i));
   const waterproofTag = tag(/^Waterproof$|\(Waterproof\)$/i);
   const hard = tag(/^Hardshell$/i);
   const onlyResistant = tag(/^Water Resistant$/i) && !waterproofTag;

@@ -1,4 +1,4 @@
-import {arcProductUrl, mammutProductUrl} from "./brand-urls";
+import {arcLeafProductUrl, arcProductUrl, mammutProductUrl} from "./brand-urls";
 
 export function publishedSku(numbers: readonly string[] = []) {
   return numbers.find((number) => /^(?:X\d{4,15}|\d{4}-\d{5})$/i.test(number))?.toUpperCase();
@@ -11,8 +11,10 @@ export function brandDestination(brand: string, stored: string | null) {
     const base = new URL(destination);
     base.search = "";
     base.hash = "";
-    const validate = brand === "arcteryx" ? arcProductUrl : brand === "mammut" ? mammutProductUrl : undefined;
-    return validate?.(base.href) ? destination : undefined;
+    const url = base.href;
+    const valid = brand === "arcteryx" ? arcProductUrl(url) || arcLeafProductUrl(url)
+      : brand === "mammut" ? mammutProductUrl(url) : undefined;
+    return valid ? destination : undefined;
   } catch {
     return undefined;
   }

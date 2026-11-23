@@ -6,11 +6,9 @@ import {storedBrandPayload} from "../lib/brands/db-payload";
 import {catalogBrand} from "../lib/catalog-scope";
 import {catalogSource, sourceIsVisible} from "../lib/catalog/product";
 import {brands, manualOverrides, priceSnapshotCrawlRuns as runs, priceSnapshots, productRaw, products} from "../lib/db/schema";
-import {arcPolicy, CrawlPolicyDenied, CrawlStop, PoliteClient} from "./http";
+import {arcPolicyFor, CrawlPolicyDenied, CrawlStop, PoliteClient} from "./http";
 import {mammutPolicy} from "./mammut-source";
 import {captureRun, emptyIssueCounts, isSnapshotTimeout, snapshotRunId, type Target} from "./snapshot-run";
-
-const policies = {arcteryx: arcPolicy, mammut: mammutPolicy};
 
 async function main() {
   const connectionString = process.env.DATABASE_URL;
@@ -50,16 +48,16 @@ async function main() {
       return source.status !== "discontinued" && sourceIsVisible(source)
         ? [{id: row.id, sku: row.sku, url: row.url, brand: row.brandSlug as Target["brand"]}] : [];
     });
-    let brand: Target["brand"] | undefined;
+    let origin: string | undefined;
     let client: PoliteClient | undefined;
     let robotsUnavailable = false;
     await captureRun(targets, new Set(prior.map(({productId}) => productId)), async (target) => {
-      const policy = policies[target.brand];
+      const policy = target.brand === "arcteryx" ? arcPolicyFor(target.url) : mammutPolicy;
       const url = policy.productUrl(target.url);
       if (!url) throw new CrawlPolicyDenied("URL outside the public product scope");
-      if (!client || brand !== target.brand) {
-        if (brand) await delay(1500);
-        brand = target.brand;
+      if (!client || origin !== policy.origin) {
+        if (origin) await delay(1500);
+        origin = policy.origin;
         robotsUnavailable = false;
         client = new PoliteClient(undefined, policy);
         try {

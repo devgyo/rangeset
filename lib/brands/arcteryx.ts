@@ -1,3 +1,4 @@
+import {arcLeafProductUrl} from "../brand-urls";
 import {categoryOrder, categorySpecs, productFamily} from "../arcteryx-view";
 import {colorwaysOf, entries, featuresOf, plainText, record, safeImage, swatchesOf, textList} from "../product-view";
 import {normalizeArcProduct} from "../parameters/arcteryx";
@@ -11,16 +12,19 @@ export const arcAdapter: BrandAdapter = {
     return allowedCategories.has(product.category ?? "") && !arcTaxonomy(product, raw, overrides).hidden;
   },
   fields(product, raw, detail) {
+    const leaf = Boolean(arcLeafProductUrl(product.url ?? ""));
     const colors = entries(raw.colourOptions);
     const materials = textList(raw.materials);
     const features = featuresOf(raw.features);
     const veilance = raw.veilance === true || entries(raw.breadcrumbs).map(record).some(({label, url}) =>
       plainText(label).toLowerCase() === "veilance" || (typeof url === "string" && /(?:^|\/)veilance(?:\/|$)/i.test(url)));
     return {
-      family: productFamily(product.name), veilance, publishedPrice: raw.price, publishedCurrency: raw.currencyCode, unisex: raw.isUnisex,
-      series: [...(veilance ? ["Veilance"] : []), ...(product.category === "Professional Use" || raw.isPro === true ? ["PRO"] : []),
+      family: (leaf && product.name.match(/^(Cold WX|Tactician|Assault Pack|Naga)\b/i)?.[1]) || productFamily(product.name), veilance, publishedPrice: raw.price, publishedCurrency: raw.currencyCode, unisex: raw.isUnisex,
+      series: [...(veilance ? ["Veilance"] : []), ...(leaf || product.category === "Professional Use" || raw.isPro === true ? ["PRO"] : []),
+        ...(leaf ? ["PRO · LEAF"] : []),
         ...(/\bwalk gently\b/i.test(product.name) ? ["Walk Gently"] : []), ...(/\bsystem[_ ]a\b/i.test(product.name) ? ["System_A"] : [])],
-      modelNumbers: product.slug.match(/-(\d{4})-(x\d+)$/i)?.slice(1) ?? [],
+      modelNumbers: product.slug.match(/-(\d{4})-(x\d+)$/i)?.slice(1) ??
+        (leaf ? product.slug.match(/-(x\d+)$/i)?.slice(1) : undefined) ?? [],
       image: safeImage(raw.image ?? record(record(colors[0]).image).url),
       hero: safeImage(record(raw.mainImage).url), swatches: swatchesOf(colors),
       summary: plainText(raw.shortDescription), description: detail ? plainText(raw.description) : "",

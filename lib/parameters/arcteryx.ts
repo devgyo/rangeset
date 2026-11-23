@@ -59,7 +59,7 @@ function put(fields: Part["fields"], key: string, value: Value | null | undefine
 }
 
 const density = /\b(\d+(?:\.\d+)?)\s*(gsm|g\s*\/\s*m(?:²|\^?2)|oz\s*\/\s*yd(?:²|2))(?!\w)/i;
-const membrane = /\bGORE[ -]TEX(?:[®™])?(?:\s+(?:PRO|PACLITE(?: PLUS)?|ACTIVE)(?:[®™])?)?(?:\s+(?:ePE|ePTFE))?\b|\bPertex Shield(?: Air)?\b|\bDermizax\b/i;
+const membrane = /\bGORE[-–— ]TEX(?:[®™])?(?:\s+(?:PRO|PACLITE(?: PLUS)?|ACTIVE)(?:[®™])?)?(?:\s+(?:ePE|ePTFE))?\b|\bPertex Shield(?: Air)?\b|\bDermizax\b/i;
 const treatment = /\b(?:(?:FC0|C0|FC-free|PFC-free)\s+)?DWR\b/ig;
 
 function partLabel(value: string) {
@@ -106,7 +106,9 @@ export function normalizeArcProduct(product: ProductDetail, input: Input = {}): 
     put(values, key, value, [rawEvidence(path, original)], reference);
   add("brand", product.brand, "brands.name");
   add("model", product.name, "product.name", raw.name ?? product.name);
-  add("product_line", product.example ? null : product.veilance ? "Veilance" : "Mainline", "product.breadcrumbs", raw.breadcrumbs ?? []);
+  const leaf = product.series?.includes("PRO · LEAF");
+  add("product_line", product.example ? null : leaf ? "PRO · LEAF" : product.veilance ? "Veilance" : "Mainline",
+    leaf ? "product.url" : "product.breadcrumbs", leaf ? product.url : raw.breadcrumbs ?? []);
   add("family", product.family, "product.name", raw.name ?? product.name);
   add("category", product.category, "products.category");
   values.product_type = productType;

@@ -4,7 +4,7 @@ import { gunzipSync } from "node:zlib";
 import robotsParser from "robots-parser";
 import { XMLParser, XMLValidator } from "fast-xml-parser";
 
-import {arcOrigin as origin, arcProductUrl as productUrl} from "../lib/brand-urls";
+import {arcLeafOrigin, arcLeafProductUrl, arcOrigin as origin, arcProductUrl as productUrl} from "../lib/brand-urls";
 export {origin, productUrl};
 export const userAgent = "Mozilla/5.0 (compatible; specbot/0.1)";
 export const fixtureUrl = `${origin}/us/en/shop/mens/beta-ar-jacket-1062`;
@@ -22,7 +22,7 @@ export class CrawlBlocked extends CrawlStop {
   }
 }
 
-type Kind = "robots" | "sitemap" | "product";
+type Kind = "robots" | "sitemap" | "listing" | "product";
 export type Page = { url: string; finalUrl: string; status: number; fetchedAt: string; body: string; offShop?: boolean; policyDenied?: boolean };
 
 function isChallenge(headers: Headers, body: string) {
@@ -56,12 +56,28 @@ export type CrawlPolicy = {
   productUrl: (value: string) => string | undefined;
   productPath?: string;
   sitemapAllowed: (value: string) => boolean;
+  listingAllowed?: (value: string) => boolean;
 };
 
 export const arcPolicy: CrawlPolicy = {
   origin, productUrl, productPath: "/us/en/shop/",
   sitemapAllowed: (url) => url === sitemapIndex || /^https:\/\/arcteryx\.com\/sitemap_[12]\.xml(?:\.gz)?$/.test(url),
 };
+
+export const leafListings = [
+  "base-layer", "cold-weather-insulation", "combat-uniforms", "load-carriage-equipment",
+  "mid-layer", "softshell", "wet-weather-protection",
+].map((category) => arcLeafOrigin + "/us/en/c/" + category);
+
+export const arcLeafPolicy: CrawlPolicy = {
+  origin: arcLeafOrigin, productUrl: arcLeafProductUrl, productPath: "/us/en/shop/",
+  sitemapAllowed: () => false,
+  listingAllowed: (url) => leafListings.includes(url),
+};
+
+export function arcPolicyFor(url: string) {
+  return arcLeafProductUrl(url) ? arcLeafPolicy : arcPolicy;
+}
 
 export class PoliteClient {
   private robots?: ReturnType<typeof robotsParser>;
@@ -101,6 +117,7 @@ export class PoliteClient {
     for (let hop = 0; hop <= 5; hop++) {
       const allowedUrl = kind === "robots" ? finalUrl === this.policy.origin + "/robots.txt"
         : kind === "product" ? this.policy.productUrl(finalUrl) === finalUrl
+        : kind === "listing" ? this.policy.listingAllowed?.(finalUrl)
         : this.policy.sitemapAllowed(finalUrl);
       if (!allowedUrl || (kind !== "robots" && !this.allows(finalUrl))) {
         throw new CrawlPolicyDenied(`URL outside crawl policy or disallowed by robots.txt: ${finalUrl}`);

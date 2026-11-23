@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { deriveSpecs, nameFamily, parseArcteryx } from "../adapters/arcteryx";
-import { fixtureUrl } from "../http";
+import {arcSnapshotVariants, deriveSpecs, nameFamily, parseArcteryx} from "../adapters/arcteryx";
+import {arcLeafPolicy, arcPolicyFor, fixtureUrl} from "../http";
+import {leafListingProducts} from "../crawl";
+import {brandLink} from "../../lib/outbound";
+import {catalogSource, toView} from "../../lib/catalog/product";
 
 const fetchedAt = "2026-11-19T18:00:00.000Z";
 const fixture = readFileSync(new URL("./fixtures/beta-ar-jacket.html", import.meta.url), "utf8");
@@ -78,4 +81,44 @@ test("rejects non-PDP HTML and non-string product envelopes", () => {
   assert.throws(() => parseArcteryx(
     '<script id="__NEXT_DATA__">{"props":{"pageProps":{"product":{}}}}</script>', fixtureUrl, fetchedAt,
   ), /JSON-string/);
+});
+
+
+test("LEAF listing requires the same public products in tiles and both official data blocks", () => {
+  const path = "/us/en/shop/mens/alpha-jacket-gen-2-3-0972";
+  const sku = "X000010972";
+  const url = arcLeafPolicy.origin + path;
+  const listing = arcLeafPolicy.origin + "/us/en/c/wet-weather-protection";
+  const props = {country: "us", language: "en", slug: ["wet-weather-protection"],
+    initialProductList: [{sku, slug: "mens/alpha-jacket-gen-2-3-0972"}]};
+  const page = `<script id="__NEXT_DATA__">${JSON.stringify({props: {pageProps: props}})}</script>
+    <script id="seo-itemlist">${JSON.stringify({itemListElement: [{url}]})}</script>
+    <a data-testid="ssr-product-tile" href="${path}">Alpha</a>`;
+  assert.deepEqual([...leafListingProducts(page, listing)], [[url, sku]]);
+  assert.throws(() => leafListingProducts(page.replace('href="' + path, 'href="' + fixtureUrl), listing), /Unverifiable LEAF listing/);
+  assert.throws(() => leafListingProducts(page + '<link rel="next" href="?page=2">', listing), /Unverifiable LEAF listing/);
+  assert.equal(arcPolicyFor(url), arcLeafPolicy);
+});
+
+test("LEAF products preserve official model numbers and prices while leaving retail availability unknown", () => {
+  const url = arcLeafPolicy.origin + "/us/en/shop/assault-pack-30";
+  const raw = {id: "X000007023", slug: "assault-pack-30", name: "Assault Pack 30", categoryEnglish: "Load Carriage Equipment",
+    price: 420, currencyCode: "USD", weight: {value: "1200 g"}, variants: [{id: "X000007023001", price: 420, stockStatus: "InStock"}]};
+  const jsonLd = {"@type": "ProductGroup", productGroupID: raw.id,
+    hasVariant: [{sku: raw.variants[0].id, offers: {price: 420, priceCurrency: "USD"}}]};
+  const html = `<script id="__NEXT_DATA__">${JSON.stringify({props: {pageProps: {product: JSON.stringify(raw)}}})}</script>
+    <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`;
+  assert.throws(() => parseArcteryx(html.replace('"price":420,"priceCurrency"', '"price":421,"priceCurrency"'), url, fetchedAt),
+    /prices differ from the published JSON-LD offers/);
+  const product = parseArcteryx(html, url, fetchedAt);
+  const view = toView(catalogSource({...product, brand: "Arc’teryx", brandSlug: "arcteryx", status: "active",
+    styleFamily: null, lastSeen: fetchedAt, payloadFetchedAt: fetchedAt, stockRatio: null, payload: product.raw}), [], product.prices, true);
+  assert.equal(view.msrp, 420);
+  assert.equal(view.inStock, null);
+  assert.deepEqual(product.raw, raw);
+  assert.deepEqual(view.series, ["PRO", "PRO · LEAF"]);
+  assert.deepEqual(view.modelNumbers, ["x000007023"]);
+  assert.deepEqual(view.taxonomy, {state: "classified", leaf: "packs.backpack"});
+  assert.equal(brandLink(view, "en"), "/out/X000007023?to=brand");
+  assert.equal(arcSnapshotVariants(product.raw, url)[0].inStock, null);
 });

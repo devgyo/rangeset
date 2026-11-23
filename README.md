@@ -32,14 +32,15 @@ The public catalog lists Arc’teryx’s US products. For the read-only local ca
 
 ## Arc'teryx catalog
 
-The crawler reads both sitemaps and visits US-English shop pages sequentially. It reads robots.txt on each run, waits at least 1.5 seconds between requests, and stops the run on a 403, 429, or detected challenge. It never uses an ecommerce API. Gzipped PDP HTML and JSON sidecars with the HTTP status, requested/final URLs, and UTC timestamp go under the gitignored `.crawl/raw/arcteryx/` directory. GitHub Actions keeps the crawl log artifact. Raw HTML from a hosted runner is temporary, while Postgres retains the latest parsed JSON for each product.
+The crawler reads both US storefront sitemaps, then discovers PRO · LEAF apparel and backpacks on the official LEAF US category pages. Both sources use the same Arc’teryx catalog and the same weekly workflow. A LEAF run validates the rendered tiles against the official list and structured metadata before reconciling the advertised SKUs with the detail pages. Any disagreement stops the LEAF update and retains its last complete import. The LEAF product pages publish list prices and product options. The catalog and snapshots leave LEAF online stock unknown because that storefront does not offer public online checkout. It reads robots.txt on each run, waits at least 1.5 seconds between requests, and stops the run on a 403, 429, or detected challenge. It never uses an ecommerce API. Gzipped PDP HTML and JSON sidecars with the HTTP status, requested/final URLs, and UTC timestamp go under the gitignored `.crawl/raw/arcteryx/` directory. GitHub Actions keeps the crawl log artifact. Raw HTML from a hosted runner is temporary, while Postgres retains the latest parsed JSON for each product.
 
 ```sh
 pnpm test
 pnpm crawl:dry-run 5
+pnpm crawl:dry-run --leaf 5
 ```
 
-The dry run accepts 1–5 PDP requests, including redirect hops, and never writes to Postgres. Its first product is the Beta AR fixture. Run the optional ingest integration test by migrating a disposable local Postgres database whose name ends in `_test`, then setting `TEST_DATABASE_URL` to that same database for `pnpm test`.
+Each dry run accepts 1–5 product requests, including redirect hops, and never writes to Postgres. The main-store dry run starts at the Beta AR fixture. Run the optional ingest integration test by migrating a disposable local Postgres database whose name ends in `_test`, then setting `TEST_DATABASE_URL` to that same database for `pnpm test`.
 
 ### Set up Neon and GitHub Actions
 
@@ -47,7 +48,7 @@ The dry run accepts 1–5 PDP requests, including redirect hops, and never write
 2. The initial migration adds eight catalog tables, three enums, indexes, constraints, and Drizzle's migration-history table. It has no data backfill. Confirm before applying it to production. Removing the Vercel `DATABASE_URL` and redeploying leaves the catalog empty. Dropping the catalog schema later would delete its stored products, prices, and review history.
 3. In Vercel, set the **pooled** Neon URL as the server-side `DATABASE_URL` and redeploy. With this variable set, `/products`, `/jackets`, jacket details, comparisons, and the sitemap read Postgres. With it unset, the catalog pages remain empty and marked `noindex`.
 4. On GitHub, set the Actions repository secret `DATABASE_URL` to the **direct** URL for the same database. Run `gh secret set DATABASE_URL --repo devgyo/rangeset` and paste the connection URL at the prompt. The crawler's session-level lock requires a direct connection.
-5. Merge the workflow to the default branch to enable its Monday 03:00 UTC schedule. **Run workflow** in GitHub Actions runs the full catalog on demand. The runner uploads its crawl log on success or failure. Apply migrations before either trigger runs.
+5. Merge the workflow to the default branch to enable its Monday 03:00 UTC schedule. **Run workflow** in GitHub Actions can run the full catalog or only the LEAF source on demand. The runner uploads its crawl log on success or failure. Apply migrations before either trigger runs.
 
 ### Catalog schema and review
 
@@ -72,7 +73,7 @@ Arc’teryx has 453 archived styles. The catalog hides 34 footwear styles and on
 
 Run `pnpm verify:content` with the direct `DATABASE_URL`, or add `--full` for a baseline over the entire visible catalog. The database session is read-only. The daily sample targets 5% (at least 40, where available) and includes all products added or recorded in `changes` in the last seven days. This can make the sample larger. Archived styles excluded from the storefront are outside the audit.
 
-The verifier uses Arc’teryx’s US public product pages. It follows robots.txt, waits at least 1.5 seconds between requests within a run and stops on HTTP 403/429 or a challenge. A missing or unreadable value is reported as unverifiable. The accuracy denominator is matches plus mismatches. The JSON report includes the offline rule findings and individual checks. The Markdown report includes an accuracy breakdown and the first ten mismatches per field.
+The verifier uses the official US product pages from the main Arc’teryx and LEAF catalogs. It follows robots.txt, waits at least 1.5 seconds between requests within a run and stops on HTTP 403/429 or a challenge. A missing or unreadable value is reported as unverifiable. The accuracy denominator is matches plus mismatches. The JSON report includes the offline rule findings and individual checks. The Markdown report includes an accuracy breakdown and the first ten mismatches per field.
 
 The offline checks use catalog data and the latest successful per-product snapshot where available. Size conventions use the official [Arc’teryx US sizing guide](https://arcteryx.com/us/en/help/sizing/unisex). The translation check uses the versioned glossary and preserves protected names and the approved Japanese help fallback.
 

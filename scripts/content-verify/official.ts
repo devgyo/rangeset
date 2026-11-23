@@ -2,7 +2,7 @@ import {setTimeout as delay} from "node:timers/promises";
 import {decode} from "html-entities";
 import {parseArcteryx} from "../../crawler/adapters/arcteryx";
 import {parseMammut, type MammutPayload} from "../../crawler/adapters/mammut";
-import {arcPolicy, CrawlBlocked, CrawlPolicyDenied, CrawlStop, PoliteClient, type CrawlPolicy, type Page} from "../../crawler/http";
+import {arcPolicyFor, CrawlBlocked, CrawlPolicyDenied, CrawlStop, PoliteClient, type CrawlPolicy, type Page} from "../../crawler/http";
 import {mammutPolicy} from "../../crawler/mammut-source";
 import {catalogSource} from "../../lib/catalog/product";
 import {mammutSource} from "../../lib/catalog/fixture";
@@ -46,7 +46,7 @@ export class OfficialReader {
   }
 
   product(brand: Brand, url: string) {
-    return this.read(url, brand === "arcteryx" ? arcPolicy : mammutPolicy, "product");
+    return this.read(url, brand === "arcteryx" ? arcPolicyFor(url) : mammutPolicy, "product");
   }
 
   series(url: string) {

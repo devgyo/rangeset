@@ -11,7 +11,7 @@ export type BrandFields = Pick<ProductDetail, "family" | "veilance" | "image" | 
 
 export type BrandAdapter = {
   accepts: (product: Pick<ProductDetail, "name" | "category" | "subTags">, input: BrandInput) => boolean;
-  fields: (product: Pick<ProductDetail, "name" | "slug" | "category" | "verifiedAt">, raw: Record<string, unknown>, detail: boolean) => BrandFields;
+  fields: (product: Pick<ProductDetail, "name" | "slug" | "category" | "verifiedAt" | "url">, raw: Record<string, unknown>, detail: boolean) => BrandFields;
   parameters: (product: ProductDetail, input?: BrandInput) => Profile;
   taxonomy: (product: Pick<ProductDetail, "name" | "category" | "subTags">, raw: Record<string, unknown>, overrides?: Map<string, unknown>) => TaxonomyEvidence;
 };

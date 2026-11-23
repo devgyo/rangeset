@@ -2,6 +2,7 @@ import { isDeepStrictEqual } from "node:util";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import * as schema from "../lib/db/schema";
+import {arcLeafProductUrl} from "../lib/brand-urls";
 import { nameFamily, type CatalogProduct, type Derived } from "./adapters/arcteryx";
 import type { CrawlResult } from "./crawl";
 
@@ -160,7 +161,7 @@ export async function ingest(db: Db, brandId: number, result: CrawlResult, detec
 
     let discontinued = 0;
     for (const old of previous) {
-      if (result.records.has(old.externalId)) continue;
+      if (result.records.has(old.externalId) || result.covers?.(old.url) === false) continue;
       const urlReused = seenByUrl.has(old.url) && seenByUrl.get(old.url) !== old.externalId;
       if (!result.absent.has(old.url) && !urlReused) {
         if (old.consecutiveMisses && old.status !== "discontinued") {
@@ -181,9 +182,10 @@ export async function ingest(db: Db, brandId: number, result: CrawlResult, detec
 
       if (old.successorId != null) continue;
       const family = nameFamily(old.name);
+      const leaf = Boolean(arcLeafProductUrl(old.url));
       const candidates = seen.filter((next) =>
         next.externalId !== old.externalId && new Date(next.firstSeen) >= new Date(old.lastSeen) &&
-        next.gender === old.gender && next.category === old.category &&
+        next.gender === old.gender && next.category === old.category && Boolean(arcLeafProductUrl(next.url)) === leaf &&
         ((old.analyticsFamily && old.analyticsFamily === next.analyticsFamily) || (family && family === nameFamily(next.name))));
       if (candidates.length === 1) {
         await saveReview(tx, {

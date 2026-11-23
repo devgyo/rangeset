@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: "0 3 * * 1"
   workflow_dispatch:
+    inputs:
+      source:
+        description: Catalog source
+        type: choice
+        options: [all, leaf]
+        default: all
 
 permissions:
   contents: read
@@ -15,7 +21,7 @@ concurrency:
 jobs:
   crawl:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
         with:
@@ -29,11 +35,14 @@ jobs:
       - name: Run catalog crawler
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CRAWL_SOURCE: ${{ inputs.source }}
         shell: bash
         run: |
           mkdir -p .crawl
           set -o pipefail
-          pnpm crawl:arcteryx 2>&1 | tee .crawl/arcteryx.log
+          args=()
+          if [ "$CRAWL_SOURCE" = leaf ]; then args+=(--leaf); fi
+          pnpm crawl:arcteryx "${args[@]}" 2>&1 | tee .crawl/arcteryx.log
       - name: Upload crawl log
         if: always()
         uses: actions/upload-artifact@v6

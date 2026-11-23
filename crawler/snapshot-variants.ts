@@ -7,7 +7,7 @@ export type SnapshotBrand = "arcteryx" | "mammut";
 
 function arcteryxObservations({body, finalUrl, fetchedAt}: Page) {
   const {externalId, raw} = parseArcteryx(body, finalUrl, fetchedAt);
-  return {externalId, variants: arcSnapshotVariants(raw)};
+  return {externalId, variants: arcSnapshotVariants(raw, finalUrl)};
 }
 
 function mammutObservations({body, finalUrl, fetchedAt}: Page) {
