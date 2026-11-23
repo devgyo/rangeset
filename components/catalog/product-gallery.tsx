@@ -2,9 +2,10 @@
 
 import {keyedItems} from "./list-keys";
 import {useCopy} from "@/i18n/ui-copy";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import {ColorDot} from "@/components/catalog/product-media";
 import {CatalogPackshot} from "./catalog-packshot";
+import {arcCatalogImage} from "@/lib/arcteryx-packshot";
 import type { Colorway } from "@/lib/product-view";
 
 export function ProductGallery({ name, colorways, cutout }: {
@@ -12,13 +13,37 @@ export function ProductGallery({ name, colorways, cutout }: {
 }) {
   const {t} = useCopy();
   const [color, setColor] = useState(0);
+  const [imageSettled, setImageSettled] = useState(false);
   const selected = colorways[color];
   const source = selected ? selected.image : cutout;
+  const firstImage = colorways[0]?.image;
+
+  useEffect(() => {
+    if (firstImage && !imageSettled) return;
+    const {connection} = navigator as Navigator & {connection?: {saveData?: boolean; effectiveType?: string}};
+    if (connection?.saveData || connection?.effectiveType?.endsWith("2g")) return;
+
+    const remaining = [...new Set(colorways.slice(1).map(({image}) => image))]
+      .filter((image): image is string => Boolean(image && image !== firstImage)).slice(0, 6);
+    let stopped = false;
+    function warmNext() {
+      if (stopped) return;
+      const next = remaining.shift();
+      if (!next) return;
+      const image = new Image();
+      image.fetchPriority = "low";
+      image.onload = image.onerror = warmNext;
+      image.src = arcCatalogImage(next);
+    }
+    warmNext();
+    warmNext();
+    return () => { stopped = true; };
+  }, [colorways, firstImage, imageSettled]);
 
   return <div className="min-w-0">
     <figure>
       <CatalogPackshot source={source} alt={selected ? `${name} · ${selected.label}` : name}
-        eager highPriority={color === 0} className="gallery-stage" />
+        eager highPriority className="gallery-stage" onSettled={() => setImageSettled(true)} />
     </figure>
     {colorways.length > 0 && <div className="mt-3 border bg-card p-3.5">
       <p className="mb-2 text-sm"><span className="control-label mr-2">{t("ui.colorway")}</span>{selected?.label}</p>
