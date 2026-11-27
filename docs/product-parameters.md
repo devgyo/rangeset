@@ -80,7 +80,7 @@ See [the v1.8.0 composite sort report](composite-sort-v1.8.0.md) for implementat
 
 ## Price and stock observation
 
-The daily snapshot job appends each official brand size–color SKU to `price_snapshots`, with observed regular price, sale price, currency and availability. Unpublished observations stay null. The new history is collected independently of the existing listing and has no price-history UI. The migration also creates `outbound_clicks` for the official brand redirect. See the [operating notes](price-snapshots-v1.8.0.md).
+The manual snapshot job appends each official brand size–color SKU to `price_snapshots`, with observed regular price, sale price, currency and availability. Unpublished observations stay null. The new history is collected independently of the existing listing and has no price-history UI. The migration also creates `outbound_clicks` for the official brand redirect. See the [operating notes](price-snapshots-v1.8.0.md).
 
 ## Evidence and review
 

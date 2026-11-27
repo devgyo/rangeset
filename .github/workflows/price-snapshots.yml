@@ -1,8 +1,6 @@
 name: Capture official brand price snapshots
 
 on:
-  schedule:
-    - cron: "17 5 * * *"
   workflow_dispatch:
 
 permissions:

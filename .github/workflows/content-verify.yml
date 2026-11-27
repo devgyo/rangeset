@@ -1,37 +1,16 @@
 name: Verify catalog content
 
 on:
-  schedule:
-    - cron: "0 7 * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
-  actions: read
 
 jobs:
-  snapshot-order:
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    steps:
-      - if: github.event_name == 'schedule'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          snapshot_date=$(TZ=Asia/Shanghai date +%F)
-          while true; do
-            completed=$(gh api --method GET \
-              "repos/$GITHUB_REPOSITORY/actions/workflows/price-snapshots.yml/runs" \
-              -f branch=main -f created="$snapshot_date" \
-              --jq '.workflow_runs[0].status // ""')
-            if [ "$completed" = completed ]; then break; fi
-            sleep 60
-          done
   verify:
-    needs: snapshot-order
     runs-on: ubuntu-latest
     timeout-minutes: 90
-    # Serializes manual audits with snapshot and catalog crawls too.
+    # Serializes manual audits with snapshot and catalog crawls.
     concurrency:
       group: rangeset-crawl-arcteryx
       cancel-in-progress: false
