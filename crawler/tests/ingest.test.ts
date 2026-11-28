@@ -33,7 +33,7 @@ test("ingests, reviews, preserves overrides, and reconciles product lifecycle", 
       centre_back_length_cm: { ...original.specs.centre_back_length_cm, value: 100, fetchedAt: day(2) },
       fabric_gsm: { ...original.specs.fabric_gsm, value: 140, fetchedAt: day(2) },
     },
-    prices: original.prices.map((price) => ({ ...price, price: 900, inStock: false })),
+    prices: original.prices.map((price) => ({ ...price, price: 900 })),
   };
   const next = { ...revised, slug: `successor-${key}`, externalId: `new-${key}`, url: fixtureUrl + "-successor", fetchedAt: day(4) };
 
@@ -62,7 +62,7 @@ test("ingests, reviews, preserves overrides, and reconciles product lifecycle", 
     const history = await db.select().from(schema.prices).where(and(
       eq(schema.prices.productId, inserted.id), eq(schema.prices.variant, ""),
     )).orderBy(schema.prices.fetchedAt);
-    assert.deepEqual(history.map(({ price, inStock }) => [price, inStock]), [[650, true], [900, false], [900, false]]);
+    assert.deepEqual(history.map(({ price, inStock }) => [price, inStock]), [[650, null], [900, null], [900, null]]);
     const overrides = await db.select().from(schema.manualOverrides).where(eq(schema.manualOverrides.productId, inserted.id));
     assert.equal(overrides[0].value, 456);
 
@@ -71,7 +71,8 @@ test("ingests, reviews, preserves overrides, and reconciles product lifecycle", 
     const audit = await db.select().from(schema.changes).where(eq(schema.changes.productId, inserted.id));
     assert.deepEqual(audit.filter(({ status }) => status === "needs_review").map(({ field }) => field).sort(),
       ["spec.centre_back_length_cm", "spec.weight_g"]);
-    for (const field of ["name", "description", "price", "in_stock", "spec.fabric_gsm"]) {
+    assert.ok(audit.every(({field}) => !field.endsWith("in_stock")));
+    for (const field of ["name", "description", "price", "spec.fabric_gsm"]) {
       assert.equal(audit.find((change) => change.field === field)?.status, "auto_applied", field);
     }
 

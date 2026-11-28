@@ -33,7 +33,7 @@ async function main() {
         brand: brands.name, brandSlug: brands.slug, status: products.status, category: products.category,
         gender: products.gender, subTags: products.subTags, isHardshell: products.isHardshell,
         styleFamily: products.analyticsFamily, lastSeen: products.lastSeen,
-        stockRatio: sql<null>`null`, payloadFetchedAt: productRaw.fetchedAt,
+        payloadFetchedAt: productRaw.fetchedAt,
         overrideValues: sql<Record<string, unknown>>`coalesce((
           select jsonb_object_agg(override.field, override.value)
           from ${manualOverrides} as override where override.product_id = ${products.id}

@@ -16,12 +16,13 @@ import { GenderPill, ProductBadges } from "@/components/catalog/product-media";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { readProduct, relatedProducts } from "@/lib/catalog";
+import { listProducts, readProduct, relatedProducts } from "@/lib/catalog";
 import { formatPrice, type ProductDetail } from "@/lib/product-view";
 import { ParameterLabel, ParameterLegend, ParameterSections, ParameterValue } from "@/components/catalog/parameter-table";
 import { parametersOf } from "@/lib/brands";
 import { compareValues, getParameter, keyParameters, parameterGroups } from "@/lib/parameters/model";
 import {publicParameterGroups, withoutParameterEvidence} from "@/lib/public-parameters";
+import {betaShellComparison, hasBetaShellPair} from "@/lib/curated-comparison";
 import {brandLink} from "@/lib/outbound";
 import {productJsonLd, serializeJsonLd} from "@/lib/product-jsonld";
 import {siteUrl} from "@/lib/site";
@@ -100,7 +101,11 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
   const product = await readProduct(slug);
   if (!product) notFound();
   const category = leafSlug(product.taxonomy);
-  const [siblings, t] = await Promise.all([relatedProducts(product), getTranslations({locale})]);
+  const [siblings, t, betaPair] = await Promise.all([
+    relatedProducts(product), getTranslations({locale}),
+    betaShellComparison.slugs.includes(product.slug) && listProducts().then((products) =>
+      hasBetaShellPair(products.filter(({status, example}) => status !== "pending_review" && !example).map(({slug}) => slug))),
+  ]);
   const profile = parametersOf(product);
   const core = keyParameters(profile);
   const sections = publicParameterGroups(parameterGroups([profile]));
@@ -110,8 +115,8 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
 
   return <article className="site-width py-7 sm:py-11">
     {!product.example && <script type="application/ld+json" dangerouslySetInnerHTML={{__html: serializeJsonLd(productJsonLd({...product, hero: null}, canonical))}} />}
-    <div className="grid items-start gap-6 lg:grid-cols-[1fr_.9fr] lg:gap-12">
-      <div className="min-w-0 lg:col-start-2 lg:row-start-1">
+    <div className="product-overview">
+      <div className="product-overview-heading min-w-0">
         <nav aria-label={t("ui.breadcrumb")} className="mb-5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <Link href={`/products?brand=${product.brandSlug ?? ""}`} className="hover:text-primary">{product.brand}</Link>
           {category && <><span aria-hidden="true">/</span><Link href={taxonomyPath(category)} className="hover:text-primary">{t(taxonomyLabelKey(category))}</Link></>}
@@ -122,34 +127,38 @@ export default async function ProductPage({ params }: PageProps<"/[locale]/produ
         <div className="mt-4 flex flex-wrap items-center gap-2.5">
           <p className="font-mono text-2xl tabular-nums text-primary">{displayParameter(t, locale, priceField, getParameter(profile, priceField))}</p>
           <span className="control-label">{t("ui.msrp")}</span>
-          <Badge variant="outline" className="text-muted-foreground">
-            {t(product.inStock === true ? "ui.in_stock" : product.inStock === false ? "ui.out_of_stock" : "ui.stock_not_published")}
-          </Badge>
-        </div>
-        {product.activities.length > 0 && <ul aria-label={t("field.activities")} className="mt-4 flex flex-wrap gap-1.5">
-          {product.activities.map((activity) => <li key={activity}><Badge variant="outline">{activityLabel(t, activity)}</Badge></li>)}
-        </ul>}
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <CompareButton slug={product.slug} name={product.name} image={product.image}
-            category={product.category} gender={product.gender} />
-          {outbound && <Button variant="outline" asChild><a href={outbound}>{t("ui.view_on_brand_site")}</a></Button>}
         </div>
       </div>
-      <div className="min-w-0 lg:col-start-1 lg:row-start-1">
+      <div className="product-overview-gallery min-w-0">
         <ClientMessages scope="gallery">
           <ProductGallery name={product.name} colorways={product.colorways} cutout={product.image} />
         </ClientMessages>
       </div>
+      <div className="product-overview-facts min-w-0">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          {core.length > 0 && <h2 id="key-heading" className="section-title">{t("ui.key_specs")}</h2>}
+          <CompareButton slug={product.slug} name={product.name} image={product.image}
+            category={product.category} gender={product.gender} />
+        </div>
+        {core.length > 0 && <section aria-labelledby="key-heading">
+          <dl className="key-spec-strip grid gap-px border bg-border" style={{ "--metric-count": core.length } as CSSProperties}>
+            {core.map((field) => <div data-parameter-row key={field.key} className={cn("min-w-0 bg-card p-3 sm:p-4", core.length % 2 !== 0 && "max-sm:last:col-span-2")}>
+              <dt className="control-label"><ParameterLabel field={field} /></dt>
+              <dd className="mt-1 break-words text-sm leading-snug sm:text-base"><ParameterValue field={field} value={withoutParameterEvidence(field, getParameter(profile, field))} /></dd>
+            </div>)}
+          </dl>
+        </section>}
+        {product.activities.length > 0 && <ul aria-label={t("field.activities")} className="mt-4 flex flex-wrap gap-1.5">
+          {product.activities.map((activity) => <li key={activity}><Badge variant="outline">{activityLabel(t, activity)}</Badge></li>)}
+        </ul>}
+        {(betaPair || outbound) && <div className="mt-4 flex flex-wrap items-center gap-3">
+          {betaPair && <Button variant="outline" asChild><Link href={betaShellComparison.path} prefetch={false}>
+            {t("seo.beta_shell_title")}
+          </Link></Button>}
+          {outbound && <Button variant="outline" asChild><a href={outbound}>{t("ui.view_on_brand_site")}</a></Button>}
+        </div>}
+      </div>
     </div>
-    {core.length > 0 && <section className="mt-9" aria-labelledby="key-heading">
-      <h2 id="key-heading" className="section-title mb-4">{t("ui.key_specs")}</h2>
-      <dl className="key-spec-strip grid gap-px border bg-border" style={{ "--metric-count": core.length } as CSSProperties}>
-        {core.map((field) => <div data-parameter-row key={field.key} className={cn("min-w-0 bg-card p-3 sm:p-4", core.length % 2 !== 0 && "max-sm:last:col-span-2")}>
-          <dt className="control-label"><ParameterLabel field={field} /></dt>
-          <dd className="mt-1 break-words text-sm leading-snug sm:text-base"><ParameterValue field={field} value={withoutParameterEvidence(field, getParameter(profile, field))} /></dd>
-        </div>)}
-      </dl>
-    </section>}
     <Trims product={product} siblings={siblings} t={t} locale={locale} />
     <section className="mt-10" aria-labelledby="full-heading">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">

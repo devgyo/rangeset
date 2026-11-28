@@ -16,7 +16,6 @@ export type Observation = {
   variant: string;
   price: number | null;
   currency: string | null;
-  inStock: boolean | null;
 };
 
 export type CatalogProduct = {
@@ -176,14 +175,6 @@ function findNestedGroups(value: unknown) {
   return value == null ? [] : findGroups(value);
 }
 
-function stock(value: unknown) {
-  const state = string(value)?.split("/").at(-1)?.replace(/[\s_-]/g, "").toLowerCase();
-  if (state === "instock" || state === "available" || state === "lowstock" || state === "limitedavailability") return true;
-  if (state === "outofstock" || state === "soldout" || state === "unavailable" || state === "notavailable") return false;
-  if (typeof value === "boolean") return value;
-  return null;
-}
-
 function productGroups(html: string) {
   return scripts(html, /\btype\s*=\s*["']application\/ld\+json["']/i).flatMap((block) => {
     try { return findGroups(JSON.parse(block)); } catch { return []; }
@@ -207,10 +198,8 @@ function crossCheckVariants(groups: Json[], raw: Json, prices: Observation[]) {
     if (!observation || !matched) return [];
     const offer = object(Array.isArray(matched.offers) ? matched.offers[0] : matched.offers);
     const price = number(offer.price);
-    const inStock = stock(offer.availability);
     const discrepancies = [];
     if (price !== null && observation.price !== null && price !== observation.price) discrepancies.push(`${id}: price differs from JSON-LD`);
-    if (inStock !== null && observation.inStock !== null && inStock !== observation.inStock) discrepancies.push(`${id}: stock differs from JSON-LD`);
     return discrepancies;
   });
 }
@@ -290,12 +279,9 @@ export function parseArcteryx(html: string, url: string, fetchedAt: string): Cat
   const currency = string(raw.currencyCode);
   const variants = array(raw.variants).map(object).flatMap((variant) => {
     const id = string(variant.id);
-    return id ? [{variant: id, price: salePrice(variant), currency: string(variant.currencyCode) ?? currency,
-      inStock: leaf ? null : stock(variant.stockStatus)}] : [];
+    return id ? [{variant: id, price: salePrice(variant), currency: string(variant.currencyCode) ?? currency}] : [];
   });
-  const states = variants.map(({ inStock }) => inStock);
-  const inStock = states.includes(true) ? true : states.length && states.every((state) => state === false) ? false : null;
-  const prices = [{ variant: "", price: salePrice(raw), currency, inStock }, ...new Map(variants.map((row) => [row.variant, row])).values()];
+  const prices = [{ variant: "", price: salePrice(raw), currency }, ...new Map(variants.map((row) => [row.variant, row])).values()];
   const slug = [string(raw.slug) ?? name, externalId].map((value) => normalizedName(value).replace(/ /g, "-")).join("-");
   const category = leaf ? leafCategory(sourceCategory, name, subTags)
     : sourceCategory === "Apparel Accessories" ? "Accessories" : sourceCategory;
@@ -311,8 +297,7 @@ export function parseArcteryx(html: string, url: string, fetchedAt: string): Cat
   };
 }
 
-export function arcSnapshotVariants(raw: Json, url?: string | null) {
-  const leaf = Boolean(url && arcLeafProductUrl(url));
+export function arcSnapshotVariants(raw: Json) {
   const currency = string(raw.currencyCode);
   const colors = new Map(array(raw.colourOptions).map(object).map((item) => [string(item.id), string(item.label)]));
   const sizes = new Map(array(object(raw.sizeOptions).options).map(object).map((item) => [string(item.id) ?? string(item.value), string(item.label)]));
@@ -327,7 +312,7 @@ export function arcSnapshotVariants(raw: Json, url?: string | null) {
     return {
       variantKey: snapshotVariantKey(string(item.id), color, size), color, size, priceCents: price,
       salePriceCents: discount !== null && (price === null || discount < price) ? discount : null,
-      currency: unit && /^[A-Z]{3}$/.test(unit) ? unit : null, inStock: leaf ? null : stock(item.stockStatus),
+      currency: unit && /^[A-Z]{3}$/.test(unit) ? unit : null,
     };
   });
 }

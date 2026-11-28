@@ -91,7 +91,7 @@ export function officialProduct(page: Page, brand: Brand): AuditProduct {
   return {
     ...catalogSource({
       ...record, brand: "Arc'teryx", brandSlug: brand, status: "active", styleFamily: record.analyticsFamily,
-      stockRatio: null, lastSeen: page.fetchedAt, payloadFetchedAt: page.fetchedAt, payload: record.raw,
+      lastSeen: page.fetchedAt, payloadFetchedAt: page.fetchedAt, payload: record.raw,
     }),
     brandSlug: brand, sku: record.externalId, payload: record.raw,
     prices: record.prices, specs: Object.entries(record.specs).map(([key, value]) => ({key, ...value})),

@@ -18,7 +18,7 @@ export function snapshotRunId(explicit?: string, workflowRun?: string) {
 
 function pageObservation(target: Target, status: "missing_404" | "blocked", sourceUrl: string, capturedAt: string): Observation {
   return {productId: target.id, variantKey: "__page__", color: null, size: null, priceCents: null, salePriceCents: null,
-    currency: null, inStock: null, status, sourceUrl, capturedAt};
+    currency: null, status, sourceUrl, capturedAt};
 }
 
 export function emptyIssueCounts() {

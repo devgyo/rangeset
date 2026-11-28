@@ -22,7 +22,7 @@ field.weight_size,Weight reference size,称重尺码,重量の基準サイズ,�
 field.fit,Fit,版型,フィット,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,AZ1 规格栏写「款型」，正文用「版型」；版型更常见
 field.back_length,Centre back length,后中长,着丈（センターバック）,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m https://arcteryx.jp/pages/260618_beta-series,AZ1「衣服后中长」；AJ1「センターバック長さ」，AJ2 对比表「着丈」
 field.inseam,Inseam,内缝长,股下,字段,,https://arcteryx.com/us/zh/help/sizing/mens/bottoms https://store.yamap.com/guide/size,AZ4 官方用「内缝长」；口语「内长」
-field.sizes,Available sizes,尺码,サイズ展開,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,
+field.sizes,Listed sizes,尺码,サイズ展開,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/beta-ar-jacket-m,
 field.colors,Colorways,配色数,カラー展開数,字段,,,字段为数量；needs_review: 日文常写「カラー展開」，「数」为我方补
 field.materials,Main fabric,面料,素材,字段,,https://arcteryx.com/us/zh/shop/mens/beta-ar-jacket-1062 https://arcteryx.jp/products/cerium-jacket-m,
 field.fabric_name,Fabric name,面料名称,素材名,字段,,,
@@ -189,6 +189,8 @@ ui.reset_filters,Reset filters,重置筛选,絞り込みを解除,界面,,,
 ui.catalog_all_shown,All {count} products shown,已显示全部 {count} 款,全{count}点を表示済み,界面,,,
 ui.catalog_pagination,Catalog pages,目录分页,カタログのページ,界面,,,
 ui.catalog_page,Page {page},第 {page} 页,{page}ページ,界面,,,
+ui.catalog_previous_page,Previous page,上一页,前のページ,界面,,,
+ui.catalog_next_page,Next page,下一页,次のページ,界面,,,
 ui.catalog_load_failed,The catalog could not load.,目录加载失败。,カタログを読み込めませんでした。,界面,,,
 ui.catalog_retry,Try again,重试,再試行,界面,,,
 ui.loading_catalog_filters,Loading catalog filters…,正在加载筛选…,絞り込みを読み込み中…,界面,,,
@@ -202,6 +204,7 @@ ui.clear,Clear,清空,すべて外す,界面,,,
 ui.add_a_product,Add a product,添加商品,商品を追加,界面,,,
 ui.search_products_to_compare,Search products to compare,搜索要对比的商品,比較する商品を検索,界面,,,
 ui.no_matching_products,No matching products.,没有匹配的商品。,該当する商品はありません。,界面,,,
+ui.catalog_search_hint,Try a model name such as Beta AR or a style number such as X000011062.,试试输入型号名，例如 Beta AR，或款号，例如 X000011062。,モデル名（Beta AR など）や品番（X000011062 など）で検索してください。,界面,,,
 ui.select_two_to_four_products_to_compare,Select two to four products to compare.,请选择 2–4 款商品进行对比。,比較する商品を2〜4点選んでください。,界面,,,
 ui.add_one_more_product_to_compare_specs,Add one more product to compare specs.,再加 1 款即可对比参数。,もう1点追加すると比較できます。,界面,,,
 ui.mixed_categories_·_some_parameters_may_n,Mixed categories · Some parameters may not apply,品类不同 · 部分参数可能不适用,カテゴリー混在 · 一部の項目は該当しない場合があります,界面,,,
@@ -224,9 +227,6 @@ ui.full_specifications,Full specifications,全部参数,すべてのスペック
 ui.example_data,Example data,示例数据,サンプルデータ,界面,,,
 ui.example,Example,示例,サンプル,界面,,,
 ui.discontinued,Discontinued,已停产,廃番,界面,,https://www.rakuten.co.jp/canpanera/contents/arcteryx/jacket/beta/compare/,RKT「廃番」
-ui.in_stock,In stock,有货,在庫あり,界面,,https://arcteryx.jp/products/cerium-jacket-m,AJ3「在庫あり」
-ui.out_of_stock,Out of stock,缺货,在庫切れ,界面,,https://arcteryx.jp/products/cerium-jacket-m,
-ui.stock_not_published,Stock not published,库存未公布,在庫情報なし,界面,,,
 ui.product_not_found,Product not found,未找到该商品,商品が見つかりません,界面,,,
 ui.skip_to_content,Skip to content,跳到正文,本文へスキップ,界面,,,
 ui.weight_reference,Weight reference,称重尺码,重量の基準サイズ,界面,,,
@@ -281,6 +281,10 @@ ui.about,About {label},{label},{label},本地化补充,,,复用现有标签或�
 ui.photo_angles,Photo angles,拍摄角度,撮影アングル,本地化补充,,,needs_review: v1 补充草译。
 ui.colorway,Colorway,配色,カラー,本地化补充,,,needs_review: v1 补充草译。
 ui.colorways,Colorways,配色选项,カラーバリエーション,本地化补充,,,needs_review: v1 补充草译。
+ui.color_image_loading,Loading the {color} image.,正在加载 {color} 的图片。,{color} の画像を読み込み中です。,界面,,,
+ui.color_image_failed,The {color} image could not load.,{color} 的图片加载失败。,{color} の画像を読み込めませんでした。,界面,,,
+ui.color_image_missing,No image is published for {color}.,{color} 暂无公开图片。,{color} の画像は公開されていません。,界面,,,
+ui.color_image_showing,Showing {color}.,当前显示 {color}。,表示中のカラーは {color} です。,界面,,,
 ui.model_height,Model {height},模特身高 {height},モデル身長{height},本地化补充,,,needs_review: v1 补充草译。
 ui.wearing_size,Wearing size {size},试穿尺码 {size},着用サイズ{size},本地化补充,,,needs_review: v1 补充草译。
 ui.view_product,View {name},查看 {name},{name}を見る,本地化补充,,,needs_review: v1 补充草译。
@@ -288,7 +292,7 @@ ui.color_count,{count} colors,{count} 种配色,{count}色,本地化补充,,,nee
 ui.catalog_filters,Catalog filters,目录筛选,カタログの絞り込み,本地化补充,,,needs_review: v1 补充草译。
 ui.product_categories,Product categories,品类,カテゴリー,本地化补充,,,本地化复用已有术语 field.category，保留既有英文。
 ui.sort_featured,Featured,综合排序,おすすめ順,界面,,,
-ui.sort_featured_help,Featured: available items with at least three card specs come first. Newer release seasons lead within each brand and group. Brands are interleaved by share. No paid placement or scores.,综合排序：可购买且至少有三项卡片参数的商品优先。同组内各品牌按占比穿插，品牌内新季在前。不收费、不打分。,おすすめ順：購入可能でカードの項目が3つ以上ある商品を優先します。同じグループではブランドごとの掲載数に応じて交互に並べ、各ブランド内では新しいシーズンを先に表示します。掲載料やスコア付けはありません。,界面,,,
+ui.sort_featured_help,"Featured: models with at least three card specs come first, with newer release seasons first within each brand. Discontinued models appear in the lower group.",综合排序优先显示至少有三项卡片参数的商品，同品牌内新季在前。已停产款排在后一组。,おすすめ順では、カードに3項目以上の仕様がある製品を優先し、ブランド内では新しいシーズンの製品を先に表示します。廃番モデルは後のグループに表示します。,界面,,,
 ui.sort_name,Name A–Z,商品名 A–Z,商品名順（A–Z）,本地化补充,,,needs_review: v1 补充草译。
 ui.sort_price_asc,Price low–high,价格从低到高,価格が安い順,本地化补充,,,needs_review: v1 补充草译。
 ui.sort_price_desc,Price high–low,价格从高到低,価格が高い順,本地化补充,,,needs_review: v1 补充草译。
@@ -300,6 +304,7 @@ ui.jacket_count,"{count, plural, one {# jacket} other {# jackets}}",{count} 款�
 ui.compare_dock,Compare dock,商品对比,商品を比較,本地化补充,,,本地化复用已有术语 ui.compare_products，保留既有英文。
 ui.compare_action,{action} {name},{action} · {name},{action} · {name},本地化补充,,,复用现有标签或格式。
 ui.compare_count,Compare ({count}),对比 ({count}),比較 ({count}),本地化补充,,,复用已有术语和现有数字或符号格式。
+ui.compare_selection_status,"{count, plural, one {# product selected for comparison} other {# products selected for comparison}}",已选 {count} 款商品进行对比,比較する商品を{count}点選択中,界面,,,
 ui.close_picker,Close product picker,关闭商品选择器,商品選択を閉じる,本地化补充,,,needs_review: v1 补充草译。
 ui.scroll_compare,Scrollable product comparison,商品对比,商品を比較,本地化补充,,,本地化复用已有术语 ui.compare_products，保留既有英文。
 ui.comparison_table,Side-by-side product comparison,商品对比,商品を比較,本地化补充,,,本地化复用已有术语 ui.compare_products，保留既有英文。
@@ -337,6 +342,8 @@ seo.template,{title} | Rangeset,{title} | Rangeset,{title} | Rangeset,本地化�
 seo.description,Browse and compare published Arc’teryx product specifications.,浏览和对比 Arc’teryx 公布的商品参数。,Arc’teryxが公表した製品スペックを閲覧・比較できます。,本地化补充,,,needs_review: v1 补充草译。
 seo.catalog_description,Browse the Arc’teryx US catalog and compare published specifications across models.,浏览始祖鸟美国商品目录，对比不同款式的官方参数。,Arc’teryxの米国向けカタログで、モデルごとの公表スペックを比較できます。,本地化补充,,,needs_review: v1 补充草译。
 seo.compare_description,Compare published specifications for up to four Arc’teryx products.,并排对比最多 4 款 Arc’teryx 商品的已公布参数。,Arc’teryx製品の公表スペックを最大4点まで並べて比較できます。,本地化补充,,,needs_review: v1 补充草译。
+seo.beta_shell_title,Arc’teryx Beta AR vs Beta SL,Arc’teryx Beta AR 和 Beta SL 对比,Arc’teryx Beta ARとBeta SLの比較,界面,,,
+seo.beta_shell_description,"The Beta AR is a durable shell for varied mountain use. The Beta SL is built to pack small when weight and space matter. Compare the men’s models by published weight, waterproof membrane and fit.",Beta AR 是适合多种山地活动的耐用硬壳。Beta SL 更注重轻量和易收纳，适合对背包重量和空间有要求时携带。下方对比两款男装的官方重量、防水膜和版型。,Beta ARは幅広い山岳アクティビティに向けた耐久性重視のシェルです。Beta SLは、荷物の重さやかさを抑えたいときに携行しやすいモデルです。メンズの公表重量、防水メンブレン、フィットを比較できます。,界面,,,
 seo.jackets_description,"Browse and compare hardshell jackets by membrane, construction, weight, price, and features.",按防水膜、结构、重量、价格和功能浏览和对比硬壳夹克。,防水メンブレン、構造、重量、価格、機能からハードシェルジャケットを比較できます。,本地化补充,,,needs_review: v1 补充草译。
 seo.product_description,Published configuration and specs for the {brand} {name}.,{brand} {name} 的已公布配置与参数。,{brand} {name}の公表仕様とスペック。,本地化补充,,,needs_review: v1 补充草译。
 group.numbers,Numbers,数值参数,数値スペック,本地化补充,,,needs_review: v1 补充草译。
@@ -504,3 +511,10 @@ activity.mountaineering,Mountaineering,登山,登山,活动,,,needs_review: 日�
 activity.skiing,Skiing,滑雪,スキー,活动,,,needs_review: 日文草译。
 activity.travel,Travel,旅行,旅行,活动,,,needs_review: 日文草译。
 activity.via_ferrata,Via Ferrata,铁道式攀登,ヴィア・フェラータ,活动,,,needs_review: 日文草译。
+ui.home_search,Search,搜索,検索,界面,,,
+ui.catalog_done,Done,完成,完了,界面,,,
+ui.catalog_active_filters,Active filters,已选筛选条件,適用中の絞り込み,界面,,,
+ui.catalog_remove_filter,Remove filter: {label},移除筛选条件：{label},絞り込みを解除：{label},界面,,,
+ui.compare_key_differences,Key differences,主要差异,主な違い,界面,,,
+ui.compare_scroll_left,Show products to the left,查看左侧商品,左側の商品を表示,界面,,,
+ui.compare_scroll_right,Show products to the right,查看右侧商品,右側の商品を表示,界面,,,

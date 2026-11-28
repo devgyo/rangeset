@@ -30,7 +30,7 @@ test("reads the saved PDP and preserves its brand provenance", () => {
     assert.equal(product.specs[key].source, "not_published");
     assert.equal(product.specs[key].value, null);
   }
-  assert.deepEqual(product.prices[1], { variant: "X000011062012", price: 650, currency: "USD", inStock: true });
+  assert.deepEqual(product.prices[1], { variant: "X000011062012", price: 650, currency: "USD" });
   assert.deepEqual(product.crossCheck, []);
 });
 
@@ -100,7 +100,7 @@ test("LEAF listing requires the same public products in tiles and both official 
   assert.equal(arcPolicyFor(url), arcLeafPolicy);
 });
 
-test("LEAF products preserve official model numbers and prices while leaving retail availability unknown", () => {
+test("LEAF products preserve official model numbers and prices without publishing inventory", () => {
   const url = arcLeafPolicy.origin + "/us/en/shop/assault-pack-30";
   const raw = {id: "X000007023", slug: "assault-pack-30", name: "Assault Pack 30", categoryEnglish: "Load Carriage Equipment",
     price: 420, currencyCode: "USD", weight: {value: "1200 g"}, variants: [{id: "X000007023001", price: 420, stockStatus: "InStock"}]};
@@ -112,15 +112,15 @@ test("LEAF products preserve official model numbers and prices while leaving ret
     /prices differ from the published JSON-LD offers/);
   const product = parseArcteryx(html, url, fetchedAt);
   const view = toView(catalogSource({...product, brand: "Arc’teryx", brandSlug: "arcteryx", status: "active",
-    styleFamily: null, lastSeen: fetchedAt, payloadFetchedAt: fetchedAt, stockRatio: null, payload: product.raw}), [], product.prices, true);
+    styleFamily: null, lastSeen: fetchedAt, payloadFetchedAt: fetchedAt, payload: product.raw}), [], product.prices, true);
   assert.equal(view.msrp, 420);
-  assert.equal(view.inStock, null);
+  assert.ok(!Object.hasOwn(view, "inStock"));
   assert.deepEqual(product.raw, raw);
   assert.deepEqual(view.series, ["PRO", "PRO · LEAF"]);
   assert.deepEqual(view.modelNumbers, ["x000007023"]);
   assert.deepEqual(view.taxonomy, {state: "classified", leaf: "packs.backpack"});
   assert.equal(brandLink(view, "en"), "/out/X000007023?to=brand");
-  assert.equal(arcSnapshotVariants(product.raw, url)[0].inStock, null);
+  assert.equal(arcSnapshotVariants(product.raw)[0].priceCents, 42000);
 });
 
 
@@ -138,7 +138,7 @@ test("the catalog includes accessories from both stores and the previously archi
   const product = parseArcteryx(html, url, fetchedAt);
   assert.equal(product.category, "Accessories");
   const source = catalogSource({...product, brand: "Arc’teryx", brandSlug: "arcteryx", status: "active",
-    styleFamily: null, lastSeen: fetchedAt, payloadFetchedAt: fetchedAt, stockRatio: null, payload: product.raw});
+    styleFamily: null, lastSeen: fetchedAt, payloadFetchedAt: fetchedAt, payload: product.raw});
   assert.deepEqual(toView(source, [], product.prices, true).taxonomy, {state: "classified", leaf: "accessories"});
   const lid = {...source, name: "Alpha PRO Backpack Lid", category: "Professional Use", subTags: ["Pack Accessories"]};
   assert.deepEqual(toView(lid, [], [], true).taxonomy, {state: "classified", leaf: "accessories"});

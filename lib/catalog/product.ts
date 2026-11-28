@@ -10,12 +10,12 @@ import {releaseSeasonRank, type FeaturedProduct} from "./featured-sort";
 export type CatalogSource = {
   id?: number;
   name: string; slug: string; brand: string; brandSlug: string; category: string | null; gender: string | null; url: string | null;
-  status: ProductDetail["status"]; subTags: string[]; isHardshell: boolean; styleFamily: string | null; stockRatio: number | null;
+  status: ProductDetail["status"]; subTags: string[]; isHardshell: boolean; styleFamily: string | null;
   lastSeen: string; payloadFetchedAt: string | null; payload: unknown; taxonomyPayload?: unknown; overrideValues?: Record<string, unknown>;
 };
 
-export type PriceRow = {variant: string; price: number | null; currency: string | null; inStock: boolean | null};
-export type CatalogView = ProductDetail & Pick<FeaturedProduct, "brandSlug" | "styleFamily" | "stockRatio" | "id">;
+export type PriceRow = {variant: string; price: number | null; currency: string | null};
+export type CatalogView = ProductDetail & Pick<FeaturedProduct, "brandSlug" | "styleFamily" | "id">;
 export type CatalogListing = Pick<CatalogCard, "brand" | "category" | "gender" | "family" | "subTags" | "veilance" | "example" |
   "image" | "swatches" | "activities" | "msrp" | "currency" | "taxonomy" | "modelNumbers" | "series" | "productType" | "protectionType">
   & FeaturedProduct & {card: CardParameters; swatchCount: number; membrane?: string | number | boolean};
@@ -93,8 +93,6 @@ export function toView(row: ReturnType<typeof catalogSource>, dbSpecs: IndexedSp
   const priceOverride = row.overrides.get("price");
   const msrp = priceOverride === null || typeof priceOverride === "number" ? amount(priceOverride) : currency ? amount(publishedPrice) : null;
   const variants = dbPrices.filter(({variant}) => variant !== "");
-  const variantStates = variants.map(({inStock}) => inStock);
-  const variantStock = variantStates.includes(true) ? true : variantStates.length && variantStates.every((state) => state === false) ? false : null;
   const offers = detail && currency ? variants.flatMap((row) =>
     row.currency === currency && row.price !== null && Number.isFinite(row.price) && row.price > 0 ? [row.price] : []) : [];
   const lowPrice = Math.min(...offers);
@@ -103,10 +101,10 @@ export function toView(row: ReturnType<typeof catalogSource>, dbSpecs: IndexedSp
     ...visuals, specs,
     offerRange: offers.length > 1 && lowPrice < highPrice ? {lowPrice, highPrice, offerCount: offers.length} : undefined,
     id: row.id, name: row.name, slug: row.slug, brand: row.brand, category: row.category, url: row.url,
-    brandSlug: row.brandSlug, styleFamily: row.styleFamily ?? styleFamily ?? null, stockRatio: row.stockRatio,
+    brandSlug: row.brandSlug, styleFamily: row.styleFamily ?? styleFamily ?? null,
     gender: productGender(row.gender, row.overrides.has("gender") ? undefined : unisex),
     subTags: row.subTags, isHardshell: row.isHardshell, status: row.status, verifiedAt,
-    msrp, currency, inStock: dbPrices.find(({variant}) => variant === "")?.inStock ?? variantStock,
+    msrp, currency,
     taxonomy: classifyTaxonomy(adapter.taxonomy(row, {...payload, ...record(row.taxonomyPayload)}, row.overrides), row.overrides.get("parameters.taxonomy")),
   };
   product.parameters = adapter.parameters(product, {raw: payload, fetchedAt: row.payloadFetchedAt, indexed: dbSpecs, overrides: row.overrides});
@@ -126,13 +124,13 @@ export function applyTaxonomyPresentation(product: CatalogView, taxonomy: Taxono
 
 export function cardOnly(product: CatalogView): CatalogListing {
   const {slug, name, brand, category, gender, family, subTags, veilance, status, example,
-    image, swatches, activities, msrp, currency, inStock, specs, taxonomy, modelNumbers, series} = product;
+    image, swatches, activities, msrp, currency, specs, taxonomy, modelNumbers, series} = product;
   const profile = parametersOf(product);
   const card = selectCardParameters(profile);
   return {id: product.id, slug, name, brand, category, gender, family, subTags, veilance, status, example, taxonomy, modelNumbers, series,
-    image, swatches: swatches.slice(0, 5), swatchCount: swatches.length, activities, msrp, currency: example ? "USD" : currency, inStock,
+    image, swatches: swatches.slice(0, 5), swatchCount: swatches.length, activities, msrp, currency: example ? "USD" : currency,
     membrane: specs.membrane?.value,
     productType: classificationFilterValue(profile.values.product_type), protectionType: classificationFilterValue(profile.values.protection_type),
-    brandSlug: product.brandSlug, styleFamily: product.styleFamily, stockRatio: product.stockRatio,
+    brandSlug: product.brandSlug, styleFamily: product.styleFamily,
     releaseSeason: releaseSeasonRank(product.year, product.season), cardValueCount: countCardValues(card, profile), card};
 }

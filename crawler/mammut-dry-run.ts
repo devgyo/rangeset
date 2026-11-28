@@ -84,8 +84,8 @@ async function createDryRun(manifest: MammutManifest) {
       "| --- | --- |",
       ...raw.fields.map(({label, value}) => `| ${inline(label)} | ${inline(value)} |`),
       `| Description excerpt | ${inline(raw.description.split(/(?<=\.)\s+/).slice(0, 2).join(" "))} |`,
-      `| Price evidence by variant (first 3) | ${raw.variants.slice(0, 3).map(({id, price, originalPrice, inStock}) =>
-        `${id}: price ${text(price)}, originalPrice ${text(originalPrice)}, inStock ${text(inStock)}`).join("; ")} |`,
+      `| Price evidence by variant (first 3) | ${raw.variants.slice(0, 3).map(({id, price, originalPrice}) =>
+        `${id}: price ${text(price)}, originalPrice ${text(originalPrice)}`).join("; ")} |`,
       "",
       `Parsed: ${view.taxonomy?.state === "classified" ? view.taxonomy.leaf : view.taxonomy?.state}. Weight ${text(view.card.weight)} g. Fit ${text(view.card.fit)}. Published body fabric name ${text(view.card.mainFabric)}. Body composition ${view.card.composition?.fibers.map(({fiber, pct}) => pct + "% " + fiber).join(", ") ?? "—"}. MSRP ${text(raw.msrp)} USD. Sale ${text(raw.salePrice)} USD. ${raw.variants.length} published variant combinations.`,
       `Normalized ratings and fill: hydrostatic head ${reading("hydrostatic_head")}, breathability ${reading("breathability")}, insulation type ${reading("insulation_type")}. Weight reference size ${reading("weight_size")}.`,
@@ -100,7 +100,7 @@ async function createDryRun(manifest: MammutManifest) {
     `- Retained ${summary.kept} products. Filtered ${summary.filtered} URLs, including ${manifest.filtered.length} sitemap exclusions and ${filtered.length - manifest.filtered.length} page-scope exclusions or duplicates.`,
     `- Errors ${summary.errors}; pending ${summary.pending}. Stop reason: ${summary.stopped ?? "none"}.`,
     `- Needs review: ${needsReview.length} of ${saved.length} (${summary.reviewPercent}).`,
-    `- List prices ${saved.filter(({raw}) => raw.msrp !== null).length}; sale prices ${saved.filter(({raw}) => raw.salePrice !== null).length}; dated releases ${saved.filter(({raw}) => raw.year !== null && raw.season).length}; published variant stock ${cards.filter(({stockRatio}) => stockRatio !== null).length}.`,
+    `- List prices ${saved.filter(({raw}) => raw.msrp !== null).length}; sale prices ${saved.filter(({raw}) => raw.salePrice !== null).length}; dated releases ${saved.filter(({raw}) => raw.year !== null && raw.season).length}.`,
     "", "## Category counts", "", "| Leaf or state | Products |", "| --- | ---: |",
     ...Object.entries(categories).sort().map(([category, total]) => `| ${category} | ${total} |`),
     "", "## Catalog card coverage", "", "| Cell | Values | Coverage |", "| --- | ---: | ---: |",

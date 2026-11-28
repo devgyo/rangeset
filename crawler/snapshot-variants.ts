@@ -7,16 +7,16 @@ export type SnapshotBrand = "arcteryx" | "mammut";
 
 function arcteryxObservations({body, finalUrl, fetchedAt}: Page) {
   const {externalId, raw} = parseArcteryx(body, finalUrl, fetchedAt);
-  return {externalId, variants: arcSnapshotVariants(raw, finalUrl)};
+  return {externalId, variants: arcSnapshotVariants(raw)};
 }
 
 function mammutObservations({body, finalUrl, fetchedAt}: Page) {
   const {externalId, raw} = parseMammut(body, finalUrl, fetchedAt);
-  const variants = raw.variants.map(({id, sku, color, size, price, originalPrice, currency, inStock}) => ({
+  const variants = raw.variants.map(({id, sku, color, size, price, originalPrice, currency}) => ({
     variantKey: snapshotVariantKey(sku === undefined ? id : sku, color, size), color, size,
     priceCents: priceCents(originalPrice ?? price),
     salePriceCents: price !== null && originalPrice !== null && price < originalPrice ? priceCents(price) : null,
-    currency, inStock,
+    currency,
   }));
   return {externalId, variants};
 }

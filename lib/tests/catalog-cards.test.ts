@@ -89,3 +89,19 @@ test("search matches exact model numbers and retries only supported qualifiers w
   assert.deepEqual(searchCatalog([ifora, insulated], "9525"), []);
   assert.deepEqual(searchCatalog([ifora, insulated], "hoodie"), []);
 });
+
+test("shared catalog search matches localized families and taxonomy while keeping exact style numbers", () => {
+  const beta = {
+    slug: "arcteryx-mens-beta-ar-jacket-1062-x000011062", name: "Beta AR Jacket", family: "Beta",
+    brand: "Arc’teryx", gender: "men" as const, subTags: [], taxonomy: {state: "classified", leaf: "outer.hardshell"} as const,
+  };
+  const gamma = {...beta, slug: "arcteryx-womens-gamma-1234-x000010000", name: "Gamma Jacket", family: "Gamma", gender: "women" as const};
+  const products = [beta, gamma];
+  const japanese = (key: string) => translators.ja(key as Parameters<typeof translators.ja>[0]);
+  for (const query of ["Beta", "贝塔 AR", "ベータ", "始祖鸟 Beta", "アークテリクス ベータ", "メンズ ベータ", "ベータ ハードシェル", "Ｘ００００１１０６２", "1062"]) {
+    assert.deepEqual(searchCatalog(products, query, japanese), [beta], query);
+  }
+  assert.deepEqual(searchCatalog(products, "11062", japanese), []);
+  assert.deepEqual(searchCatalog(products, "1062 women"), []);
+  assert.deepEqual(searchCatalog(products, "ハードシェル", japanese), products);
+});

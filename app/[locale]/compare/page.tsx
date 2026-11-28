@@ -5,7 +5,7 @@ import {pageAlternates} from "@/i18n/routing";
 import {displayParameter} from "@/i18n/copy";
 import type { Metadata } from "next";
 import { ComparisonGrid, type ComparisonProduct, type PickerProduct } from "@/components/catalog/comparison-grid";
-import { genderLabel, type CatalogCard, type ProductDetail } from "@/lib/product-view";
+import { type CatalogCard, type ProductDetail } from "@/lib/product-view";
 import { listProducts, readProducts, type CatalogListing } from "@/lib/catalog";
 import {brandLink} from "@/lib/outbound";
 import { buildComparison, comparisonIds } from "@/lib/comparison";
@@ -30,8 +30,8 @@ function summary(product: Pick<CatalogCard, "slug" | "name" | "image" | "gender"
 }
 
 function picker(product: CatalogListing): PickerProduct {
-  return { ...summary(product), keywords: [product.name, product.brand, product.family, product.category, ...(product.modelNumbers ?? []),
-    product.gender, genderLabel(product.gender), ...product.subTags, product.membrane].join(" ").toLocaleLowerCase("en-US") };
+  const {brand, brandSlug, family, subTags, modelNumbers, series, membrane} = product;
+  return {...summary(product), brand, brandSlug, family, subTags, modelNumbers, series, membrane};
 }
 
 export default async function ComparePage({ searchParams }: PageProps<"/[locale]/compare">) {

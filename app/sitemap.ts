@@ -2,6 +2,7 @@ import type {MetadataRoute} from "next";
 import {catalogEnabled, indexableProductSlugs} from "@/lib/catalog";
 import {languageAlternates, localizedPath, locales} from "@/i18n/routing";
 import {taxonomyPath, taxonomySlugs} from "@/lib/taxonomy";
+import {betaShellComparison, hasBetaShellPair} from "@/lib/curated-comparison";
 import {siteUrl} from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -9,6 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (catalogEnabled) {
     const slugs = await indexableProductSlugs();
     paths.push("/products", ...taxonomySlugs.map(taxonomyPath), ...slugs.map((slug) => `/products/${slug}`));
+    if (hasBetaShellPair(slugs)) paths.push(betaShellComparison.path);
   }
   return paths.flatMap((path) => {
     const languages = Object.fromEntries(Object.entries(languageAlternates(path)).map(([locale, href]) => [locale, new URL(href, siteUrl).href]));

@@ -3,7 +3,7 @@ import {entries, plainText, record, safeImage, textList} from "../../lib/product
 
 export type MammutVariant = {
   id: string; sku?: string | null; color: string | null; size: string | null; price: number | null; originalPrice: number | null;
-  inStock: boolean | null; currency: "USD" | null; image: string | null;
+  currency: "USD" | null; image: string | null;
 };
 
 export type MammutPayload = {
@@ -105,7 +105,6 @@ export function parseMammut(html: string, url: string, fetchedAt: string): Mammu
         price: item.currency === "USD" ? money(item.price) : null,
         originalPrice: item.currency === "USD" && item.discounted === true ? money(item.originalPrice) : null,
         currency: item.currency === "USD" ? "USD" : null,
-        inStock: typeof item.inStock === "boolean" ? item.inStock : null,
         image: variantImage(item),
       });
     }

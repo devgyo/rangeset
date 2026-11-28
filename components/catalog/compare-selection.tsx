@@ -2,20 +2,21 @@
 
 import {Link, usePathname} from "@/i18n/navigation";
 import {genderDisplay, useCopy} from "@/i18n/ui-copy";
-import { memo, useMemo, useSyncExternalStore } from "react";
+import { memo, useLayoutEffect, useMemo, useRef, useSyncExternalStore } from "react";
 import { Check, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import dynamic from "next/dynamic";
+import CompareDockPanel from "./compare-dock-panel";
+import {findCompareButton, neighborAfterRemoval} from "./compare-focus";
 import {taxonomyPath} from "@/lib/taxonomy";
 import { comparisonHref } from "@/lib/comparison-href";
 import {catalogBrand, isCatalogProduct} from "@/lib/catalog-scope";
 import {safeImage, type CatalogCard} from "@/lib/product-view";
 
-const CompareDockPanel = dynamic(() => import("./compare-dock-panel"), {ssr: false});
-
 const storageKey = "rangeset:comparison";
 const listeners = new Set<() => void>();
 let fallback = "";
+let dockEntrancePath: string | undefined;
+let lastAddButton: HTMLButtonElement | undefined;
 
 export type PickedProduct = Pick<CatalogCard, "slug" | "name" | "image" | "category" | "gender" | "taxonomy">;
 
@@ -66,10 +67,14 @@ export const CompareButton = memo(function CompareButton({ slug, name, image, ca
     <Button type="button" variant={selected ? "secondary" : "outline"}
       className={compact ? "h-9 w-full justify-center" : "h-10 px-4"} disabled={atLimit}
       aria-label={t("ui.compare_action", {action: t(selected ? "ui.remove" : "ui.compare"), name: `${name} (${genderDisplay(t, gender)})`})}
-      aria-pressed={selected} title={atLimit ? t("ui.compare_up_to_four_products") : undefined}
-      onClick={() => {
+      data-compare-toggle={slug} aria-pressed={selected} aria-describedby={atLimit ? "catalog-compare-limit" : undefined}
+      onClick={(event) => {
         const current = decodeSelection(snapshot());
-        rememberSelection(current.some((product) => product.slug === slug)
+        const alreadySelected = current.some((product) => product.slug === slug);
+        if (!alreadySelected && current.length >= 4) return;
+        dockEntrancePath = !current.length && event.detail > 0 ? location.pathname : undefined;
+        if (!alreadySelected) lastAddButton = event.currentTarget;
+        rememberSelection(alreadySelected
           ? current.filter((product) => product.slug !== slug) : [...current, {slug, name, image, category, gender}]);
       }}>
       {selected ? <Check aria-hidden="true" /> : <Plus aria-hidden="true" />}
@@ -79,24 +84,60 @@ export const CompareButton = memo(function CompareButton({ slug, name, image, ca
 });
 
 export function CompareDock() {
+  const {t} = useCopy();
   const selection = useCompareSelection();
   const route = usePathname();
-  if (!selection.length || (!route.startsWith("/products") && route !== "/jackets")) return null;
-  return <CompareDockPanel selection={selection} onChange={rememberSelection} />;
+  const onCatalog = route === "/products" || route.startsWith("/products/") || route === "/jackets";
+  const dock = useRef<HTMLElement>(null);
+  const focusAfterChange = useRef<{trigger: HTMLElement; neighbor?: string; original?: string} | null>(null);
+  const entrance = onCatalog && selection.length === 1 && typeof window !== "undefined" && dockEntrancePath === location.pathname;
+
+  useLayoutEffect(() => {
+    if (selection.length) dockEntrancePath = undefined;
+    const change = focusAfterChange.current;
+    if (!change) return;
+    focusAfterChange.current = null;
+    if (!onCatalog || (document.activeElement !== document.body && document.activeElement !== change.trigger)) return;
+
+    const neighbor = change.neighbor && dock.current && findCompareButton(dock.current, "data-compare-remove", change.neighbor);
+    const original = change.original && findCompareButton(document, "data-compare-toggle", change.original);
+    const lastAdd = lastAddButton?.isConnected && lastAddButton;
+    (neighbor || original || lastAdd || document.querySelector<HTMLElement>("[data-compare-nav]"))?.focus();
+    if (!selection.length) lastAddButton = undefined;
+  }, [onCatalog, selection]);
+
+  function remove(slug: string | undefined, trigger: HTMLElement) {
+    if (document.activeElement === trigger) {
+      focusAfterChange.current = {
+        trigger,
+        neighbor: slug && neighborAfterRemoval(selection, slug),
+        original: slug ?? lastAddButton?.getAttribute("data-compare-toggle") ?? selection[0]?.slug,
+      };
+    }
+    rememberSelection(slug ? selection.filter((product) => product.slug !== slug) : []);
+  }
+
+  if (!onCatalog) return null;
+  return <>
+    <p className="sr-only" role="status">{t("ui.compare_selection_status", {count: selection.length})}</p>
+    {selection.length > 0 && <CompareDockPanel dockRef={dock} selection={selection} entrance={entrance} onRemove={remove} />}
+  </>;
 }
 
 export function CatalogNav() {
   const {t} = useCopy();
   const selection = useCompareSelection();
   const route = usePathname();
+  const hardshells = taxonomyPath("hardshell-jackets");
+  const inHardshells = route === hardshells || route.startsWith(hardshells + "/");
   const links = [
-    { label: "ui.nav_catalog", href: "/products", active: route.startsWith("/products") },
-    { label: "ui.compare", href: comparisonHref(selection.map(({ slug }) => slug)), active: route === "/compare" },
-    { label: "ui.nav_hardshells", href: taxonomyPath("hardshell-jackets"), active: route === taxonomyPath("hardshell-jackets") },
+    { label: "ui.nav_catalog", href: "/products", active: !inHardshells && (route === "/products" || route.startsWith("/products/")) },
+    { label: "ui.compare", href: comparisonHref(selection.map(({ slug }) => slug)), active: route === "/compare" || route.startsWith("/compare/") },
+    { label: "ui.nav_hardshells", href: hardshells, active: inHardshells },
   ];
   return <nav aria-label={t("ui.navigation")} className="flex items-center gap-2.5 sm:gap-6">
     {links.map(({ label, href, active }) => (
-      <Link key={label} className="nav-link" href={href} aria-current={active ? "page" : undefined}>
+      <Link key={label} className="nav-link" data-compare-nav={label === "ui.compare" ? "" : undefined} href={href} aria-current={active ? "page" : undefined}>
         {t(label)}
         {label === "ui.compare" && selection.length > 0 &&
           <span className="ml-1 rounded-sm bg-primary px-1 text-[0.625rem] text-primary-foreground">{selection.length}</span>}

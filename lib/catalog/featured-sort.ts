@@ -6,8 +6,8 @@ export function catalogSort(value: string | null): CatalogSort {
   return catalogSorts.find((sort) => sort === value) ?? defaultCatalogSort;
 }
 
-type Tier = "A" | "C" | "D";
-const tiers: readonly Tier[] = ["A", "C", "D"];
+type Tier = "A" | "C";
+const tiers: readonly Tier[] = ["A", "C"];
 
 export type FeaturedProduct = {
   id?: number;
@@ -16,8 +16,6 @@ export type FeaturedProduct = {
   brandSlug: string;
   styleFamily: string | null;
   releaseSeason: number | null;
-  inStock: boolean | null;
-  stockRatio: number | null;
   cardValueCount: number;
   status: "active" | "discontinued" | "pending_review";
 };
@@ -31,7 +29,6 @@ export function releaseSeasonRank(year: number | null, season: string): number |
 }
 
 function tierFor(product: FeaturedProduct): Tier {
-  if (product.inStock === false || (product.stockRatio !== null && product.stockRatio < 0.5)) return "D";
   return product.cardValueCount < 3 || product.status === "discontinued" ? "C" : "A";
 }
 

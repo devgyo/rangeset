@@ -5,7 +5,8 @@ import {fieldsByKey} from "@/lib/parameters/registry";
 import {missing} from "@/lib/parameters/model";
 import {notFound} from "next/navigation";
 import {getTranslations} from "next-intl/server";
-import {localizedPath, pageAlternates, type Locale} from "@/i18n/routing";
+import {Link} from "@/i18n/navigation";
+import {pageAlternates, type Locale} from "@/i18n/routing";
 import type {Metadata} from "next";
 import {CatalogBrowser} from "@/components/catalog/catalog-browser";
 import {catalogEnabled, listProducts, localCatalog} from "@/lib/catalog";
@@ -36,7 +37,7 @@ export async function CatalogPage({locale, category = "", page = 1}: {locale: Lo
   const pages = Math.max(1, Math.ceil(matching.length / catalogPageSize));
   if (page > pages) notFound();
   const preview = catalogPageSlice(rankFeatured(matching), page);
-  const crawlLinks = [page - 1, page + 1].filter((number) => number >= 1 && number <= pages);
+  const adjacentPages = [page - 1, page + 1].filter((number) => number >= 1 && number <= pages);
   function styleFilter(fieldKey: "product_type" | "protection_type") {
     const field = fieldsByKey.get(fieldKey)!;
     const options: [string, string][] = Object.entries(field.options ?? {}).map(([key, label]) => [key, optionLabel(t, field, key, label)]);
@@ -52,16 +53,21 @@ export async function CatalogPage({locale, category = "", page = 1}: {locale: Lo
       <ClientMessages scope="catalog">
         <CatalogBrowser key={category + ":" + page} startPage={page} previewCount={preview.length}
           previewCards={preview.map(({product}, index) => <CatalogCardView key={product.slug} product={product} eager={index < 2} />)}
+          pagination={adjacentPages.length > 0 && <nav className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1" aria-label={t("ui.catalog_pagination")}>
+            {adjacentPages.map((number) => {
+              const previous = number < page;
+              const label = t(previous ? "ui.catalog_previous_page" : "ui.catalog_next_page");
+              return <Link className="spec-link inline-flex min-h-11 items-center whitespace-nowrap text-sm sm:min-h-8" prefetch={false}
+                key={number} href={paginatedPath(category, number)} rel={previous ? "prev" : "next"}
+                aria-label={`${label} (${t("ui.catalog_page", {page: number})})`}>
+                {label}
+              </Link>;
+            })}
+          </nav>}
           styleFilters={{type: styleFilter("product_type"), protection: styleFilter("protection_type")}}
           facets={catalogFacets(matching)} category={category} categoryCounts={categoryCounts} total={products.length} matchingCount={matching.length} />
       </ClientMessages>
-      {crawlLinks.length > 0 && <noscript>
-        <nav className="my-5 flex gap-4" aria-label={t("ui.catalog_pagination")}>
-          {crawlLinks.map((number) => <a className="spec-link" key={number} href={localizedPath(paginatedPath(category, number), locale)}>
-            {t("ui.catalog_page", {page: number})}
-          </a>)}
-        </nav>
-      </noscript>}
+
     </div>
   );
 }

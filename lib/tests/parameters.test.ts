@@ -11,7 +11,7 @@ function product(props: Partial<ProductDetail> = {}): ProductDetail {
   return {
     slug: "test", name: "Example Jacket", brand: "Example", category: "Shell Jackets", gender: "men",
     family: null, subTags: [], veilance: false, isHardshell: false, status: "active", image: null, hero: null,
-    swatches: [], activities: [], summary: "", msrp: null, inStock: null, specs: {},
+    swatches: [], activities: [], summary: "", msrp: null, specs: {},
     url: "https://example.com/product", verifiedAt: "2026-11-20", description: "", materials: [],
     features: [], facility: "", year: null, season: "", sizes: [], colorways: [], ...props,
   };

@@ -14,27 +14,26 @@ function page(file: string, url: string) {
   return {url, finalUrl: url, status: 200, fetchedAt, body: (file.endsWith(".gz") ? gunzipSync(saved) : saved).toString("utf8")};
 }
 
-test("Arc’teryx snapshot retains stock and separate list and sale prices per variant", () => {
+test("Arc’teryx snapshot retains separate list and sale prices per variant", () => {
   const variants = snapshotVariants("arcteryx", "X000011062", page("beta-ar-jacket.html", fixtureUrl));
-  assert.deepEqual(variants[0], {variantKey: "X000011062012", color: "17216", size: "6035", priceCents: 65000, salePriceCents: null, currency: "USD", inStock: true});
+  assert.deepEqual(variants[0], {variantKey: "X000011062012", color: "17216", size: "6035", priceCents: 65000, salePriceCents: null, currency: "USD"});
   assert.equal(variants.length, new Set(variants.map(({variantKey}) => variantKey)).size);
   assert.throws(() => snapshotVariants("arcteryx", "X000099999", page("beta-ar-jacket.html", fixtureUrl)), /different SKU/);
   assert.deepEqual(arcSnapshotVariants({currencyCode: "USD", variants: [
     {id: "sample-one", price: 650, discountPrice: 499, stockStatus: "outOfStock"},
     {colourLabel: "Slate", sizeLabel: "M", price: 0},
   ]}), [
-    {variantKey: "sample-one", color: null, size: null, priceCents: 65000, salePriceCents: 49900, currency: "USD", inStock: false},
-    {variantKey: "Slate|M", color: "Slate", size: "M", priceCents: null, salePriceCents: null, currency: "USD", inStock: null},
+    {variantKey: "sample-one", color: null, size: null, priceCents: 65000, salePriceCents: 49900, currency: "USD"},
+    {variantKey: "Slate|M", color: "Slate", size: "M", priceCents: null, salePriceCents: null, currency: "USD"},
   ]);
 });
 
-test("Mammut snapshot keeps the published variant stock alongside its price", () => {
+test("Mammut snapshot keeps the published variant prices", () => {
   const url = "https://www.mammut.com/us/en/products/1013-02962/broad-peak-in-hooded-jacket-men";
   const variants = snapshotVariants("mammut", "1013-02962", page("mammut-broad-peak.html.gz", url));
   assert.ok(variants.length > 1);
   assert.ok(variants.every(({variantKey, currency}) => variantKey.startsWith("1013-02962-") && currency === "USD"));
-  assert.ok(variants.some(({priceCents, inStock}) => priceCents === 39900 && inStock === true));
-  assert.ok(variants.some(({inStock}) => inStock === false));
+  assert.ok(variants.some(({priceCents}) => priceCents === 39900));
 });
 
 test("snapshot HTTP client stops on 403/429 and uses a URL-free User-Agent", async (t) => {
@@ -81,8 +80,8 @@ test("snapshot capture resumes completed pages, records a 404, and stops on 403 
   assert.deepEqual(requested, [2,3,4]);
   assert.equal(savedPages, 3);
   assert.ok(observations.some((row) => row.productId === 2 && row.status === "ok"));
-  assert.deepEqual(observations.filter((row) => row.status !== "ok").map(({productId, status, priceCents, inStock}) =>
-    [productId, status, priceCents, inStock]), [[3,"missing_404",null,null],[4,"blocked",null,null]]);
+  assert.deepEqual(observations.filter((row) => row.status !== "ok").map(({productId, status, priceCents}) =>
+    [productId, status, priceCents]), [[3,"missing_404",null],[4,"blocked",null]]);
 });
 
 test("snapshot summary counts URL, policy, timeout and parse failures separately and continues", async (t) => {

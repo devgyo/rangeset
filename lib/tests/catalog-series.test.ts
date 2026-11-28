@@ -8,7 +8,7 @@ function listing(slug: string, brandSlug: string, series: string[], gender: Cata
   return {
     slug, name: slug, brandSlug, brand: brandSlug === "mammut" ? "Mammut" : "Arc’teryx", series, gender,
     category: null, family: null, subTags: [], veilance: false, image: null, swatches: [], swatchCount: 0, activities: [],
-    msrp: null, inStock: null, styleFamily: null, stockRatio: null, releaseSeason: null, cardValueCount: 0,
+    msrp: null, styleFamily: null, releaseSeason: null, cardValueCount: 0,
     status: "active", card: {weight: null, fit: null, mainFabric: null, composition: null},
   };
 }

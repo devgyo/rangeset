@@ -1,7 +1,7 @@
 import {publishedSku} from "./outbound";
 import type {ProductDetail} from "./product-view";
 
-type ProductMetadata = Pick<ProductDetail, "name" | "brand" | "image" | "hero" | "modelNumbers" | "msrp" | "currency" | "inStock" | "offerRange">;
+type ProductMetadata = Pick<ProductDetail, "name" | "brand" | "image" | "hero" | "modelNumbers" | "msrp" | "currency" | "offerRange">;
 
 function absoluteImage(value: string | null) {
   try {
@@ -17,11 +17,10 @@ export function productJsonLd(product: ProductMetadata, url: string) {
   const image = absoluteImage(product.image) ?? absoluteImage(product.hero);
   const priceCurrency = product.currency && /^[A-Z]{3}$/.test(product.currency) ? product.currency : undefined;
   const price = product.msrp !== null && Number.isFinite(product.msrp) && product.msrp > 0 ? product.msrp : undefined;
-  const availability = typeof product.inStock === "boolean" ? `https://schema.org/${product.inStock ? "InStock" : "OutOfStock"}` : undefined;
-  const offerFields = {url, ...(priceCurrency && {priceCurrency}), ...(availability && {availability})};
+  const offerFields = {url, ...(priceCurrency && {priceCurrency})};
   const offers = product.offerRange
     ? {"@type": "AggregateOffer", ...product.offerRange, ...offerFields}
-    : price !== undefined || availability ? {"@type": "Offer", ...(price !== undefined && {price}), ...offerFields} : undefined;
+    : price !== undefined ? {"@type": "Offer", price, ...offerFields} : undefined;
   return {
     "@context": "https://schema.org",
     "@type": "Product",

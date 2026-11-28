@@ -94,7 +94,7 @@ export const registry: Field[] = [
   field("fit", "Fit", "sizing", 40, "text", "apparel", "Published description of the cut.", { highlight: ["apparel"], core: true }),
   field("back_length", "Centre back length", "sizing", 50, "number", "upper", "Length measured at the centre back in the published reference size.", { unit: "cm", compare: "measurement", core: true, highlight: ["upper"] }),
   field("inseam", "Inseam", "sizing", 60, "number", "bottom", "Length along the inside leg in the published reference size.", { unit: "cm", compare: "measurement", core: true, highlight: ["bottom"] }),
-  field("sizes", "Available sizes", "sizing", 70, "list", "all", "Sizes offered by the brand. Availability can vary."),
+  field("sizes", "Listed sizes", "sizing", 70, "list", "all", "Sizes listed by the brand for this model."),
   field("colors", "Colorways", "sizing", 80, "number", "all", "Number of colorways listed by the brand."),
   field("materials", "Main fabric", "fabric", 10, "parts", "all", "Published fabrics grouped by their location on the product."),
   field("fabric_name", "Fabric name", "fabric", 20, "text", "all", "The fabric or technology name as published.", { component: "fabric", core: true }),

@@ -54,7 +54,7 @@ function product(fields: Partial<ProductDetail>): ProductDetail {
   return {
     name: "Test", slug: "test", brand: "Arc’teryx", family: null, status: "active", category: "Shell Jackets", gender: "men",
     subTags: [], veilance: false, isHardshell: false, image: null, hero: null, swatches: [], activities: [], summary: "",
-    msrp: null, inStock: null, specs: {}, url: null, verifiedAt: null, description: "", materials: [], features: [],
+    msrp: null, specs: {}, url: null, verifiedAt: null, description: "", materials: [], features: [],
     facility: "", year: null, season: "", sizes: [], colorways: [], ...fields,
   };
 }

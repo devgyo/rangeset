@@ -3,16 +3,16 @@ import {test} from "node:test";
 import {productJsonLd, serializeJsonLd} from "../product-jsonld";
 
 const url = "https://rangeset.com/ja/products/beta-ar";
-const base = {name: "Beta AR Jacket", brand: "Arc’teryx", image: null, hero: null, msrp: null, inStock: null};
+const base = {name: "Beta AR Jacket", brand: "Arc’teryx", image: null, hero: null, msrp: null};
 
 test("Product JSON-LD emits the known Brand, SKU, image, currency, and Offer subset", () => {
   const image = "https://images.arcteryx.com/beta.jpg";
   const json = productJsonLd({...base, image, modelNumbers: ["1062", "X000011062"],
-    msrp: 650, currency: "USD", inStock: false}, url);
+    msrp: 650, currency: "USD"}, url);
   assert.deepEqual(JSON.parse(serializeJsonLd(json)), {
     "@context": "https://schema.org", "@type": "Product", name: "Beta AR Jacket",
     brand: {"@type": "Brand", name: "Arc’teryx"}, image, sku: "X000011062", url,
-    offers: {"@type": "Offer", url, price: 650, priceCurrency: "USD", availability: "https://schema.org/OutOfStock"},
+    offers: {"@type": "Offer", url, price: 650, priceCurrency: "USD"},
   });
 });
 

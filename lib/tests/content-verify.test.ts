@@ -3,7 +3,7 @@ import {readFileSync} from "node:fs";
 import {test} from "node:test";
 import {gunzipSync} from "node:zlib";
 import {CrawlBlocked, type Page} from "../../crawler/http";
-import {compare, compareSnapshotStock, fields, productFacts, sample, variantsOf} from "../../scripts/content-verify/compare";
+import {compare, fields, productFacts, sample} from "../../scripts/content-verify/compare";
 import {officialProduct, OfficialReader, parseSeries, seriesEvidence} from "../../scripts/content-verify/official";
 import {failing, summarize, type ProductAudit} from "../../scripts/content-verify/report";
 import {verifyProducts} from "../../scripts/content-verify/run";
@@ -34,7 +34,7 @@ test("content verification samples both brands proportionally, always includes r
   assert.equal(sample(inventory, "2026-11-21", true).length, 800);
 });
 
-test("product facts use both official adapters and compare normalized materials and false stock independently", () => {
+test("product facts use both official adapters and compare normalized materials", () => {
   const {facts} = productFacts(mammut);
   assert.equal(facts.sku.value, "1013-02962");
   assert.equal(facts.currency.value, "USD");
@@ -42,13 +42,6 @@ test("product facts use both official adapters and compare normalized materials 
   assert.ok(Array.isArray(facts.composition.value) && facts.composition.value.length);
   assert.ok(productFacts(arc).facts.weight.value);
   assert.equal(compare("colors", {value: ["Black", "Red"]}, {value: ["Red", "Black"]}, mammutUrl).status, "match");
-  const stock = (value: boolean | null) => ({value: [["Black S", value]], evidence: "Black, S"});
-  assert.equal(compare("variantStock", stock(false), stock(false), mammutUrl).status, "match");
-  assert.equal(compare("variantStock", stock(false), stock(null), mammutUrl).status, "unverifiable");
-  const wrong = compare("variantStock", stock(false), stock(true), mammutUrl);
-  assert.equal(wrong.status, "mismatch");
-  assert.equal(wrong.evidence, "Black, S");
-  assert.equal(wrong.url, mammutUrl);
   assert.equal(compare("productLine", {value: ["Eiger Extreme"]}, {value: []}, mammutUrl).status, "unverifiable");
   assert.equal(compare("productLine", {value: ["Eiger Extreme"]}, {value: [], confirmedAbsence: true}, mammutUrl).status, "mismatch");
 });
@@ -70,57 +63,6 @@ test("Mammut product and evidence requests use separate policies on the same hos
   assert.equal(seriesEvidence(listing, "1010-33030", "Eiger Extreme")?.found, true);
   assert.equal(await reader.series(seriesUrl), listing);
   assert.equal(requests.filter((url) => url === seriesUrl).length, 1);
-});
-
-test("stock comparison uses same-day price snapshots by SKU and excludes snapshots more than six hours old", async () => {
-  const fetchedAt = "2026-11-21T12:10:00Z";
-  const capturedAt = "2026-11-21T06:10:00Z";
-  for (const product of [arc, mammut]) {
-    const snapshots = variantsOf(product).map((variant) => ({...variant, capturedAt}));
-    assert.ok(snapshots.length);
-    const matched = compareSnapshotStock(snapshots, product, fetchedAt, product.url!);
-    assert.equal(matched.status, "match");
-    assert.deepEqual(matched.stockVariants, {comparable: snapshots.length, mismatch: 0});
-    const changed = snapshots.map((variant, index) => index === 0 ? {...variant, inStock: !variant.inStock} : variant);
-    const mismatch = compareSnapshotStock(changed, product, fetchedAt, product.url!);
-    assert.equal(mismatch.status, "mismatch");
-    assert.deepEqual(mismatch.stockVariants, {comparable: snapshots.length, mismatch: 1});
-    assert.deepEqual(mismatch.stockWindow, {snapshotCapturedAt: [capturedAt], officialFetchedAt: fetchedAt});
-    assert.match(compareSnapshotStock(changed, product, "2026-11-21T12:10:00.001Z", product.url!).reason!, /6-hour/);
-    assert.match(compareSnapshotStock(changed, product, "2026-11-21T16:00:00Z", product.url!).reason!, /observation day/);
-    assert.match(compareSnapshotStock([], product, fetchedAt, product.url!).reason!, /No successful/);
-  }
-  const snapshots = variantsOf(mammut).map((variant) => ({...variant, capturedAt}));
-  const {products} = await verifyProducts([{
-    ...mammut, snapshots, prices: mammut.prices.map((variant) => ({...variant, inStock: !variant.inStock})),
-  }], {
-    async product() { return {...mammutPage, fetchedAt}; },
-    async series() { throw new Error("Unexpected series request"); },
-  });
-  assert.equal(products[0].results.find(({field}) => field === "variantStock")?.status, "match");
-});
-
-test("stock counts only unique same-SKU pairs with known states inside the window", () => {
-  const fetchedAt = "2026-11-21T12:10:00Z";
-  const capturedAt = "2026-11-21T06:10:00Z";
-  const [different, matching, unknown, expired, conflicting] = variantsOf(mammut).filter((row) => typeof row.inStock === "boolean");
-  const rows = [
-    {...different, inStock: !different.inStock, capturedAt},
-    {...matching, capturedAt},
-    {...matching, capturedAt},
-    {...unknown, inStock: null, capturedAt},
-    {...expired, capturedAt: "2026-11-21T06:09:59Z"},
-    {...conflicting, capturedAt},
-    {...conflicting, inStock: !conflicting.inStock, capturedAt},
-    {...matching, variantKey: "snapshot-only", capturedAt},
-  ];
-  const result = compareSnapshotStock(rows, mammut, fetchedAt, mammutUrl);
-  assert.equal(result.status, "mismatch");
-  assert.deepEqual(result.stockVariants, {comparable: 2, mismatch: 1});
-  assert.match(result.evidence!, new RegExp(different.variantKey));
-  const partial = compareSnapshotStock([{...matching, capturedAt}], mammut, fetchedAt, mammutUrl);
-  assert.equal(partial.status, "unverifiable");
-  assert.deepEqual(partial.stockVariants, {comparable: 1, mismatch: 0});
 });
 
 test("series verification accepts visible cards with an exact article and the correct series title", () => {
@@ -170,20 +112,6 @@ test("unverifiable rows never affect denominators and four field errors fail eve
     results: [{field: "sku", status: "match"}, {field: "fit", status: "unverifiable"}]}]), null), false);
 });
 
-test("stock uses the aggregate variant rate with a strict 10% boundary and separate non-stock thresholds", () => {
-  const stock = (mismatch: number, comparable: number): ProductAudit["results"][number] => ({
-    field: "variantStock", status: mismatch ? "mismatch" : "match", stockVariants: {comparable, mismatch},
-  });
-  const summary = (...results: ProductAudit["results"]) =>
-    summarize([{brand: "mammut", sku: mammut.sku, name: mammut.name, url: mammutUrl, results}]);
-  const threshold = summary({field: "name", status: "match"}, stock(1, 1), stock(1, 5), stock(1, 10), stock(1, 24));
-  assert.deepEqual(threshold.stockVariants, {comparable: 40, mismatch: 4, mismatchRate: 0.1, threshold: 0.1});
-  assert.equal(failing(threshold, null), false);
-  assert.equal(failing(summary({field: "name", status: "match"}, stock(2, 10)), null), true);
-  assert.equal(failing(summary({field: "sku", status: "mismatch"}, stock(0, 500)), null), true);
-  assert.equal(failing(summary({field: "name", status: "match"}, {field: "variantStock", status: "unverifiable"}), null), false);
-});
-
 test("translated catalog terms agree with the glossary and allow protected names", () => {
   assert.deepEqual(checkTranslations(), []);
 });
@@ -194,7 +122,7 @@ test("offline rules flag price, currency, snapshot changes and identical images 
     {...mammut, prices: [...mammut.prices, {...variant, price: -1, currency: "CAD"}]},
     {...mammut, sku: "1013-02963", prices: [...mammut.prices, {...variant, price: 40, currency: "USD"}],
       snapshots: [{variantKey: variant.variant, priceCents: 10000, salePriceCents: null, currency: "USD",
-        inStock: true, capturedAt: publishedAt}]},
+        capturedAt: publishedAt}]},
   ]);
   for (const rule of ["nonpositive_price", "region_currency", "price_delta_above_50_percent", "identical_image_url"]) {
     assert.ok(issues.some((entry) => entry.rule === rule), rule);

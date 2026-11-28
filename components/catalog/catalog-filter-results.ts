@@ -6,10 +6,10 @@ import {seriesGroups, seriesMatches} from "@/lib/catalog/series";
 import {matchesTaxonomy} from "@/lib/taxonomy";
 
 export function filterCatalog(catalog: CatalogListing[], {
-  category, gender, family, brand, series, legacyLine, activity, productType, protectionType, query, sort,
+  category, gender, family, brand, series, legacyLine, activity, productType, protectionType, query, sort, translate,
 }: {
   category: string; gender: string; family: string; brand: string[]; series: string[]; legacyLine: string | null;
-  activity: string[]; productType: string; protectionType: string; query: string; sort: CatalogSort;
+  activity: string[]; productType: string; protectionType: string; query: string; sort: CatalogSort; translate?: (key: string) => string;
 }) {
   const products = catalog.filter((product) => !category || matchesTaxonomy(product, category));
   const filtered = products.filter((product) =>
@@ -20,8 +20,8 @@ export function filterCatalog(catalog: CatalogListing[], {
   const selected = series.length || legacyLine ? filtered.filter((product) =>
     series.length ? series.some((value) => product.series?.some((line) => seriesMatches(value, product.brandSlug, line))) :
       product.veilance === (legacyLine === "veilance")) : filtered;
-  const matches = searchCatalog(selected, query);
-  const counts = seriesGroups(selected === filtered ? matches : searchCatalog(filtered, query));
+  const matches = searchCatalog(selected, query, translate);
+  const counts = seriesGroups(selected === filtered ? matches : searchCatalog(filtered, query, translate));
   const results = sort === defaultCatalogSort ? rankFeatured(matches).map(({product}) => product)
     : [...matches].sort((a, b) => {
       const byName = a.name.localeCompare(b.name, "en") || compareCatalogIdentity(a, b);

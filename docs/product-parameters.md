@@ -36,8 +36,8 @@ Use `parameters.taxonomy` in `manual_overrides` with a stable leaf key, optional
 | Main material (Denier), Water column, Breathability | Ordered denier, hydrostatic head in mm, and RET or MVTR with published units and bounds. |
 | Main fabric name | A structured name or a description identifying the body/outer fabric. An unscoped technology mention leaves the named field unpublished. |
 | Filling, Fill power, Fill weight | Published fill type, down ratio and power, and fill mass or location-specific synthetic density when published. |
-| Variant originalPrice, price, color, size, inStock | List and sale price stored separately in USD. Cards and price sorting use list price. Variant stock is derived only from published combinations and flags. |
-| Release year / season | Used only when explicitly published. An in-season stock flag does not give a release date. Merchandising labels such as New Style and New Colors Added stay in the source data. |
+| Variant originalPrice, price, color, size | List and sale price stored separately in USD. Cards and price sorting use list price. |
+| Release year / season | Used only when explicitly published. Merchandising labels such as New Style and New Colors Added stay in the source data. |
 
 Use the saved US HTML crawl to reproduce the [Mammut dry-run report](mammut-import-v1.7.0.md). The local catalog loads `data/arcteryx-local.json` and `data/mammut-dry-run.json` in read-only mode. Run `RANGESET_LOCAL_CATALOG=1 pnpm dev`, or set that variable on both `pnpm build` and `pnpm start` for a production-mode local server. `pnpm crawl:mammut:dry-run` refreshes the dry run. Pass `--from-cache` to reprocess saved HTML. `crawler/mammut-import.ts --apply` is the separate transactional importer for new Mammut rows, after approval.
 
@@ -71,16 +71,15 @@ The mapping ignores case and normalizes hyphens and spacing. Search accepts publ
 Featured is the default in all three languages. It ranks the current filtered and searched result set before pagination:
 
 - **A:** at least three card values and no lower-tier condition.
-- **C:** fewer than three card values or a discontinued item that has not met D.
-- **D:** explicitly sold out or fewer than half of reported size–color combinations are in stock.
+- **C:** fewer than three card values or a discontinued item.
 
-D takes precedence over C. Discontinued comes from `products.status = 'discontinued'`, after the existing manual status override. Unknown stock does not downgrade a product. A known value or explicit N/A counts toward completeness, as does the main fabric composition fallback. Release season orders each brand queue within its tier. Unknown release seasons follow known ones without changing tier. Same-season style families stay together. Smooth weighted round-robin interleaves brands in proportion to their tier counts.
+Discontinued comes from `products.status = 'discontinued'`, after the existing manual status override. A known value or explicit N/A counts toward completeness, as does the main fabric composition fallback. Release season orders each brand queue within its tier. Unknown release seasons follow known ones without changing tier. Same-season style families stay together. Smooth weighted round-robin interleaves brands in proportion to their tier counts.
 
 See [the v1.8.0 composite sort report](composite-sort-v1.8.0.md) for implementation and verification details.
 
-## Price and stock observation
+## Price observation
 
-The manual snapshot job appends each official brand size–color SKU to `price_snapshots`, with observed regular price, sale price, currency and availability. Unpublished observations stay null. The new history is collected independently of the existing listing and has no price-history UI. The migration also creates `outbound_clicks` for the official brand redirect. See the [operating notes](price-snapshots-v1.8.0.md).
+The manual snapshot job appends each official brand size–color SKU to `price_snapshots`, with observed regular price, sale price and currency. Unpublished observations stay null. The new history is collected independently of the existing listing and has no price-history UI. The migration also creates `outbound_clicks` for the official brand redirect. See the [operating notes](price-snapshots-v1.8.0.md).
 
 ## Evidence and review
 

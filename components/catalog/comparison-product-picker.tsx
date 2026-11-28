@@ -4,6 +4,7 @@ import {Button} from "@/components/ui/button";
 import {displayPrice} from "@/i18n/copy";
 import {genderDisplay, useCopy} from "@/i18n/ui-copy";
 import {leafSlug, taxonomyLabelKey} from "@/lib/taxonomy";
+import {searchCatalog} from "@/lib/catalog-search";
 import {ProductImage} from "./product-media";
 import type {ComparisonProduct, PickerProduct} from "./comparison-grid";
 
@@ -14,12 +15,8 @@ export default function ProductPicker({ products, selected, onPick, onClose }: {
   const [query, setQuery] = useState("");
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => { input.current?.focus(); }, []);
-  const terms = query.toLocaleLowerCase("en-US").trim().split(/\s+/);
-  const results = products.filter((product) => !selected.some(({ slug }) => slug === product.slug) &&
-    terms.every((term) => {
-      const gender = term.replace(/['’]s$/, "");
-      return ["men", "women", "unisex"].includes(gender) ? product.gender === gender : product.keywords.includes(term);
-    })).slice(0, 12);
+  const selectedSlugs = new Set(selected.map(({slug}) => slug));
+  const results = searchCatalog(products.filter(({slug}) => !selectedSlugs.has(slug)), query, t).slice(0, 12);
   return <section id="comparison-picker" aria-labelledby="picker-heading" className="my-3 border bg-card p-3 sm:p-4"
     onKeyDown={(event) => { if (event.key === "Escape") onClose(); }}>
     <div className="mb-2 flex items-center justify-between gap-3">
@@ -44,6 +41,6 @@ export default function ProductPicker({ products, selected, onPick, onClose }: {
           <Plus size={14} className="shrink-0 text-primary" aria-hidden="true" />
         </button>
       </li>)}
-    </ul> : <p role="status" className="mt-3 text-sm text-muted-foreground">{t("ui.no_matching_products")}</p>}
+    </ul> : <p role="status" className="mt-3 text-sm text-muted-foreground">{t("ui.no_matching_products")} {t("ui.catalog_search_hint")}</p>}
   </section>;
 }

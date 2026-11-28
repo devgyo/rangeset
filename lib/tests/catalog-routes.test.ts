@@ -4,6 +4,7 @@ import {test} from "node:test";
 import en from "../../messages/en.json";
 import zh from "../../messages/zh.json";
 import ja from "../../messages/ja.json";
+import {betaShellComparison} from "../curated-comparison";
 import {cardFields} from "../parameters/registry";
 
 const site = process.env.TEST_SITE_URL;
@@ -29,14 +30,18 @@ test("all three language catalogs, home navigation, and searches exclude footwea
       assert.ok(!html.includes("Footwear"), prefix + path);
       for (const slug of shoeSlugs) assert.ok(!html.includes(slug), slug);
       if (path === "/products") {
-        assert.match(html, /<option value="featured" selected=""/);
-        assert.ok(html.includes(translations[prefix].ui.sort_featured_help), prefix);
+        assert.match(html, /aria-haspopup="dialog" aria-expanded="false"/);
+        assert.ok(html.includes(translations[prefix].ui.catalog_filters), prefix);
+        assert.doesNotMatch(html, /<option value="featured"/);
         const cards = [...html.matchAll(/<article class="gear-card [^"]*">([\s\S]*?)<\/article>/g)];
         assert.ok(cards.length > 0, prefix);
         for (const [, card] of cards) {
           const keys = [...card.matchAll(/data-card-field="([^"]+)"/g)].map(([, key]) => key);
           assert.deepEqual(keys, cardFields.map(({key}) => key), prefix);
         }
+      } else {
+        assert.ok(html.includes(`action="${prefix}/products"`), prefix);
+        assert.match(html, /<input[^>]*name="q"/);
       }
     }
   }
@@ -152,6 +157,7 @@ test("each translated detail includes Product JSON-LD and the official-site rout
     assert.equal(data.sku, "X000011062");
     assert.equal(data.brand["@type"], "Brand");
     assert.ok(data.image && data.offers.price > 0 && data.offers.priceCurrency);
+    assert.ok(!Object.hasOwn(data.offers, "availability"));
     assert.equal(new URL(data.url).pathname, prefix + "/products/" + beta);
     assert.equal(data.offers.url, data.url);
     assert.match(data.image, /^https:\/\//);
@@ -171,7 +177,7 @@ test("catalog HTML omits full product specs and detail fields", options, async (
   assert.equal(response.status, 200);
   const cards = await response.json();
   assert.ok(cards.length > 24);
-  for (const field of ["summary", "specs", "colorways", "description", "facility", "hero", "verifiedAt", "url", "salePrice"]) {
+  for (const field of ["summary", "specs", "colorways", "description", "facility", "hero", "verifiedAt", "url", "salePrice", "inStock", "stockRatio"]) {
     assert.ok(cards.every((card: Record<string, unknown>) => !(field in card)), field);
   }
   assert.equal((html.match(/<article class="gear-card/g) ?? []).length, 24);
@@ -185,7 +191,8 @@ test("catalog exposes crawlable, disjoint server-rendered pages in all three lan
     const secondResponse = await get(prefix + "/products?page=2");
     assert.equal(secondResponse.status, 200);
     const second = await rendered(secondResponse);
-    assert.match(first, /<noscript>[\s\S]*?href="[^"]*\/products\?page=2"/);
+    assert.match(first, /<a[^>]*href="[^"]*\/products\?page=2"[^>]*>/);
+    assert.doesNotMatch(first, /<noscript>[\s\S]*?href="[^"]*\/products\?page=2"/);
     assert.equal(cardPaths(first).length, 24);
     assert.equal(cardPaths(second).length, 24);
     assert.equal(new Set([...cardPaths(first), ...cardPaths(second)]).size, 48);
@@ -194,4 +201,33 @@ test("catalog exposes crawlable, disjoint server-rendered pages in all three lan
   const next = await get("/zh/products/category/hardshell-jackets/page/2");
   assert.equal(next.status, 200);
   assert.equal(cardPaths(await rendered(next)).length, 24);
+});
+
+
+test("the published Beta AR and Beta SL comparison has a localized canonical and stays separate from the tool", options, async () => {
+  const {path, slugs} = betaShellComparison;
+  const sitemap = await (await get("/sitemap.xml")).text();
+  for (const prefix of locales) {
+    const response = await get(prefix + path);
+    assert.equal(response.status, 200);
+    const html = await rendered(response);
+    assert.match(html, /<h1[^>]*>[^<]*Beta AR[^<]*Beta SL/);
+    assert.match(html, /class="comparison-matrix"/);
+    const header = html.split('class="comparison-matrix"')[1]?.match(/<thead>[\s\S]*?<\/thead>/)?.[0];
+    assert.ok(header, prefix);
+    assert.match(header, /line-clamp-2/);
+    assert.doesNotMatch(header, /<img|<button|href="\/out\//);
+    assert.match(html, /class="comparison-product-info"/);
+    assert.match(html, /class="compare-overview-table"/);
+    assert.ok(html.indexOf('class="compare-overview-table"') < html.indexOf('class="comparison-matrix"'));
+    const canonical = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+    assert.ok(canonical);
+    assert.equal(new URL(canonical).pathname, prefix + path);
+    assert.ok(sitemap.includes(prefix + path + "</loc>"));
+    const product = await rendered(await get(prefix + "/products/" + slugs[0]));
+    assert.ok(product.includes('href="' + prefix + path + '"'));
+    const tool = await rendered(await get(prefix + "/compare?ids=" + slugs.join(",")));
+    assert.match(tool, /name="robots" content="noindex, follow"/);
+    if (process.env.RANGESET_LOCAL_CATALOG !== "1") assert.doesNotMatch(html, /name="robots" content="noindex/);
+  }
 });

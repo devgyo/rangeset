@@ -34,7 +34,7 @@ test("Mammut hardshell keeps localized fit inputs, qualified RET and Body, Panel
   assert.ok(parts.some(({part}) => part === "lining"));
   assert.equal(record.raw.msrp, 999);
   assert.equal(record.raw.salePrice, null);
-  assert.ok(record.raw.variants.some(({color, size, inStock}) => color && size && typeof inStock === "boolean"));
+  assert.ok(record.raw.variants.some(({color, size}) => color && size));
 });
 
 test("Mammut down product parses Body fabric and fill, and is searchable by exact model number", () => {

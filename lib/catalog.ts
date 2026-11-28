@@ -25,13 +25,6 @@ async function catalogRows(slugs?: string[], mode: "none" | "card" | "detail" = 
   const query = db.select({
     id: products.id, slug: products.slug, brand: brands.name, name: products.name,
     brandSlug: brands.slug, styleFamily: products.analyticsFamily,
-    stockRatio: mode === "card" ? sql<number | null>`(
-      select avg(${prices.inStock}::int)::float8
-      from ${prices}
-      where ${prices.productId} = ${products.id}
-        and ${prices.channel} = 'brand_us' and ${prices.variant} <> ''
-        and ${prices.fetchedAt} = ${productRaw.fetchedAt}
-    )` : sql<null>`null`,
     category: products.category, gender: products.gender, url: products.url,
     status: products.status, lastSeen: products.lastSeen, isHardshell: products.isHardshell, subTags: products.subTags,
     overrideValues: sql<Record<string, unknown>>`coalesce((
@@ -154,7 +147,7 @@ async function loadProducts(mode: "card" | "detail", slugs?: string[]) {
       : db.select().from(productSpecs).where(inArray(productSpecs.productId, ids)),
     db.selectDistinctOn([prices.productId, prices.variant], {
       productId: prices.productId, variant: prices.variant,
-      price: prices.price, currency: prices.currency, inStock: prices.inStock,
+      price: prices.price, currency: prices.currency,
     }).from(prices).where(and(inArray(prices.productId, ids), eq(prices.channel, "brand_us"),
       mode === "card" ? eq(prices.variant, "") : undefined))
       .orderBy(prices.productId, prices.variant, desc(prices.fetchedAt), desc(prices.id)),
@@ -173,7 +166,7 @@ async function loadListing() {
   };
 }
 
-const cachedListing = unstable_cache(loadListing, ["catalog-v1.8.0-with-accessories", catalogBrand], {revalidate: 300});
+const cachedListing = unstable_cache(loadListing, ["catalog-without-inventory", catalogBrand], {revalidate: 300});
 const readListing = cache(catalogEnabled && !localCatalog ? cachedListing : loadListing);
 export const listProducts = async () => (await readListing()).cards;
 export const homeFeature = async () => (await readListing()).feature;

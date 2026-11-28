@@ -11,32 +11,23 @@ const prior = releaseSeasonRank(2027, "FW")!;
 function product(slug: string, overrides: Partial<FeaturedProduct> = {}): FeaturedProduct {
   return {
     slug, name: slug, brandSlug: "a", styleFamily: null, releaseSeason: fall,
-    inStock: true, stockRatio: null, cardValueCount: 4, status: "active", ...overrides,
+    cardValueCount: 4, status: "active", ...overrides,
   };
 }
 
-test("Featured tiers prioritize thin stock and incomplete data, and place in-stock discontinued items in C and out-of-stock discontinued items in D", () => {
+test("Featured prioritizes complete active products and keeps discontinued products in the lower tier", () => {
   const items = [
-    product("sold out", {inStock: false, releaseSeason: null, cardValueCount: 1}),
-    product("low stock", {stockRatio: 0.49, cardValueCount: 2}),
     product("incomplete", {cardValueCount: 2}),
     product("old", {releaseSeason: prior}),
     product("discontinued", {status: "discontinued"}),
-    product("discontinued no stock", {status: "discontinued", inStock: false}),
-    product("discontinued incomplete", {status: "discontinued", cardValueCount: 2}),
-    product("discontinued sold out", {status: "discontinued", inStock: false, cardValueCount: 2}),
     product("unpublished", {releaseSeason: null}),
-    product("half available", {stockRatio: 0.5, releaseSeason: spring, cardValueCount: 3}),
-    product("no stock data", {inStock: null}),
+    product("spring", {releaseSeason: spring, cardValueCount: 3}),
     product("newest"),
   ];
   assert.deepEqual(rankFeatured(items).map(({tier, product}) => [tier, product.slug]), [
-    ["A", "newest"], ["A", "no stock data"], ["A", "half available"],
-    ["A", "old"], ["A", "unpublished"], ["C", "discontinued"],
-    ["C", "discontinued incomplete"], ["C", "incomplete"], ["D", "discontinued no stock"],
-    ["D", "discontinued sold out"], ["D", "low stock"], ["D", "sold out"],
+    ["A", "newest"], ["A", "spring"], ["A", "old"], ["A", "unpublished"],
+    ["C", "discontinued"], ["C", "incomplete"],
   ]);
-  assert.equal(rankFeatured([items[3]])[0].tier, "A");
   assert.equal(releaseSeasonRank(2028, "Unspecified"), null);
   assert.equal(releaseSeasonRank(null, "SS"), null);
 });

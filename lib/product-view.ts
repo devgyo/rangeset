@@ -13,7 +13,7 @@ export type CatalogCard = {
   family: string | null; subTags: string[]; veilance: boolean; isHardshell: boolean;
   status: "active" | "discontinued" | "pending_review"; example?: boolean;
   image: string | null; hero: string | null; swatches: ColorSwatch[];
-  activities: string[]; summary: string; msrp: number | null; inStock: boolean | null;
+  activities: string[]; summary: string; msrp: number | null;
   specs: Record<string, CatalogSpec | undefined>;
   taxonomy?: TaxonomyResult; modelNumbers?: string[]; series?: string[]; brandSlug?: string; salePrice?: number | null;
   productType?: string; protectionType?: string; currency?: string | null;

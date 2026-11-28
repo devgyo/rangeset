@@ -114,8 +114,8 @@ test("featured sort takes alternating brand queues for equally represented real 
   const arc = JSON.parse(readFileSync("data/arcteryx-local.json", "utf8")) as FixtureRow[];
   const {products} = JSON.parse(readFileSync("data/mammut-dry-run.json", "utf8")) as {products: MammutProduct[]};
   const byBrand = (rows: FixtureRow[]) => fixtureProducts(rows, false).map(cardOnly)
-    .filter((product) => matchesTaxonomy(product, "hardshell-jackets") && product.cardValueCount >= 3 && (product.stockRatio ?? 1) >= 0.5)
-    .slice(0, 3).map((product) => ({...product, releaseSeason: null, inStock: null}));
+    .filter((product) => matchesTaxonomy(product, "hardshell-jackets") && product.cardValueCount >= 3)
+    .slice(0, 3).map((product) => ({...product, releaseSeason: null}));
   const arcCards = byBrand(arc);
   const mammutCards = byBrand(products.map(mammutSource));
   assert.equal(arcCards.length, 3);

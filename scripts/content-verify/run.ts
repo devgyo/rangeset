@@ -1,5 +1,5 @@
 import {mammutPayload} from "../../lib/brands/mammut";
-import {compare, compareSnapshotStock, fields, productFacts, type Result} from "./compare";
+import {compare, fields, productFacts, type Result} from "./compare";
 import {type AuditProduct} from "./data";
 import {directMammutLine, mammutLines, mustHalt, type OfficialReader, officialProduct, seriesEvidence} from "./official";
 import type {ProductAudit} from "./report";
@@ -39,8 +39,7 @@ async function checkProduct(reader: Reader, product: AuditProduct, onStop: (reas
     }
     return fields.map((field): Result => fresh.sku !== product.sku && field !== "sku"
       ? {field, status: "unverifiable", reason: "Official page returned a different article", url}
-      : field === "variantStock" ? compareSnapshotStock(product.snapshots, fresh, page.fetchedAt, url)
-        : compare(field, stored[field], official[field], field === "productLine" ? lineUrl : url));
+      : compare(field, stored[field], official[field], field === "productLine" ? lineUrl : url));
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
     if (mustHalt(error)) onStop(reason);

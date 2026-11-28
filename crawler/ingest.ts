@@ -119,14 +119,14 @@ async function ingestProduct(tx: Transaction, brandId: number, record: CatalogPr
   }
 
   const lastPrices = previous ? await tx.selectDistinctOn([prices.variant], {
-    variant: prices.variant, price: prices.price, currency: prices.currency, inStock: prices.inStock,
+    variant: prices.variant, price: prices.price, currency: prices.currency,
   }).from(prices).where(and(eq(prices.productId, id), eq(prices.channel, channel)))
     .orderBy(prices.variant, sql`${prices.fetchedAt} desc`) : [];
   const oldPrices = new Map(lastPrices.map((row) => [row.variant, row]));
   const observedPrices = new Map(record.prices.map((row) => [row.variant, row]));
   for (const old of lastPrices) {
-    if (!observedPrices.has(old.variant) && ![old.price, old.currency, old.inStock].every((value) => value === null)) {
-      observedPrices.set(old.variant, { variant: old.variant, price: null, currency: null, inStock: null });
+    if (!observedPrices.has(old.variant) && ![old.price, old.currency].every((value) => value === null)) {
+      observedPrices.set(old.variant, { variant: old.variant, price: null, currency: null });
     }
   }
   for (const row of observedPrices.values()) {
@@ -135,7 +135,6 @@ async function ingestProduct(tx: Transaction, brandId: number, record: CatalogPr
       const prefix = row.variant ? `variant.${row.variant}.` : "";
       observe(prefix + "price", old?.price == null ? null : { amount: old.price, currency: old.currency },
         row.price == null ? null : { amount: row.price, currency: row.currency });
-      observe(prefix + "in_stock", old?.inStock, row.inStock);
     }
   }
   await tx.insert(prices).values([...observedPrices.values()].map((row) => ({
